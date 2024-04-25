@@ -1,19 +1,18 @@
 package main
 
-import "github.com/gofiber/fiber"
+import "github.com/gofiber/fiber/v2"
 
 func main() {
 	// Fiber instance
 	app := fiber.New()
 
 	// Routes
-	app.Get("/", hello)
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})
 
 	// start server
-	app.Listen(3000)
+	app.Listen(":8080")
 }
 
-// Handler
-func hello(c *fiber.Ctx) {
-	c.SendString("Hello, world!")
-}
+

@@ -15,5 +15,5 @@ func main() {
 
 // Handler
 func hello(c *fiber.Ctx) {
-	c.send("Hello, world!")
+	c.SendString("Hello, world!")
 }

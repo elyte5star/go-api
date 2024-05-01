@@ -4,9 +4,11 @@ go 1.22.2
 
 require github.com/gofiber/fiber v1.14.6
 
+require github.com/rabbitmq/amqp091-go v1.9.0 // indirect
+
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/fiber/v2 v2.52.4 // indirect
+	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/schema v1.3.0 // indirect

@@ -21,6 +21,15 @@ func TimeElapsed(start time.Time, name string) string{
 }
 
 
+func ConnectionString() string {
+    connStr, status := os.LookupEnv("CONN_STR")
+    if !status {
+		Logger().Error("Missing environment variable CONN_STR")
+    }
+
+    return connStr
+}
+
 
 func Logger () *slog.Logger{
 	logHandler:= slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true})

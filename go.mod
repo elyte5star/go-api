@@ -4,7 +4,12 @@ go 1.22.2
 
 require github.com/gofiber/fiber v1.14.6
 
-require github.com/rabbitmq/amqp091-go v1.9.0 // indirect
+require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/doug-martin/goqu/v9 v9.19.0 // indirect
+	github.com/go-sql-driver/mysql v1.8.1 // indirect
+	github.com/rabbitmq/amqp091-go v1.9.0 // indirect
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect

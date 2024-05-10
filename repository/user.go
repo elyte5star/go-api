@@ -9,6 +9,6 @@ import (
 
 type GetUserResponse struct {
 	UserId       uuid.UUID `json:"userid"`
-	UserName string    `json:"username"`
+	Username string    `json:"username"`
 	Password  string    `json:"password"`
 }

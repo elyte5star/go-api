@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -37,6 +38,7 @@ func Logger () *slog.Logger{
 	return logger
 }
 
+
 func SystemInfo() {
 	defer TimeElapsed(time.Now(), "System Information")
 	myVersion := runtime.Version()
@@ -54,4 +56,13 @@ func SystemInfo() {
 	Logger().Info("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
 	Logger().Info("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	
+}
+
+const JwtSecret = "7a3c54660456ff1137b652e498624dfa09a0ec12b4fc49d38b85465da15027a1"
+
+
+var RequestLogConfig = logger.Config{
+    Format:        "${pid} | ${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
+    TimeZone:      "UTC",
+   
 }

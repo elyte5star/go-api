@@ -1,22 +1,55 @@
 package main
 
 import (
+	"fmt"
+	"log/slog"
+	"os"
+
+	"github.com/api/common/config"
 	router "github.com/api/router"
 	"github.com/api/util"
-	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	slogfiber "github.com/samber/slog-fiber"
 )
 
 func main() {
-	
-	util.SystemInfo()
+
+	//check if application meets requirments
+	meetSysRequirment := util.SystemInfo()
+
+	if !meetSysRequirment {
+		os.Exit(500)
+	}
+
+	// Load the config struct with values from the environment
+	conf := config.Config()
+
+	// Set up the logger
+	log := util.Logger()
+	conf.Logger = log
+
+	fmt.Printf("%+v\n", conf)
+
+	appInfo := fmt.Sprintf("%s:%s", conf.ServiceName, conf.Version)
+
 	// Fiber instance
 	app := fiber.New(fiber.Config{
-		AppName: "Elyte Realm v1.0.1",
+		AppName: appInfo,
 	})
 
-	app.Use(logger.New(util.RequestLogConfig))
+	if conf.Debug {
+		config := slogfiber.Config{
+			DefaultLevel:     slog.LevelDebug,
+			ClientErrorLevel: slog.LevelWarn,
+			ServerErrorLevel: slog.LevelError,
+		}
+		app.Use(slogfiber.NewWithConfig(log, config))
+
+	} else {
+		app.Use(slogfiber.New(log))
+
+	}
+
 	// Routes
 	router.RouteSetup(app)
 
@@ -24,7 +57,7 @@ func main() {
 		return c.SendString("Hello, World!")
 	})
 
+	address := fmt.Sprintf(":%v", conf.Port)
 	// start server
-	app.Listen(":8080")
+	app.Listen(address)
 }
-

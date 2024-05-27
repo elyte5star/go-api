@@ -1,20 +1,38 @@
 package config
 
 import (
-	"os"
+	"log"
+	"log/slog"
 	"github.com/joho/godotenv"
-	"github.com/api/util"
+	"github.com/kelseyhightower/envconfig"
 )
 
+type  AppConfig struct {
+	Debug      bool `required:"true"`
+	ServiceName string `required:"true"`
+	Version     string `required:"true"`
+	Logger *slog.Logger `ignored:"true"`
+	Port string `required:"true"`
+}
 
-func Config(key string) string {
+func Config() AppConfig{
+
+	var s  AppConfig
+
+	// Load the environment vars from a .env file if present
 	err := godotenv.Load()
 	if err != nil {
-		util.Logger().Error("Error loading .env file")
-
+		log.Fatal(err)
 	}
-	return os.Getenv(key)
+
+	err = envconfig.Process("myapp", &s)
+    if err != nil {
+		log.Fatal(err)
+    }
+	
+	return s
 
 }
+
 
 

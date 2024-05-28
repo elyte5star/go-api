@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-
 	"github.com/api/common/config"
 	router "github.com/api/router"
 	"github.com/api/util"
@@ -28,8 +27,6 @@ func main() {
 	log := util.Logger()
 	conf.Logger = log
 
-	fmt.Printf("%+v\n", conf)
-
 	appInfo := fmt.Sprintf("%s:%s", conf.ServiceName, conf.Version)
 
 	// Fiber instance
@@ -52,12 +49,16 @@ func main() {
 
 	// Routes
 	router.RouteSetup(app)
-
+	
+	
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
 	address := fmt.Sprintf(":%v", conf.Port)
+
+	log.Info("Listening on " + address)
 	// start server
 	app.Listen(address)
+
 }

@@ -13,6 +13,7 @@ type  AppConfig struct {
 	Version     string `required:"true"`
 	Logger *slog.Logger `ignored:"true"`
 	Port string `required:"true"`
+	CorsOrigins string `required:"true"`
 }
 
 func Config() AppConfig{

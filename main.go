@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"os"
 	"github.com/api/common/config"
+	"github.com/api/common/middleware"
+	_ "github.com/api/docs"
 	router "github.com/api/router"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
@@ -47,14 +49,15 @@ func main() {
 
 	}
 
+	swaggerDocHandler := middleware.SwaggerHandler(conf)
+
+	app.Get("/docs/*", swaggerDocHandler)
+
+
 	// Routes
 	router.RouteSetup(app)
-	
-	
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
 
+	
 	address := fmt.Sprintf(":%v", conf.Port)
 
 	log.Info("Listening on " + address)

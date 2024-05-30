@@ -51,7 +51,7 @@ func main() {
 
 	swaggerDocHandler := middleware.SwaggerHandler(conf)
 
-	app.Get("/docs/*", swaggerDocHandler)
+	app.Get("/swagger/*", swaggerDocHandler)
 
 
 	// Routes

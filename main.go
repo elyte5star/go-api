@@ -49,16 +49,20 @@ func main() {
 
 	}
 
+
+	// Output the config for debugging
+	//fmt.Printf("%+v\n", conf.DbConfig)
+
 	swaggerDocHandler := middleware.SwaggerHandler(conf)
 
-	app.Get("/swagger/*", swaggerDocHandler)
+	app.Get("/docs/*", swaggerDocHandler)
 
 
 	// Routes
 	router.RouteSetup(app)
 
 	
-	address := fmt.Sprintf(":%v", conf.Port)
+	address := fmt.Sprintf(":%v", conf.ServicePort)
 
 	log.Info("Listening on " + address)
 	// start server

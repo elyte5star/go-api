@@ -51,7 +51,7 @@ func main() {
 
 
 	// Output the config for debugging
-	//fmt.Printf("%+v\n", conf.DbConfig)
+	fmt.Printf("%+v\n", conf.DbConfig)
 
 	swaggerDocHandler := middleware.SwaggerHandler(conf)
 

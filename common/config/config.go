@@ -12,27 +12,23 @@ type AppConfig struct {
 	ServiceName string       `required:"true"`
 	Version     string       `required:"true"`
 	Logger      *slog.Logger `ignored:"true"`
-	ServicePort        string       `required:"true"`
+	ServicePort string       `required:"true"`
 	CorsOrigins string       `required:"true"`
 	Url         string       `required:"true"`
 	Doc         string       `required:"true"`
-	DbConfig  *DbSpec
-	
+	DbConfig    *DbSpec
 }
 
-
 type DbSpec struct {
-	MysqlUser string `envconfig:"MYSQL_USER" required:"true" split_words:"true"`
-	MysqlPassword string `envconfig:"MYSQL_PASSWORD" required:"true" split_words:"true"`
-	MysqlHost     string `envconfig:"MYSQL_HOST" required:"true" split_words:"true"`
-	MysqlPort     string `envconfig:"MYSQL_PORT" required:"true" split_words:"true"`
-	MysqlDatabase string `envconfig:"MYSQL_DATABASE" required:"true" split_words:"true"`
+	User     string `envconfig:"MYSQL_USER" required:"true" split_words:"true"`
+	Password string `envconfig:"MYSQL_PASSWORD" required:"true" split_words:"true"`
+	Host     string `envconfig:"MYSQL_HOST" required:"true" split_words:"true"`
+	Port     string `envconfig:"MYSQL_PORT" required:"true" split_words:"true"`
+	Database string `envconfig:"MYSQL_DATABASE" required:"true" split_words:"true"`
 }
 
 func Config() AppConfig {
-
 	var config AppConfig
-
 	// Load the environment vars from a .env file if present
 	err := godotenv.Load()
 	if err != nil {

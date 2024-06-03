@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -16,15 +18,27 @@ type AppConfig struct {
 	CorsOrigins string       `required:"true"`
 	Url         string       `required:"true"`
 	Doc         string       `required:"true"`
-	DbConfig    *DbSpec
+	DbConfig    *DbConfig
 }
 
-type DbSpec struct {
+type DbConfig struct {
 	User     string `envconfig:"MYSQL_USER" required:"true" split_words:"true"`
 	Password string `envconfig:"MYSQL_PASSWORD" required:"true" split_words:"true"`
 	Host     string `envconfig:"MYSQL_HOST" required:"true" split_words:"true"`
 	Port     string `envconfig:"MYSQL_PORT" required:"true" split_words:"true"`
 	Database string `envconfig:"MYSQL_DATABASE" required:"true" split_words:"true"`
+}
+
+func (dbConfig *DbConfig) URL() string {
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?timeout=30s",
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Database,
+	)
+	return dsn
 }
 
 func Config() AppConfig {

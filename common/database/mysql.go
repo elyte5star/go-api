@@ -2,32 +2,13 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
+
+	"github.com/api/common/config"
 	"github.com/go-sql-driver/mysql"
 )
 
-type DbConfig struct {
-	User string `required:"true" split_words:"true"`
-	Password string `required:"true" split_words:"true"`
-	Host     string `required:"true" split_words:"true"`
-	Port     string `required:"true" split_words:"true"`
-	Database string `required:"true" split_words:"true"`
-}
-
-func (dbConfig *DbConfig) URL() string {
-	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?timeout=30s",
-		dbConfig.User,
-		dbConfig.Password,
-		dbConfig.Host,
-		dbConfig.Port,
-		dbConfig.Database,
-	)
-	return dsn
-}
-
-func getConfig(dbConfig DbConfig) (*mysql.Config, error) {
+func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
 	config, err := mysql.ParseDSN(dbConfig.URL())
 	if err != nil {
 		return nil, err
@@ -37,8 +18,8 @@ func getConfig(dbConfig DbConfig) (*mysql.Config, error) {
 	return config, nil
 }
 
-func ConnectToDB(dbConfig DbConfig) (*sql.DB, error) {
-	config, err := getConfig(dbConfig)
+func ConnectToDB(cfg config.AppConfig) (*sql.DB, error) {
+	config, err := getConfig(*cfg.DbConfig)
 	if err != nil {
 		return nil, err
 	}

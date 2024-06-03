@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-
+	slogfiber "github.com/samber/slog-fiber"
 	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/api/common/middleware"
 )
 
 func Handler(cfg *config.AppConfig) *fiber.App {
@@ -35,6 +36,12 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 
 	// Recover middleware
 	fb.Use(recover.New())
+
+	//logging middleware handler
+	logger:= middleware.Logger()
+	fb.Use(slogfiber.New(logger))
+
+
 
 	return fb
 }

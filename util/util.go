@@ -2,15 +2,12 @@ package util
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	slogformatter "github.com/samber/slog-formatter"
+	
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -25,21 +22,16 @@ func TimeElapsed(start time.Time, name string) string {
 	return elapsed.String()
 }
 
-func ConnectionString() string {
-	connStr, status := os.LookupEnv("CONN_STR")
-	if !status {
-		Logger().Error("Missing environment variable CONN_STR")
-	}
+// func ConnectionString() string {
+// 	connStr, status := os.LookupEnv("CONN_STR")
+// 	if !status {
+// 		Logger().Error("Missing environment variable CONN_STR")
+// 	}
 
-	return connStr
-}
+// 	return connStr
+// }
 
-func Logger() *slog.Logger {
-	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true})
-	timeFormmatter := slogformatter.NewFormatterHandler(slogformatter.TimezoneConverter(time.UTC), slogformatter.TimeFormatter(time.DateTime, time.UTC))
-	logger := slog.New(timeFormmatter(logHandler))
-	return logger
-}
+
 
 func SystemInfo() bool {
 	defer TimeElapsed(time.Now(), "Checking System Information and Requirements")

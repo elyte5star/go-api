@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-
 	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"

@@ -26,8 +26,8 @@ func main() {
 	conf := config.Config()
 
 	// Set up the logger
-	log := util.Logger()
-	conf.Logger = log
+	logger:= middleware.Logger()
+	conf.Logger = logger
 
 	appInfo := fmt.Sprintf("%s:%s", conf.ServiceName, conf.Version)
 
@@ -42,10 +42,10 @@ func main() {
 			ClientErrorLevel: slog.LevelWarn,
 			ServerErrorLevel: slog.LevelError,
 		}
-		app.Use(slogfiber.NewWithConfig(log, config))
+		app.Use(slogfiber.NewWithConfig(logger, config))
 
 	} else {
-		app.Use(slogfiber.New(log))
+		app.Use(slogfiber.New(logger))
 
 	}
 
@@ -64,7 +64,7 @@ func main() {
 	
 	address := fmt.Sprintf(":%v", conf.ServicePort)
 
-	log.Info("Listening on " + address)
+	logger.Info("Listening on " + address)
 	// start server
 	app.Listen(address)
 

@@ -34,7 +34,6 @@ func (m *Migration) Filename() string {
 // Name is the name of the migration.
 func (m *Migration) Name() string {
 	matches := filenameRegexp.FindStringSubmatch(m.Filename())
-
 	if len(matches) < 3 {
 		return ""
 	}

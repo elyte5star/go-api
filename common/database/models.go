@@ -27,7 +27,6 @@ type Product struct {
 	Details       string    `json:"details"`
 }
 
-
 type Review struct {
 	Rid          int    `json:"rid"`
 	Rating       int    `json:"rating"`

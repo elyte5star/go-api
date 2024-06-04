@@ -16,12 +16,9 @@ func main() {
 	// Set up the logger
 	logger := middleware.DefaultLogger()
 	if conf.Debug {
-		logger = middleware.DebugLogger()
+		middleware.DebugLogger()
 	}
 	conf.Logger = logger
-
-	// Output the config for debugging
-	//fmt.Printf("%+v\n", conf.DbConfig)
 
 	bootstrap := Handler(&conf)
 	address := fmt.Sprintf(":%v", conf.ServicePort)

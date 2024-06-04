@@ -20,10 +20,6 @@ func DefaultLogger() *slog.Logger {
 	return logger
 }
 
-func DebugLogger() *slog.Logger {
-	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})
-	//timeFormmatter := slogformatter.NewFormatterHandler(slogformatter.TimezoneConverter(time.UTC), slogformatter.TimeFormatter(time.DateTime, time.UTC))
-	logger := slog.New(logHandler)
-	slog.SetDefault(logger)
-	return logger
+func DebugLogger() {
+	programLevel.Set(slog.LevelDebug)
 }

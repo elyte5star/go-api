@@ -13,7 +13,7 @@ import (
 var programLevel = new(slog.LevelVar) // Info by default
 
 func DefaultLogger() *slog.Logger {
-	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel, AddSource: true})
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel})
 	//timeFormmatter := slogformatter.NewFormatterHandler(slogformatter.TimezoneConverter(time.UTC), slogformatter.TimeFormatter(time.DateTime, time.UTC))
 	logger := slog.New(logHandler)
 	slog.SetDefault(logger)
@@ -21,7 +21,7 @@ func DefaultLogger() *slog.Logger {
 }
 
 func DebugLogger() *slog.Logger {
-	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true})
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})
 	//timeFormmatter := slogformatter.NewFormatterHandler(slogformatter.TimezoneConverter(time.UTC), slogformatter.TimeFormatter(time.DateTime, time.UTC))
 	logger := slog.New(logHandler)
 	slog.SetDefault(logger)

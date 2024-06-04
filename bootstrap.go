@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
-	slogfiber "github.com/samber/slog-fiber"
+
 	"github.com/api/common/config"
+	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/api/common/middleware"
+	slogfiber "github.com/samber/slog-fiber"
 )
 
 func Handler(cfg *config.AppConfig) *fiber.App {
 
 	appInfo := fmt.Sprintf("%s:%s", cfg.ServiceName, cfg.Version)
+
+	//logger middleware
+	logger := cfg.Logger
 
 	// Fiber instance
 	fb := fiber.New(fiber.Config{
@@ -20,6 +25,12 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		EnablePrintRoutes: cfg.Debug,
 		ErrorHandler:      cfg.PanicRecovery,
 	})
+
+	//check if application meets requirments
+	meetSysRequirment := util.SysRequirment(cfg)
+	if !meetSysRequirment {
+		fb.Shutdown()
+	}
 
 	// The index route is open
 	fb.Get("/", func(c *fiber.Ctx) error {
@@ -34,14 +45,16 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		AllowOrigins: cfg.CorsOrigins,
 	}))
 
+	// Add a Favicos middleware handler
+	fb.Use(favicon.New(favicon.Config{
+		File: "./docs/favicon.ico",
+	}))
+
 	// Recover middleware
 	fb.Use(recover.New())
 
-	//logging middleware handler
-	logger:= middleware.Logger()
 	fb.Use(slogfiber.New(logger))
-
-
+	//Set logging to DEBUG LEVEL in Development
 
 	return fb
 }

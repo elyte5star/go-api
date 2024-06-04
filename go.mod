@@ -8,7 +8,6 @@ require (
 	github.com/gofiber/swagger v1.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/samber/slog-fiber v1.15.0
-	github.com/samber/slog-formatter v1.0.0
 	github.com/swaggo/swag v1.16.3
 )
 
@@ -23,12 +22,9 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/samber/lo v1.38.1 // indirect
-	github.com/samber/slog-multi v1.0.0 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	go.opentelemetry.io/otel v1.19.0 // indirect
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/tools v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

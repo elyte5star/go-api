@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -21,6 +22,9 @@ func TimeElapsed(start time.Time, name string) string {
 	fmt.Println(name + " took " + elapsed.String())
 	return elapsed.String()
 }
+func TimeNow() string {
+	return time.Now().UTC().String()
+}
 
 // func ConnectionString() string {
 // 	connStr, status := os.LookupEnv("CONN_STR")
@@ -31,24 +35,23 @@ func TimeElapsed(start time.Time, name string) string {
 // 	return connStr
 // }
 
-
-
-func SystemInfo() bool {
+func SysRequirment(cfg *config.AppConfig) bool {
 	defer TimeElapsed(time.Now(), "Checking System Information and Requirements")
+	logger := cfg.Logger
 	myVersion := runtime.Version()
 	major := strings.Split(myVersion, ".")[0][2]
 	minor := strings.Split(myVersion, ".")[1]
 	m1, _ := strconv.Atoi(string(major))
 	m2, _ := strconv.Atoi(minor)
 	if m1 == 1 && m2 < 8 {
-		fmt.Print("Need Go version 1.22 or higher!")
+		logger.Error("Need Go version 1.22 or higher!")
 		return false
 	}
-	fmt.Println("You are using " + runtime.Compiler + " ")
-	fmt.Println("on a" + runtime.GOARCH + "machine")
-	fmt.Println("Using Go version " + runtime.Version())
-	fmt.Println("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
-	fmt.Println("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
+	logger.Info("You are using " + runtime.Compiler + " ")
+	logger.Info("on a" + runtime.GOARCH + "machine")
+	logger.Info("Using Go version " + runtime.Version())
+	logger.Info("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
+	logger.Info("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true
 
 }

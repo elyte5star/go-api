@@ -21,7 +21,7 @@ func main() {
 	conf.Logger = logger
 
 	// Output the config for debugging
-	fmt.Printf("%+v\n", conf)
+	//fmt.Printf("%+v\n", conf)
 
 	bootstrap := Handler(&conf)
 	address := fmt.Sprintf(":%v", conf.ServicePort)

@@ -47,11 +47,11 @@ func SysRequirment(cfg *config.AppConfig) bool {
 		logger.Error("Need Go version 1.22 or higher!")
 		return false
 	}
-	logger.Info("You are using " + runtime.Compiler + " ")
-	logger.Info("on a" + runtime.GOARCH + "machine")
-	logger.Info("Using Go version " + runtime.Version())
-	logger.Info("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
-	logger.Info("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
+	// logger.Info("You are using " + runtime.Compiler + " ")
+	// logger.Info("on a" + runtime.GOARCH + "machine")
+	// logger.Info("Using Go version " + runtime.Version())
+	// logger.Info("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
+	// logger.Info("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true
 
 }

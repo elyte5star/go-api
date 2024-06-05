@@ -11,7 +11,7 @@ import (
 func main() {
 
 	// Load the config struct with values from the environment
-	conf := config.Config()
+	conf := config.ParseConfig()
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()

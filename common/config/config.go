@@ -2,10 +2,8 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
-
-	"github.com/go-playground/log"
-
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -49,14 +47,18 @@ func (dbConfig *DbConfig) URL() string {
 }
 
 func ParseConfig() AppConfig {
+
+	log.Println("Parsing ENV vars...")
+	defer log.Println("Done Parsing ENV vars")
+
 	var config AppConfig
 	// Load the environment vars from a .env file if present
 	err := godotenv.Load()
 	if err != nil {
-		log.WithFields(log.F("error", err)).Alert("Error Parsing ENV variables")
+		log.Fatal(err)
 	}
 	if err = envconfig.Process("myapp", &config); err != nil {
-		log.WithFields(log.F("error", err)).Alert("Error Parsing ENV variables to struct")
+		log.Fatal(err)
 	}
 
 	return config

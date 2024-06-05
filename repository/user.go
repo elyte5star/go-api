@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 type GetUserResponse struct {

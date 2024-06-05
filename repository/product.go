@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/gofrs/uuid"
+import "github.com/google/uuid"
 
 type GetProductResponse struct {
 	Pid           uuid.UUID `json:"pid"`

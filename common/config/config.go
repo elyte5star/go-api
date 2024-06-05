@@ -10,15 +10,21 @@ import (
 )
 
 type AppConfig struct {
-	Debug       bool         `required:"true"`
-	ServiceName string       `required:"true"`
-	Version     string       `required:"true"`
-	Logger      *slog.Logger `ignored:"true"`
-	ServicePort string       `required:"true"`
-	CorsOrigins string       `required:"true"`
-	Url         string       `required:"true"`
-	Doc         string       `required:"true"`
-	DbConfig    *DbConfig
+	Debug                 bool         `required:"true"`
+	ClientOrigin          string       `required:"true"`
+	SmtpServer            string       `required:"true"`
+	SmtpUsername          string       `required:"true"`
+	SmtpPassword          string       `required:"true"`
+	JwtSecretKey          string       `required:"true"`
+	JwtExpireMinutesCount int          `required:"true"`
+	ServiceName           string       `required:"true"`
+	Version               string       `required:"true"`
+	Logger                *slog.Logger `ignored:"true"`
+	ServicePort           string       `required:"true"`
+	CorsOrigins           string       `required:"true"`
+	Url                   string       `required:"true"`
+	Doc                   string       `required:"true"`
+	DbConfig              *DbConfig
 }
 
 type DbConfig struct {

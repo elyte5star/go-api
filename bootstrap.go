@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/api/common/config"
+	"github.com/api/common/middleware"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
+	_ "github.com/api/docs"
 )
 
 func Handler(cfg *config.AppConfig) *fiber.App {
@@ -55,6 +57,9 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 
 	fb.Use(slogfiber.New(logger))
 	//Set logging to DEBUG LEVEL in Development
+
+	DocRoute := fb.Group("/swagger")
+	DocRoute.Get("*", middleware.SwaggerHandler(cfg))
 
 	return fb
 }

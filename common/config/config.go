@@ -50,7 +50,6 @@ func (dbConfig *DbConfig) URL() string {
 
 func ParseConfig(val *validator.Validate) (config *AppConfig, err error) {
 
-	log.Println("Parsing ENV vars...")
 	defer log.Println("Done Parsing ENV vars")
 	config = &AppConfig{}
 	// Load the environment vars from a .env file if present

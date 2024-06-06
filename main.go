@@ -5,7 +5,6 @@ import (
 
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
-	_ "github.com/api/docs"
 	"github.com/api/util"
 )
 

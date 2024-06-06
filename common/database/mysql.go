@@ -1,11 +1,12 @@
 package database
 
 import (
-	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/api/common/config"
 	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
@@ -18,13 +19,13 @@ func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
 	return config, nil
 }
 
-func ConnectToDB(cfg config.AppConfig) (*sql.DB, error) {
+func ConnectToMySQL(cfg config.AppConfig) (*sqlx.DB, error) {
 	config, err := getConfig(*cfg.DbConfig)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
 	// Get a database handle.
-	db, err := sql.Open("mysql", config.FormatDSN())
+	db, err := sqlx.Open("mysql", config.FormatDSN())
 	if err != nil {
 		return nil, err
 	}
@@ -32,5 +33,11 @@ func ConnectToDB(cfg config.AppConfig) (*sql.DB, error) {
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxIdleTime(5 * time.Minute)
 	db.SetConnMaxLifetime(60 * time.Minute)
+	// Try to ping database.
+	if err := db.Ping(); err != nil {
+		defer db.Close() // close database connection
+		return nil, fmt.Errorf("error, not sent ping to database, %w", err)
+	}
+
 	return db, nil
 }

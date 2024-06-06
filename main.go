@@ -6,12 +6,13 @@ import (
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
+	"github.com/api/util"
 )
 
 func main() {
-
+	validate := util.InitValidator()
 	// Load the config struct with values from the environment
-	conf := config.ParseConfig()
+	conf, _ := config.ParseConfig(validate)
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()
@@ -21,9 +22,9 @@ func main() {
 	conf.Logger = logger
 
 	// Output the config for debugging
-	//fmt.Printf("%+v\n", conf)
+	fmt.Printf("%+v\n", conf)
 
-	bootstrap := Handler(&conf)
+	bootstrap := Handler(conf)
 	address := fmt.Sprintf(":%v", conf.ServicePort)
 
 	logger.Info("Listening on " + address)

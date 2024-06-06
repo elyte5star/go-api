@@ -1,8 +1,14 @@
 package repository
 
 import (
+	"github.com/api/common/database/schema"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
+
+type UserQueries struct {
+	*sqlx.DB
+}
 
 type GetUserResponse struct {
 	UserId           uuid.UUID `json:"userid"`
@@ -17,17 +23,100 @@ type GetUserResponse struct {
 	Telephone        string    `json:"telephone"`
 }
 
-type TokenResponse struct{
-	UserId       uuid.UUID `json:"userid"`
-	UserName string    `json:"username"`
-	Email  string    `json:"email"`
-	Enabled bool `json:"enabled"`
-	Admin bool `json:"admin"`
+type TokenResponse struct {
+	UserId      uuid.UUID `json:"userid"`
+	UserName    string    `json:"username"`
+	Email       string    `json:"email"`
+	Enabled     bool      `json:"enabled"`
+	Admin       bool      `json:"admin"`
 	AccessToken string    `json:"accessToken"`
-	TokenType string    `json:"tokenType"`
-
+	TokenType   string    `json:"tokenType"`
 }
 
 type GetUsersResponse struct {
-	Users []GetUsersResponse `json:"users"`
+	Users []GetUserResponse `json:"users"`
+}
+
+func (q *UserQueries) GetUserById(userid *uuid.UUID) (GetUserResponse, error) {
+	var user GetUserResponse
+
+	// Define query string.
+	query := `SELECT * FROM books WHERE userid = $1`
+
+	// Send query to database.
+	err := q.Get(&user, query, userid)
+	if err != nil {
+		// Return empty object and error.
+		return user, err
+	}
+	// Return query result.
+
+	return user, nil
+}
+
+func (q *UserQueries) GetUsers() (GetUsersResponse, error) {
+	// Define users variable.
+
+	var users GetUsersResponse
+	// Define query string.
+	query := `SELECT * FROM users`
+
+	// Send query to database.
+	err := q.Get(&users, query)
+	if err != nil {
+		// Return empty object and error.
+		return users, err
+	}
+
+	// Return query result.
+	return users, nil
+}
+
+// Createuser method for creating User by given User object.
+func (q *UserQueries) CreateUser(user *schema.User) error {
+
+	// Define query string.
+	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11,$12,$13,$14,$15,$16)`
+
+	// Send query to database.
+	_, err := q.Exec(query, user.Userid, user.AuditInfo, user.UserName, user.Password, user.Email, user.AccountNonLocked, user.Admin, user.Enabled, user.Telephone, user.Discount, user.FailedAttempt, user.LockTime, user.UserOtp, user.Address, user.Locations, user.Bookings)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}
+
+// UpdateUser method for updating user by given User object.
+func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
+	// Define query string.
+	query := `UPDATE users SET updated_at = $2, title = $3, author = $4, book_status = $5, book_attrs = $6 WHERE id = $1`
+
+	// Send query to database.
+	_, err := q.Exec(query, userid, b.UpdatedAt, b.Title, b.Author, b.BookStatus, b.BookAttrs)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}
+
+// DeleteUser method for delete user by given ID.
+func (q *UserQueries) DeleteUser(userid uuid.UUID) error {
+	// Define query string.
+	query := `DELETE FROM books WHERE id = $1`
+
+	// Send query to database.
+	_, err := q.Exec(query, userid)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
 }

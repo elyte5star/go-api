@@ -37,8 +37,8 @@ type Otp struct {
 
 
 type User struct {
-	UserId           uuid.UUID       `json:"userid" validate:"required,uuid"`
-	AuditInfo        AuditEntity     `json:"auditInfo"`
+	Userid           uuid.UUID       `json:"userid" validate:"required,uuid"`
+	AuditInfo        AuditEntity     `json:"auditInfo" validate:"required,dive"`
 	UserName         string          `json:"username" validate:"required,lte=255"`
 	Password         string          `json:"password" validate:"required"`
 	Email            string          `json:"email" validate:"required,email"`

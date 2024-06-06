@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type AppConfig struct {
@@ -46,21 +48,20 @@ func (dbConfig *DbConfig) URL() string {
 	return dsn
 }
 
-func ParseConfig() AppConfig {
+func ParseConfig(val *validator.Validate) (config *AppConfig, err error) {
 
 	log.Println("Parsing ENV vars...")
 	defer log.Println("Done Parsing ENV vars")
-
-	var config AppConfig
+	config = &AppConfig{}
 	// Load the environment vars from a .env file if present
-	err := godotenv.Load()
-	if err != nil {
+	if err = godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
-	if err = envconfig.Process("myapp", &config); err != nil {
+	if err = envconfig.Process("myapp", config); err != nil {
 		log.Fatal(err)
 	}
+	//err = val.Struct(config)
 
-	return config
+	return
 
 }

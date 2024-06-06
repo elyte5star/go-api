@@ -9,6 +9,8 @@ import (
 
 	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/google/uuid"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -61,4 +63,40 @@ const JwtSecret = "7a3c54660456ff1137b652e498624dfa09a0ec12b4fc49d38b85465da1502
 var RequestLogConfig = logger.Config{
 	Format:   "${pid} | ${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
 	TimeZone: "UTC",
+}
+
+func InitValidator() *validator.Validate {
+	// Create a new validator for a Book model.
+	validate := validator.New()
+
+	// Custom validation for uuid.UUID fields.
+	_ = validate.RegisterValidation("uuid", func(fl validator.FieldLevel) bool {
+		field := fl.Field().String()
+		if _, err := uuid.Parse(field); err != nil {
+			return true
+		}
+		return false
+	})
+
+	return validate
+}
+
+// ValidatorErrors func for show validation errors for each invalid fields.
+func ValidatorErrors(err error) map[string]string {
+	// Define fields map.
+	fields := map[string]string{}
+
+	// this check is only needed when your code could produce
+	// an invalid value for validation such as interface with nil
+	// value most including myself do not usually have code like this.
+	if _, ok := err.(*validator.InvalidValidationError); ok {
+		fmt.Println(err)
+	}
+
+	// Make error message for each invalid field.
+	for _, err := range err.(validator.ValidationErrors) {
+		fields[err.Field()] = err.Tag()
+	}
+
+	return fields
 }

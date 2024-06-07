@@ -5,13 +5,13 @@ import (
 
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
+	_ "github.com/api/docs"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
-	_ "github.com/api/docs"
 )
 
 func Handler(cfg *config.AppConfig) *fiber.App {
@@ -47,7 +47,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		AllowOrigins: cfg.CorsOrigins,
 	}))
 
-	// Add a Favicos middleware handler
+	// Add a Favicon middleware handler
 	fb.Use(favicon.New(favicon.Config{
 		File: "./docs/favicon.ico",
 	}))
@@ -55,8 +55,8 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 	// Recover middleware
 	fb.Use(recover.New())
 
-	fb.Use(slogfiber.New(logger))
 	//Set logging to DEBUG LEVEL in Development
+	fb.Use(slogfiber.New(logger))
 
 	DocRoute := fb.Group("/swagger")
 	DocRoute.Get("*", middleware.SwaggerHandler(cfg))

@@ -22,7 +22,7 @@ func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
 func ConnectToMySQL(cfg config.AppConfig) (*sqlx.DB, error) {
 	config, err := getConfig(*cfg.DbConfig)
 	if err != nil {
-		return nil, fmt.Errorf("error, not connected to database, %w", err)
+		return nil, fmt.Errorf("error, Getting Database configurations, %w", err)
 	}
 	// Get a database handle.
 	db, err := sqlx.Open("mysql", config.FormatDSN())

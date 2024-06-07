@@ -1,11 +1,11 @@
 package database
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/api/common/config"
 )
 
-func Initialize(dbDriver *sql.DB,cfg *config.AppConfig) {
+func Initialize(dbDriver *sqlx.DB,cfg *config.AppConfig) {
 	// statement, driverError := dbDriver.Prepare(train)
 	// if driverError != nil {
 	// 	cfg.Logger.Error(driverError.Error())

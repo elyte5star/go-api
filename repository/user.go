@@ -23,15 +23,7 @@ type GetUserResponse struct {
 	Telephone        string    `json:"telephone"`
 }
 
-type TokenResponse struct {
-	UserId      uuid.UUID `json:"userid"`
-	UserName    string    `json:"username"`
-	Email       string    `json:"email"`
-	Enabled     bool      `json:"enabled"`
-	Admin       bool      `json:"admin"`
-	AccessToken string    `json:"accessToken"`
-	TokenType   string    `json:"tokenType"`
-}
+
 
 type GetUsersResponse struct {
 	Users []GetUserResponse `json:"users"`

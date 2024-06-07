@@ -1,0 +1,24 @@
+version: '3.8'
+networks:
+  net:
+
+volumes:
+  persistence:
+services:
+  db:
+    image: mysql:latest
+    container_name: MySQLCont
+    environment:
+      - "MYSQL_USER=userExample"
+      - "MYSQL_DATABASE=elyteGo"
+      - "MYSQL_ROOT_PASSWORD=54321"
+      - "MYSQL_PASSWORD=54321"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./persistence:/var/lib/mysql
+    networks:
+      - net
+  
+
+  

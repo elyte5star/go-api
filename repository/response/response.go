@@ -10,7 +10,7 @@ type NoContent struct {
 
 type RequestResponse struct {
 	Path      string      `default:"0" json:"path"`
-	Message   string      `default:"Operation Successful!" json:"mesage"`
+	Message   string      `default:"Operation Successful!" json:"message"`
 	Success   bool        `default:"true" json:"success"`
 	Code      int         `default:"200" json:"code"`
 	TimeStamp time.Time   `json:"timeStamp"`

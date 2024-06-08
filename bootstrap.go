@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/api/common/config"
-	//"github.com/api/common/middleware"
+	routers "github.com/api/router"
 	_ "github.com/api/docs"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
@@ -13,6 +13,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
 )
+
+
 
 func Handler(cfg *config.AppConfig) *fiber.App {
 
@@ -34,14 +36,6 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		fb.Shutdown()
 	}
 
-	// The index route is open
-	fb.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(200).JSON(&fiber.Map{
-			"success": true,
-			"message": "Ok",
-		})
-	})
-
 	//Swagger middleware
 	//middleware.SwaggerRoute(fb, cfg)
 
@@ -60,7 +54,9 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 
 	//Set logging to DEBUG LEVEL in Development
 	fb.Use(slogfiber.New(logger))
-
 	
+	//Add routes
+	routers.RouteSetup(fb, cfg)
+
 	return fb
 }

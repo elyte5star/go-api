@@ -1,4 +1,13 @@
 info:
   contact: {}
+  description: Interactive Documentation for Elyte e-Market
+  termsOfService: http://swagger.io/terms/
+  title: Elyte Realm API
+  version: 1.0.1
 paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

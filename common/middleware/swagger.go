@@ -2,21 +2,27 @@ package middleware
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/api/common/config"
+	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/swagger"
 )
 
-func SwaggerHandler(cfg *config.AppConfig) fiber.Handler {
+func SwaggerRoute(app *fiber.App, cfg *config.AppConfig) {
 	// Add the handler to serve the redoc
 	specFile := cfg.Doc
-	swaggerConfig := swagger.Config{
-		Title:        fmt.Sprintf("%s:%s Documentation", cfg.ServiceName, cfg.Version),
-		URL:          specFile,
-		DeepLinking:  false,
-		DocExpansion: "none",
+	if _, err := os.Stat(specFile); err == nil {
+		swaggerRoute := app.Group("/swagger")
+		swaggerConfig := swagger.Config{
+			Title:    fmt.Sprintf("%s:%s Documentation", cfg.ServiceName, cfg.Version),
+			FilePath: specFile,
+		}
+		swagger.New(swaggerConfig)
+		swaggerRoute.Get("*", swagger.New(swaggerConfig))
+	} else {
+		cfg.Logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", specFile))
+
 	}
-	return swagger.New(swaggerConfig)
 
 }

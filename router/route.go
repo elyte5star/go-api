@@ -1,12 +1,13 @@
 package routers
 
 import (
+	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2"
 )
 
-func RouteSetup(app *fiber.App) {
+func RouteSetup(app *fiber.App,cfg *config.AppConfig) {
 
-
+	
 	//middleware
 	// jwt := middleware.NewAuthMiddleware(util.JwtSecret)
 

@@ -25,7 +25,7 @@ func (cfg *AppConfig) PanicRecovery(c *fiber.Ctx, err error) error {
 	if err != nil {
 		cfg.Logger.Error(err.Error())
 		// In case the SendFile fails
-		return c.Status(fiber.StatusInternalServerError).JSON(response.ErrorResponse{Code: fiber.StatusInternalServerError})
+		return c.Status(fiber.StatusInternalServerError).JSON(response.NewErrorResponse())
 	}
 
 	// Return from handler

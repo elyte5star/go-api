@@ -1,12 +1,21 @@
+basePath: /
+host: localhost:8080
 info:
-  contact: {}
-  description: Interactive Documentation for Elyte e-Market
+  contact:
+    email: elyte5star@gmail.com
+    name: Elyte Fiber Application.
+    url: https://github.com/elyte5star.
+  description: Interactive Documentation for Elyte-Realm API
+  license:
+    name: Proprietary
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
   title: Elyte Realm API
   version: 1.0.1
 paths: {}
 securityDefinitions:
   ApiKeyAuth:
+    description: Jwt Bearer Token
     in: header
     name: Authorization
     type: apiKey

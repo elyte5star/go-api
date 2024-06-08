@@ -1,15 +1,26 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Interactive Documentation for Elyte e-Market",
+        "description": "Interactive Documentation for Elyte-Realm API",
         "title": "Elyte Realm API",
         "termsOfService": "http://swagger.io/terms/",
-        "contact": {},
+        "contact": {
+            "name": "Elyte Fiber Application.",
+            "url": "https://github.com/elyte5star.",
+            "email": "elyte5star@gmail.com"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "1.0.1"
     },
+    "host": "localhost:8080",
+    "basePath": "/",
     "paths": {},
     "securityDefinitions": {
         "ApiKeyAuth": {
+            "description": "Jwt Bearer Token",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

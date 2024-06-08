@@ -10,7 +10,15 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
-        "contact": {},
+        "contact": {
+            "name": "Elyte Fiber Application.",
+            "url": "https://github.com/elyte5star.",
+            "email": "elyte5star@gmail.com"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -18,6 +26,7 @@ const docTemplate = `{
     "paths": {},
     "securityDefinitions": {
         "ApiKeyAuth": {
+            "description": "Jwt Bearer Token",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -28,11 +37,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.1",
-	Host:             "",
-	BasePath:         "",
+	Host:             "localhost:8080",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Elyte Realm API",
-	Description:      "Interactive Documentation for Elyte e-Market",
+	Description:      "Interactive Documentation for Elyte-Realm API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

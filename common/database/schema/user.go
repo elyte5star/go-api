@@ -48,8 +48,8 @@ type User struct {
 	Discount         float64         `db:"discount" json:"discount"`
 	FailedAttempt    int             `db:"failedAttempt" json:"failedAttempt"`
 	LockTime         time.Time       `db:"lockTime" json:"lockTime"`
-	UserOtp          Otp             `db:"otp" json:"otp"`
-	Address          UserAddress     `db:"address" json:"address"`
+	UserOtp          *Otp            `db:"otp" json:"otp"`
+	Address          *UserAddress    `db:"address" json:"address"`
 	Locations        []*Userlocation `db:"locations" json:"locations"`
 	Bookings         []*Booking      `db:"bookings" json:"bookings"`
 }

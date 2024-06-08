@@ -3,7 +3,6 @@ package routers
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
@@ -12,19 +11,20 @@ import (
 )
 
 func healthCheck(c *fiber.Ctx) error {
-
-	res_ := res.RequestResponse{
-		Path:      c.Route().Path,
-		Message:   "Server is up and running",
-		Success:   true,
-		Code:      fiber.StatusOK,
-		TimeStamp: time.Now().UTC(),
-	}
-	if err := c.Status(fiber.StatusOK).JSON(res_); err != nil {
+	response := res.NewResponse(c)
+	response.Message = "Server is up and running"
+	if err := c.Status(fiber.StatusOK).JSON(response); err != nil {
 		return fmt.Errorf("error, Server is down, %w", err)
 	}
 
 	return nil
+}
+
+func NotFoundRoute(c *fiber.Ctx) error {
+	response := res.NewErrorResponse()
+	response.Message = "Sorry, endpoint is not found"
+	response.Code = fiber.StatusNotFound
+	return c.Status(fiber.StatusNotFound).JSON(response)
 }
 
 func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
@@ -32,7 +32,11 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	//logger middleware
 	logger := cfg.Logger
 
-	app.Get("/", healthCheck)
+	serverStatus := app.Group("/")
+	serverStatus.Get("/status", healthCheck)
+	
+	// NotFoundRoute func for describe 404 Error route.
+	app.Use(NotFoundRoute)
 
 	//middleware
 	// jwt := middleware.NewAuthMiddleware(util.JwtSecret)
@@ -60,7 +64,7 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 
 	specFile := cfg.Doc
 	if _, err := os.Stat(specFile); err == nil {
-		swaggerRoute := app.Group("/swagger")
+		swaggerRoute := app.Group("/docs")
 		swaggerRoute.Get("*", middleware.SwaggerHandler(cfg))
 	} else {
 		logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", specFile))

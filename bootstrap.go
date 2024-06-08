@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/api/common/config"
 	routers "github.com/api/router"
-	_ "github.com/api/docs"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -36,9 +34,6 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		fb.Shutdown()
 	}
 
-	//Swagger middleware
-	//middleware.SwaggerRoute(fb, cfg)
-
 	// Add a CORS middleware handler
 	fb.Use(cors.New(cors.Config{
 		AllowOrigins: cfg.CorsOrigins,
@@ -52,7 +47,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 	// Recover middleware
 	fb.Use(recover.New())
 
-	//Set logging to DEBUG LEVEL in Development
+	// Add the request logging middleware handler to all service routes
 	fb.Use(slogfiber.New(logger))
 	
 	//Add routes

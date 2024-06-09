@@ -11,20 +11,22 @@ import (
 )
 
 type AppConfig struct {
-	Debug                 bool         `required:"true"`
-	ClientOrigin          string       `required:"true"`
-	SmtpServer            string       `required:"true"`
-	SmtpUsername          string       `required:"true"`
-	SmtpPassword          string       `required:"true"`
-	JwtSecretKey          string       `required:"true"`
-	JwtExpireMinutesCount int          `required:"true"`
-	ServiceName           string       `required:"true"`
-	Version               string       `required:"true"`
-	Logger                *slog.Logger `ignored:"true"`
-	ServicePort           string       `required:"true"`
-	CorsOrigins           string       `required:"true"`
-	Url                   string       `required:"true"`
-	Doc                   string       `required:"true"`
+	Debug                 bool                `required:"true"`
+	ClientOrigin          string              `required:"true"`
+	SmtpServer            string              `required:"true"`
+	SmtpUsername          string              `required:"true"`
+	SmtpPassword          string              `required:"true"`
+	JwtSecretKey          string              `required:"true"`
+	JwtExpireMinutesCount int                 `required:"true"`
+	ServiceName           string              `required:"true"`
+	ReadTimeout           int                 `required:"true"`
+	Version               string              `required:"true"`
+	Logger                *slog.Logger        `ignored:"true"`
+	Validate              *validator.Validate `ignored:"true"`
+	ServicePort           string              `required:"true"`
+	CorsOrigins           string              `required:"true"`
+	Url                   string              `required:"true"`
+	Doc                   string              `required:"true"`
 	DbConfig              *DbConfig
 }
 
@@ -48,7 +50,7 @@ func (dbConfig *DbConfig) URL() string {
 	return dsn
 }
 
-func ParseConfig(val *validator.Validate) (config *AppConfig, err error) {
+func ParseConfig() (config *AppConfig, err error) {
 	config = &AppConfig{}
 	// Load the environment vars from a .env file if present
 	if err = godotenv.Load(); err != nil {
@@ -57,8 +59,6 @@ func ParseConfig(val *validator.Validate) (config *AppConfig, err error) {
 	if err = envconfig.Process("myapp", config); err != nil {
 		log.Fatal(err)
 	}
-	//err = val.Struct(config)
-
 	return
 
 }

@@ -72,7 +72,7 @@ func (q *UserQueries) CreateUser(user *schema.User) error {
 	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11,$12,$13,$14,$15,$16)`
 
 	// Send query to database.
-	_, err := q.Exec(query, user.Userid, user.AuditInfo, user.UserName, user.Password, user.Email, user.AccountNonLocked, user.Admin, user.Enabled, user.Telephone, user.Discount, user.FailedAttempt, user.LockTime, user.UserOtp, user.Address, user.Locations, user.Bookings)
+	_, err := q.Exec(query, user.Userid, user.AuditInfo, user.UserName, user.Password, user.Email, user.AccountNonLocked, user.Admin, user.Enabled, user.Telephone, user.Discount, user.FailedAttempt, user.LockTime)
 	if err != nil {
 		// Return only error.
 		return err
@@ -88,7 +88,7 @@ func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 	query := `UPDATE users SET lastModifiedAt = $2, LastModifiedBy = $3, telephone = $4, email = $5, address = $6 WHERE userid = $1`
 
 	// Send query to database.
-	_, err := q.Exec(query, userid, user.AuditInfo.LastModifiedAt, user.AuditInfo.LastModifiedBy, user.Telephone, user.Email, user.Address)
+	_, err := q.Exec(query, userid, user.AuditInfo.LastModifiedAt, user.AuditInfo.LastModifiedBy, user.Telephone, user.Email)
 	if err != nil {
 		// Return only error.
 		return err

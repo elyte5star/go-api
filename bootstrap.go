@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/api/common/config"
 	routers "github.com/api/router"
 	"github.com/api/util"
@@ -11,8 +13,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
 )
-
-
 
 func Handler(cfg *config.AppConfig) *fiber.App {
 
@@ -26,6 +26,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 		AppName:           appInfo,
 		EnablePrintRoutes: cfg.Debug,
 		ErrorHandler:      cfg.PanicRecovery,
+		ReadTimeout:       time.Second * time.Duration(cfg.ReadTimeout),
 	})
 
 	//check if application meets requirments
@@ -49,7 +50,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 
 	// Add the request logging middleware handler to all service routes
 	fb.Use(slogfiber.New(logger))
-	
+
 	//Add routes
 	routers.RouteSetup(fb, cfg)
 

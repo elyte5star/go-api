@@ -5,9 +5,14 @@ import (
 	"time"
 
 	"github.com/api/common/config"
+	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
+
+type Queries struct {
+	*repository.UserQueries
+}
 
 func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
 	config, err := mysql.ParseDSN(dbConfig.URL())
@@ -36,8 +41,19 @@ func ConnectToMySQL(cfg config.AppConfig) (*sqlx.DB, error) {
 	// Try to ping database.
 	if err := db.Ping(); err != nil {
 		defer db.Close() // close database connection
-		return nil, fmt.Errorf("error, not sent ping to database, %w", err)
+		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
 
 	return db, nil
+}
+
+func DbWithQueries(cfg config.AppConfig) (*Queries, error) {
+	db, err := ConnectToMySQL(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &Queries{
+		UserQueries: &repository.UserQueries{DB: db},
+	}, nil
+
 }

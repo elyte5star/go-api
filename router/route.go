@@ -35,8 +35,7 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	serverStatus := app.Group("/")
 	serverStatus.Get("/status", healthCheck)
 	
-	// NotFoundRoute func for describe 404 Error route.
-	app.Use(NotFoundRoute)
+	
 
 	//middleware
 	// jwt := middleware.NewAuthMiddleware(util.JwtSecret)
@@ -69,5 +68,7 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	} else {
 		logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", specFile))
 	}
+	// NotFoundRoute func for describe 404 Error route.
+	app.Use(NotFoundRoute)
 
 }

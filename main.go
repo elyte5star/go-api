@@ -8,6 +8,7 @@ import (
 	_ "github.com/api/docs"
 	"github.com/api/util"
 )
+
 /*
 @title Elyte Realm API
 @version 1.0.1
@@ -32,24 +33,30 @@ import (
 @accept json
 */
 func main() {
-	validate := util.InitValidator()
+
 	// Load the config struct with values from the environment
-	conf, _ := config.ParseConfig(validate)
+	conf, _ := config.ParseConfig()
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()
-	
+
 	//Set logging to DEBUG LEVEL in Development
 	if conf.Debug {
 		middleware.DebugLogger()
 	}
+
 	conf.Logger = logger
+
+	//Set up validation and attach to config
+	validate := util.InitValidator()
+
+	conf.Validate = validate
 
 	// Output the config for debugging
 	//fmt.Printf("%+v\n", conf)
 
 	bootstrap := Handler(conf)
-	
+
 	address := fmt.Sprintf(":%v", conf.ServicePort)
 
 	logger.Info("Listening on " + address)

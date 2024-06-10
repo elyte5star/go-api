@@ -14,7 +14,7 @@ type Queries struct {
 	*repository.UserQueries
 }
 
-func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
+func getDbConfig(dbConfig *config.DbConfig) (*mysql.Config, error) {
 	config, err := mysql.ParseDSN(dbConfig.URL())
 	if err != nil {
 		return nil, err
@@ -24,8 +24,8 @@ func getConfig(dbConfig config.DbConfig) (*mysql.Config, error) {
 	return config, nil
 }
 
-func ConnectToMySQL(cfg config.AppConfig) (*sqlx.DB, error) {
-	config, err := getConfig(*cfg.DbConfig)
+func ConnectToMySQL(cfg *config.AppConfig) (*sqlx.DB, error) {
+	config, err := getDbConfig(cfg.DbConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error, Getting Database configurations, %w", err)
 	}
@@ -47,7 +47,7 @@ func ConnectToMySQL(cfg config.AppConfig) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func DbWithQueries(cfg config.AppConfig) (*Queries, error) {
+func DbWithQueries(cfg *config.AppConfig) (*Queries, error) {
 	db, err := ConnectToMySQL(cfg)
 	if err != nil {
 		return nil, err

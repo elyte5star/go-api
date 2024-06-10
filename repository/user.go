@@ -29,7 +29,7 @@ type GetUsersResponse struct {
 	Users []GetUserResponse `json:"users"`
 }
 
-func (q *UserQueries) GetUserById(userid *uuid.UUID) (GetUserResponse, error) {
+func (q *UserQueries) GetUserById(userid uuid.UUID) (GetUserResponse, error) {
 
 	var user GetUserResponse
 

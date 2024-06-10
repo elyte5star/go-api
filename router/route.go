@@ -7,6 +7,7 @@ import (
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
+	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -34,8 +35,6 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 
 	serverStatus := app.Group("/")
 	serverStatus.Get("/status", healthCheck)
-	
-	
 
 	//middleware
 	// jwt := middleware.NewAuthMiddleware(util.JwtSecret)
@@ -45,9 +44,9 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	// productRoutes.Get("/:pid", service.GetSingleProduct)
 	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
 
-	// userRoutes := app.Group("/api/users",jwt)
+	userRoutes := app.Group("/api/users")
 	// userRoutes.Get("/")
-	// userRoutes.Get("/:userid")
+	userRoutes.Get("/:userid", service.GetUser)
 	// userRoutes.Delete("/:userid")
 
 	// authRoute := app.Group("/api/auth")

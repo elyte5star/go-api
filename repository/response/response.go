@@ -17,7 +17,7 @@ type RequestResponse struct {
 	Success   bool        `default:"true" json:"success"`
 	Code      int         `default:"200" json:"code"`
 	TimeStamp time.Time   `json:"timeStamp"`
-	Result    interface{} `default:"nil" json:"result"`
+	Result    interface{} `json:"result"`
 }
 
 func NewResponse(c *fiber.Ctx) *RequestResponse {

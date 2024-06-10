@@ -1,4 +1,35 @@
 basePath: /
+definitions:
+  response.ErrorResponse:
+    properties:
+      cause:
+        default: Something went wrong
+        type: string
+      code:
+        default: 500
+        type: integer
+      success:
+        default: false
+        type: boolean
+    type: object
+  response.RequestResponse:
+    properties:
+      code:
+        default: 200
+        type: integer
+      message:
+        default: Operation Successful!
+        type: string
+      path:
+        default: "0"
+        type: string
+      result: {}
+      success:
+        default: true
+        type: boolean
+      timeStamp:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -12,7 +43,36 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Elyte Realm API
   version: 1.0.1
-paths: {}
+paths:
+  /api/users/{userid}:
+    get:
+      consumes:
+      - application/json
+      description: Get User by given ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: get user by given ID
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     description: Jwt Bearer Token

@@ -73,6 +73,46 @@ paths:
       summary: get user by given ID
       tags:
       - User
+  /api/users/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user.
+      parameters:
+      - description: Username
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: Password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      - description: Email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: telephone
+        in: body
+        name: telephone
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      summary: create a new user
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     description: Jwt Bearer Token

@@ -55,12 +55,12 @@ func main() {
 	// Output the config for debugging
 	//fmt.Printf("%+v\n", conf)
 
-	bootstrap := Handler(conf)
+	h := Handler(conf)
 
 	address := fmt.Sprintf(":%v", conf.ServicePort)
 
 	logger.Info("Listening on " + address)
 	// start server
-	bootstrap.Listen(address)
+	h.Listen(address)
 
 }

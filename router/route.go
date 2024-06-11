@@ -47,6 +47,7 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	userRoutes := app.Group("/api/users")
 	// userRoutes.Get("/")
 	userRoutes.Get("/:userid", service.GetUser)
+	userRoutes.Post("create", service.CreateUser)
 	// userRoutes.Delete("/:userid")
 
 	// authRoute := app.Group("/api/auth")

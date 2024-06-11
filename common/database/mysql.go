@@ -52,6 +52,7 @@ func DbWithQueries(cfg *config.AppConfig) (*Queries, error) {
 	if err != nil {
 		return nil, err
 	}
+	Initialize(db, cfg)
 	return &Queries{
 		UserQueries: &repository.UserQueries{DB: db},
 	}, nil

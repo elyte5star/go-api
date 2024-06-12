@@ -6,7 +6,7 @@ import (
 
 	"github.com/api/common/config"
 	"github.com/api/common/middleware"
-	res "github.com/api/repository/response"
+	res "github.com/api/service/response"
 	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"
 )

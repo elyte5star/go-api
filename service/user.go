@@ -7,7 +7,7 @@ import (
 	"github.com/api/common/config"
 	"github.com/api/common/database"
 	"github.com/api/common/database/schema"
-	"github.com/api/repository/response"
+	"github.com/api/service/response"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -69,8 +69,9 @@ func CreateUser(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().UTC()
 	// Create new User struct
-	user := &schema.User{}
+	user := new(schema.User)
 	newErr := response.NewErrorResponse()
+	fmt.Println(c.Body())
 	// Check, if received JSON data is valid.
 	if err := c.BodyParser(user); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code

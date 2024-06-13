@@ -21,20 +21,20 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	)
 	`
 
-func Initialize(dbDriver *sqlx.DB, cfg *config.AppConfig) {
+func CreateTables(dbDriver *sqlx.DB, cfg *config.AppConfig) {
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {
 		cfg.Logger.Error(driverError.Error())
 
 	}
-	// // Create train table
-	// _, statementError := statement.Exec()
-	// if statementError != nil {
-	// 	log.Println("Table already exists!")
-	// }
+	// Create table
+	_, statementError := statement.Exec()
+	if statementError != nil {
+		cfg.Logger.Warn("Table already exists!")
+	}
 	// statement, _ = dbDriver.Prepare(station)
 	// statement.Exec()
 	// statement, _ = dbDriver.Prepare(schedule)
-	statement.Exec()
-
+	// statement.Exec()
+	cfg.Logger.Info("All tables created/initialized successfully!")
 }

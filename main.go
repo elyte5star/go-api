@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/api/common/config"
+	"github.com/api/common/database"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/util"
@@ -35,29 +36,33 @@ import (
 func main() {
 
 	// Load the config struct with values from the environment
-	conf, _ := config.ParseConfig()
+	cfg, _ := config.ParseConfig()
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()
 
 	//Set logging to DEBUG LEVEL in Development
-	if conf.Debug {
+	if cfg.Debug {
 		middleware.DebugLogger()
 	}
 
-	conf.Logger = logger
+	cfg.Logger = logger
 
 	//Set up validation and attach to config
 	validate := util.InitValidator()
 
-	conf.Validate = validate
+	cfg.Validate = validate
 
 	// Output the config for debugging
 	//fmt.Printf("%+v\n", conf)
 
-	h := Handler(conf)
+	h := Handler(cfg)
 
-	address := fmt.Sprintf(":%v", conf.ServicePort)
+	if _, err := database.ConnectToMySQL(cfg); err != nil {
+		logger.Error(fmt.Sprintf("Oops... Couldn't connect to db! Reason: %v", err))
+	}
+
+	address := fmt.Sprintf(":%v", cfg.ServicePort)
 
 	logger.Info("Listening on " + address)
 	// start server

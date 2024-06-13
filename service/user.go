@@ -37,7 +37,7 @@ func GetUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(fmt.Sprintf("invalid user id: %s", err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	db, err := database.DbWithQueries(&cfg)
+	db, err := database.DbWithQueries(cfg)
 	if err != nil {
 		newErr.Message = "Couldnt connect to DB!"
 		cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
@@ -52,7 +52,6 @@ func GetUser(c *fiber.Ctx) error {
 	response := response.NewResponse(c)
 	response.Result = user
 	return c.Status(fiber.StatusOK).JSON(response)
-
 }
 
 // CreateUser func creates a new user.
@@ -81,14 +80,14 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(newErr.Code).JSON(newErr)
 
 	}
-	fmt.Printf("%+v\n", &cfg)
+	fmt.Printf("%+v\n", &cfg.ServicePort)
 	// Create database connection.
-	_, err := database.DbWithQueries(&cfg)
-	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
-	}
+	// _, err:= database.DbWithQueries(cfg)
+	// if err != nil {
+	// 	newErr.Message = "Couldnt connect to DB!"
+	// 	cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	// }
 	// // Create new User struct
 	// user := new(schema.User)
 	// audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: now, LastModifiedBy: "none", CreatedBy: user.Email}

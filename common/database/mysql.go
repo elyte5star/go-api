@@ -43,16 +43,20 @@ func ConnectToMySQL(cfg *config.AppConfig) (*sqlx.DB, error) {
 		defer db.Close() // close database connection
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
+	
+	CreateTables(db, cfg)
+
+	cfg.Logger.Info(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
 
 	return db, nil
 }
 
-func DbWithQueries(cfg *config.AppConfig) (*Queries, error) {
-	db, err := ConnectToMySQL(cfg)
+func DbWithQueries(cfg config.AppConfig) (*Queries, error) {
+	db, err := ConnectToMySQL(&cfg)
 	if err != nil {
 		return nil, err
 	}
-	Initialize(db, cfg)
+	//Initialize(db, cfg)
 	return &Queries{
 		UserQueries: &repository.UserQueries{DB: db},
 	}, nil

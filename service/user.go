@@ -2,13 +2,16 @@ package service
 
 import (
 	"fmt"
-	"time"
+	//"time"
 
 	"github.com/api/common/config"
 	"github.com/api/common/database"
-	"github.com/api/common/database/schema"
+
+	//"github.com/api/common/database/schema"
+	"github.com/api/service/request"
 	"github.com/api/service/response"
-	"github.com/api/util"
+
+	//"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -67,47 +70,48 @@ func GetUser(c *fiber.Ctx) error {
 func CreateUser(c *fiber.Ctx) error {
 	var cfg config.AppConfig
 	// Get now time.
-	now := time.Now().UTC()
-	// Create new User struct
-	user := new(schema.User)
+	//now := time.Now().UTC()
+
 	newErr := response.NewErrorResponse()
-	fmt.Println(c.Body())
+	createUser := new(request.CreateUserRequest)
 	// Check, if received JSON data is valid.
-	if err := c.BodyParser(user); err != nil {
+	if err := c.BodyParser(createUser); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 
 	}
+	fmt.Printf("%+v\n", &cfg)
 	// Create database connection.
-	db, err := database.DbWithQueries(&cfg)
+	_, err := database.DbWithQueries(&cfg)
 	if err != nil {
 		newErr.Message = "Couldnt connect to DB!"
 		cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
-
-	audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: now, LastModifiedBy: "none", CreatedBy: user.Email}
-	// Set initialized default data for user:
-	user.Userid = uuid.New()
-	user.AuditInfo = *audit
-	user.Discount = 0.0
-	user.Admin = false
-	user.Enabled = true
-	user.FailedAttempt = 0
-	user.AccountNonLocked = false
-	// Validate user fields.
-	if err := cfg.Validate.Struct(user); err != nil {
-		// Return, if some fields are not valid.
-		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = fmt.Sprintf("Errors : %v", util.ValidatorErrors(err))
-		return c.Status(newErr.Code).JSON(newErr)
-	}
-	if err := db.CreateUser(user); err != nil {
-		newErr.Message = err.Error()
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
-	}
-	response := response.NewResponse(c)
-	response.Result = user.Userid
-	return c.Status(fiber.StatusOK).JSON(response)
+	// // Create new User struct
+	// user := new(schema.User)
+	// audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: now, LastModifiedBy: "none", CreatedBy: user.Email}
+	// // Set initialized default data for user:
+	// user.Userid = uuid.New()
+	// user.AuditInfo = *audit
+	// user.Discount = 0.0
+	// user.Admin = false
+	// user.Enabled = true
+	// user.FailedAttempt = 0
+	// user.AccountNonLocked = false
+	// // Validate user fields.
+	// if err := cfg.Validate.Struct(user); err != nil {
+	// 	// Return, if some fields are not valid.
+	// 	newErr.Code = fiber.ErrBadRequest.Code
+	// 	newErr.Message = fmt.Sprintf("Errors : %v", util.ValidatorErrors(err))
+	// 	return c.Status(newErr.Code).JSON(newErr)
+	// }
+	// if err := db.CreateUser(user); err != nil {
+	// 	newErr.Message = err.Error()
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	// }
+	// response := response.NewResponse(c)
+	// response.Result = user.Userid
+	return c.Status(fiber.StatusOK).JSON(createUser)
 }

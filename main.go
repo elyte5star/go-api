@@ -36,7 +36,11 @@ import (
 func main() {
 
 	// Load the config struct with values from the environment
-	cfg, _ := config.ParseConfig()
+	
+	//Set up validation and attach to config
+	validate := util.InitValidator()
+
+	cfg, _ := config.ParseConfig(validate)
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()
@@ -48,13 +52,10 @@ func main() {
 
 	cfg.Logger = logger
 
-	//Set up validation and attach to config
-	validate := util.InitValidator()
-
 	cfg.Validate = validate
 
 	// Output the config for debugging
-	//fmt.Printf("%+v\n", conf)
+	//fmt.Printf("%+v\n", cfg)
 
 	h := Handler(cfg)
 

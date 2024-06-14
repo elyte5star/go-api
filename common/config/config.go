@@ -4,38 +4,38 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-
+	
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 type AppConfig struct {
-	Debug                 bool                `required:"true"`
-	ClientOrigin          string              `required:"true"`
-	SmtpServer            string              `required:"true"`
-	SmtpUsername          string              `required:"true"`
-	SmtpPassword          string              `required:"true"`
-	JwtSecretKey          string              `required:"true"`
-	JwtExpireMinutesCount int                 `required:"true"`
-	ServiceName           string              `required:"true"`
-	ReadTimeout           int                 `required:"true"`
-	Version               string              `required:"true"`
-	Logger                *slog.Logger        `ignored:"true"`
-	Validate              *validator.Validate `ignored:"true"`
-	ServicePort           string              `required:"true"`
-	CorsOrigins           string              `required:"true"`
-	Url                   string              `required:"true"`
-	Doc                   string              `required:"true"`
+	Debug                 bool  
+	ClientOrigin          string ` validate:"required"`
+	SmtpServer            string ` validate:"required"`
+	SmtpUsername          string ` validate:"required"`
+	SmtpPassword          string ` validate:"required"`
+	JwtSecretKey          string ` validate:"required"`
+	JwtExpireMinutesCount int    ` validate:"required"`
+	ServiceName           string ` validate:"required"`
+	ReadTimeout           int    ` validate:"required"`
+	Version               string ` validate:"required"`
+	Logger                *slog.Logger
+	Validate              *validator.Validate
+	ServicePort           string ` validate:"required"`
+	CorsOrigins           string ` validate:"required"`
+	Url                   string ` validate:"required"`
+	Doc                   string ` validate:"required"`
 	DbConfig              *DbConfig
 }
 
 type DbConfig struct {
-	User     string `envconfig:"MYSQL_USER" required:"true" split_words:"true"`
-	Password string `envconfig:"MYSQL_PASSWORD" required:"true" split_words:"true"`
-	Host     string `envconfig:"MYSQL_HOST" required:"true" split_words:"true"`
-	Port     string `envconfig:"MYSQL_PORT" required:"true" split_words:"true"`
-	Database string `envconfig:"MYSQL_DATABASE" required:"true" split_words:"true"`
+	User     string `envconfig:"MYSQL_USER" split_words:"true" validate:"required"`
+	Password string `envconfig:"MYSQL_PASSWORD" split_words:"true" validate:"required"`
+	Host     string `envconfig:"MYSQL_HOST" split_words:"true" validate:"required"`
+	Port     string `envconfig:"MYSQL_PORT" split_words:"true" validate:"required"`
+	Database string `envconfig:"MYSQL_DATABASE" split_words:"true" validate:"required"`
 }
 
 func (dbConfig *DbConfig) URL() string {
@@ -50,15 +50,18 @@ func (dbConfig *DbConfig) URL() string {
 	return dsn
 }
 
-func ParseConfig() (config *AppConfig, err error) {
-	config = &AppConfig{}
+func ParseConfig(val *validator.Validate) (*AppConfig, error) {
+	var config AppConfig
 	// Load the environment vars from a .env file if present
-	if err = godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Couldnt load env files %p", err)
+	}
+	if err := envconfig.Process("myapp", &config); err != nil {
+		log.Fatalf("Couldnt parse env variables to config struct %p", err)
+	}
+	if err := val.Struct(config); err != nil {
 		log.Fatal(err)
 	}
-	if err = envconfig.Process("myapp", config); err != nil {
-		log.Fatal(err)
-	}
-	return
+	return &config, nil
 
 }

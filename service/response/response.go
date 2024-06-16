@@ -3,7 +3,7 @@ package response
 import (
 	"fmt"
 	"time"
-
+	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	d "github.com/mcuadros/go-defaults"
 )
@@ -23,7 +23,7 @@ type RequestResponse struct {
 func NewResponse(c *fiber.Ctx) *RequestResponse {
 	response := new(RequestResponse)
 	d.SetDefaults(response)
-	response.TimeStamp = time.Now().UTC()
+	response.TimeStamp = util.TimeNow()
 	response.Path = c.Route().Path
 	return response
 

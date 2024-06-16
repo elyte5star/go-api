@@ -2,12 +2,12 @@ package util
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/api/common/config"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
@@ -24,8 +24,17 @@ func TimeElapsed(start time.Time, name string) string {
 	fmt.Println(name + " took " + elapsed.String())
 	return elapsed.String()
 }
-func TimeNow() string {
-	return time.Now().UTC().String()
+func TimeNow() time.Time {
+	return time.Now().UTC()
+}
+
+func NullTime() time.Time {
+	var t time.Time
+	return t
+}
+
+func Ident() uuid.UUID {
+	return uuid.New()
 }
 
 type TimestampTime struct {
@@ -58,9 +67,8 @@ func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
 // 	return connStr
 // }
 
-func SysRequirment(cfg *config.AppConfig) bool {
-	defer TimeElapsed(time.Now(), "Checking System Information and Requirements")
-	logger := cfg.Logger
+func SysRequirment(logger *slog.Logger) bool {
+	defer TimeElapsed(time.Now(), "Checking your Go environment")
 	myVersion := runtime.Version()
 	major := strings.Split(myVersion, ".")[0][2]
 	minor := strings.Split(myVersion, ".")[1]
@@ -70,11 +78,11 @@ func SysRequirment(cfg *config.AppConfig) bool {
 		logger.Error("Need Go version 1.22 or higher!")
 		return false
 	}
-	// logger.Info("You are using " + runtime.Compiler + " ")
-	// logger.Info("on a" + runtime.GOARCH + "machine")
-	// logger.Info("Using Go version " + runtime.Version())
-	// logger.Info("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
-	// logger.Info("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
+	logger.Debug("You are using " + runtime.Compiler + " ")
+	logger.Debug("on a" + runtime.GOARCH + "machine")
+	logger.Debug("Using Go version " + runtime.Version())
+	logger.Debug("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
+	logger.Debug("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true
 
 }

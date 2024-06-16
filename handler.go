@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
-
-	"github.com/api/common/config"
-	routers "github.com/api/router"
+	"github.com/api/service"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,7 +12,7 @@ import (
 	slogfiber "github.com/samber/slog-fiber"
 )
 
-func Handler(cfg *config.AppConfig) *fiber.App {
+func Handler(cfg *service.AppConfig) *fiber.App {
 
 	appInfo := fmt.Sprintf("%s:%s", cfg.ServiceName, cfg.Version)
 
@@ -30,7 +28,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 	})
 
 	//check if application meets requirments
-	meetSysRequirment := util.SysRequirment(cfg)
+	meetSysRequirment := util.SysRequirment(cfg.Logger)
 	if !meetSysRequirment {
 		fb.Shutdown()
 	}
@@ -52,7 +50,7 @@ func Handler(cfg *config.AppConfig) *fiber.App {
 	fb.Use(slogfiber.New(logger))
 
 	//Add routes
-	routers.RouteSetup(fb, cfg)
+	service.RouteSetup(fb, cfg)
 
 	return fb
 }

@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/api/common/config"
-	"github.com/api/common/database"
+	"github.com/api/service"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/util"
@@ -40,7 +39,7 @@ func main() {
 	//Set up validation and attach to config
 	validate := util.InitValidator()
 
-	cfg, _ := config.ParseConfig(validate)
+	cfg, _ := service.ParseConfig(validate)
 
 	// Set up the logger
 	logger := middleware.DefaultLogger()
@@ -59,7 +58,7 @@ func main() {
 
 	h := Handler(cfg)
 
-	if _, err := database.ConnectToMySQL(cfg); err != nil {
+	if _, err := service.ConnectToMySQL(cfg); err != nil {
 		logger.Error(fmt.Sprintf("Oops... Couldn't connect to db! Reason: %v", err))
 	}
 

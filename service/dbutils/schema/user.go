@@ -43,10 +43,10 @@ type User struct {
 	AccountNonLocked bool        `db:"accountNonLocked" json:"accountNonLocked"`
 	Admin            bool        `db:"admin" json:"admin"`
 	Enabled          bool        `db:"enabled" json:"enabled"`
-	Telephone        string      `db:"telephone" json:"telephone" validate:"min=5,max=16"`
+	Telephone        string      `db:"telephone" json:"telephone" validate:"required"`
 	Discount         float64     `db:"discount" json:"discount"`
 	FailedAttempt    int         `db:"failedAttempt" json:"failedAttempt"`
-	LockTime         *time.Time   `db:"lockTime" json:"lockTime"`
+	LockTime         *time.Time  `db:"lockTime" json:"lockTime"`
 	AuditInfo        AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	//UserOtp          *Otp            `db:"otp" json:"otp"`
 	// Address          *UserAddress    `db:"address" json:"address"`

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/api/common/database/schema"
+	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -22,8 +22,6 @@ type GetUserResponse struct {
 	IsUsing2FA       bool      `json:"isUsing2FA"`
 	Telephone        string    `json:"telephone"`
 }
-
-
 
 type GetUsersResponse struct {
 	Users []GetUserResponse `json:"users"`
@@ -69,10 +67,10 @@ func (q *UserQueries) GetUsers() (GetUsersResponse, error) {
 func (q *UserQueries) CreateUser(user *schema.User) error {
 
 	// Define query string.
-	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11,$12,$13,$14,$15,$16)`
+	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11)`
 
 	// Send query to database.
-	_, err := q.Exec(query, user.Userid, user.AuditInfo, user.UserName, user.Password, user.Email, user.AccountNonLocked, user.Admin, user.Enabled, user.Telephone, user.Discount, user.FailedAttempt, user.LockTime)
+	_, err := q.Exec(query, user.Userid, user.UserName, user.Password, user.Email, user.Telephone, user.Discount, user.Admin, user.Enabled, user.FailedAttempt, user.AccountNonLocked, user.AuditInfo)
 	if err != nil {
 		// Return only error.
 		return err

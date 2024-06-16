@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/api/common/config"
+	"log"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,20 +21,20 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	)
 	`
 
-func CreateTables(dbDriver *sqlx.DB, cfg *config.AppConfig) {
+func CreateTables(dbDriver *sqlx.DB) {
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {
-		cfg.Logger.Error(driverError.Error())
+		log.Fatal(driverError.Error())
 
 	}
 	// Create table
 	_, statementError := statement.Exec()
 	if statementError != nil {
-		cfg.Logger.Warn("Table already exists!")
+		//cfg.Logger.Warn("Table already exists!")
 	}
 	// statement, _ = dbDriver.Prepare(station)
 	// statement.Exec()
 	// statement, _ = dbDriver.Prepare(schedule)
 	// statement.Exec()
-	cfg.Logger.Info("All tables created/initialized successfully!")
+	//cfg.Logger.Info("All tables created/initialized successfully!")
 }

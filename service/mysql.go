@@ -1,20 +1,19 @@
-package database
+package service
 
 import (
 	"fmt"
 	"time"
-
-	"github.com/api/common/config"
 	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/api/service/dbutils"
 )
 
 type Queries struct {
 	*repository.UserQueries
 }
 
-func getDbConfig(dbConfig *config.DbConfig) (*mysql.Config, error) {
+func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
 	config, err := mysql.ParseDSN(dbConfig.URL())
 	if err != nil {
 		return nil, err
@@ -24,7 +23,7 @@ func getDbConfig(dbConfig *config.DbConfig) (*mysql.Config, error) {
 	return config, nil
 }
 
-func ConnectToMySQL(cfg *config.AppConfig) (*sqlx.DB, error) {
+func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 	config, err := getDbConfig(cfg.DbConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error, Getting Database configurations, %w", err)
@@ -44,19 +43,18 @@ func ConnectToMySQL(cfg *config.AppConfig) (*sqlx.DB, error) {
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
 	
-	CreateTables(db, cfg)
+	database.CreateTables(db)
 
-	cfg.Logger.Info(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
+	cfg.Logger.Debug(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
 
 	return db, nil
 }
 
-func DbWithQueries(cfg config.AppConfig) (*Queries, error) {
-	db, err := ConnectToMySQL(&cfg)
+func DbWithQueries(cfg *AppConfig) (*Queries, error) {
+	db, err := ConnectToMySQL(cfg)
 	if err != nil {
 		return nil, err
 	}
-	//Initialize(db, cfg)
 	return &Queries{
 		UserQueries: &repository.UserQueries{DB: db},
 	}, nil

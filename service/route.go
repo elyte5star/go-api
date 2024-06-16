@@ -1,14 +1,11 @@
-package routers
+package service
 
 import (
 	"fmt"
 	"os"
-
-	"github.com/api/common/config"
-	"github.com/api/common/middleware"
 	res "github.com/api/service/response"
-	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 func healthCheck(c *fiber.Ctx) error {
@@ -21,6 +18,18 @@ func healthCheck(c *fiber.Ctx) error {
 	return nil
 }
 
+
+func SwaggerHandler(cfg *AppConfig) fiber.Handler {
+	// Add the handler to serve the redoc
+	swaggerConfig := swagger.Config{
+		DeepLinking: false,
+		// Expand ("list") or Collapse ("none") tag groups by default
+		DocExpansion: "none",
+		Title:        fmt.Sprintf("%s:%s Documentation", cfg.ServiceName, cfg.Version),
+	}
+	return swagger.New(swaggerConfig)
+
+}
 func NotFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
 	response.Message = "Sorry, endpoint is not found"
@@ -28,7 +37,7 @@ func NotFoundRoute(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotFound).JSON(response)
 }
 
-func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
+func RouteSetup(app *fiber.App, cfg *AppConfig) {
 
 	//logger middleware
 	logger := cfg.Logger
@@ -46,8 +55,8 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 
 	userRoutes := app.Group("/api/users")
 	// userRoutes.Get("/")
-	userRoutes.Get("/:userid", service.GetUser)
-	userRoutes.Post("create", service.CreateUser)
+	userRoutes.Get("/:userid", cfg.GetUser)
+	userRoutes.Post("create", cfg.CreateUser)
 	// userRoutes.Delete("/:userid")
 
 	// authRoute := app.Group("/api/auth")
@@ -64,7 +73,7 @@ func RouteSetup(app *fiber.App, cfg *config.AppConfig) {
 	specFile := cfg.Doc
 	if _, err := os.Stat(specFile); err == nil {
 		swaggerRoute := app.Group("/docs")
-		swaggerRoute.Get("*", middleware.SwaggerHandler(cfg))
+		swaggerRoute.Get("*", SwaggerHandler(cfg))
 	} else {
 		logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", specFile))
 	}

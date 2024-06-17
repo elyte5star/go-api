@@ -93,7 +93,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.Telephone = createUser.Telephone
 	user.Discount = 0.0
 	user.Admin = false
-	user.Enabled = true
+	user.Enabled = false
 	user.FailedAttempt = 0
 	user.AccountNonLocked = false
 	audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: createUser.Email}

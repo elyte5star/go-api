@@ -32,7 +32,7 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (GetUserResponse, error) {
 	var user GetUserResponse
 
 	// Define query string.
-	query := `SELECT * FROM books WHERE userid = $1`
+	query := `SELECT * FROM users WHERE userid = $1`
 
 	// Send query to database.
 	err := q.Get(&user, query, userid)
@@ -67,10 +67,11 @@ func (q *UserQueries) GetUsers() (GetUsersResponse, error) {
 func (q *UserQueries) CreateUser(user *schema.User) error {
 
 	// Define query string.
-	query := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+	query := `INSERT INTO users ( userid,username,password,email,telephone,discount,admin,enabled,failedAttempt,accountNonLocked,auditInfo)
+	 VALUES (:userid,:username,:password,:email,:telephone,:discount,:admin,:enabled,:failedAttempt,:accountNonLocked,:auditInfo)`
 
 	// Send query to database.
-	_, err := q.Exec(query, user.Userid, user.UserName, user.Password, user.Email, user.Telephone, user.Discount, user.Admin, user.Enabled, user.FailedAttempt, user.AccountNonLocked, user.AuditInfo)
+	_, err := q.NamedExec(query, user)
 	if err != nil {
 		// Return only error.
 		return err

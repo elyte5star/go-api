@@ -8,7 +8,7 @@ import (
 )
 
 const users = `CREATE TABLE IF NOT EXISTS users (
-	userid BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	userid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
 	username VARCHAR(64) NOT NULL,
 	password VARCHAR(64) NOT NULL,
 	email VARCHAR(64) NOT NULL,
@@ -20,7 +20,7 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	failedAttempt INT UNSIGNED  DEFAULT '0000' NOT NULL,
 	LockTime TIMESTAMP(0),
 	auditInfo JSON
-	)
+	) ENGINE=INNODB
 	`
 
 func CreateTables(logger *slog.Logger, dbDriver *sqlx.DB) {

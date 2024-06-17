@@ -6,7 +6,6 @@ import (
 	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/api/service/dbutils"
 )
 
 type Queries struct {
@@ -42,8 +41,6 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 		defer db.Close() // close database connection
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
-	
-	database.CreateTables(db)
 
 	cfg.Logger.Debug(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
 

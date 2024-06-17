@@ -1,7 +1,9 @@
-package database
+package dbutils
 
 import (
 	"log"
+	"log/slog"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,7 +23,7 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	)
 	`
 
-func CreateTables(dbDriver *sqlx.DB) {
+func CreateTables(logger *slog.Logger, dbDriver *sqlx.DB) {
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {
 		log.Fatal(driverError.Error())
@@ -30,11 +32,12 @@ func CreateTables(dbDriver *sqlx.DB) {
 	// Create table
 	_, statementError := statement.Exec()
 	if statementError != nil {
-		//cfg.Logger.Warn("Table already exists!")
+		
+		logger.Warn("Table already exists!")
 	}
 	// statement, _ = dbDriver.Prepare(station)
 	// statement.Exec()
 	// statement, _ = dbDriver.Prepare(schedule)
 	// statement.Exec()
-	//cfg.Logger.Info("All tables created/initialized successfully!")
+	logger.Info("All tables created/initialized successfully!")
 }

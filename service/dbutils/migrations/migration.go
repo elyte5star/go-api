@@ -1,4 +1,4 @@
-package dbutils
+package migrations
 
 import (
 	"io/fs"

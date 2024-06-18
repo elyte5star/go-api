@@ -61,7 +61,6 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 // @Success 200 {object} response.RequestResponse
 // @Router /api/users/create [post]
 func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
-
 	// Get now time.
 	now := util.TimeNow()
 

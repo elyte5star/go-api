@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/api/service/dbutils/schema"
 	"github.com/api/service/request"
@@ -106,6 +107,9 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err := db.CreateUser(user); err != nil {
+		if strings.Contains(err.Error(), "Error 1062") {
+			newErr.Message = "Duplicate key"
+		}
 		newErr.Message = err.Error()
 		cfg.Logger.Error(fmt.Sprintf("%+v\n", newErr))
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)

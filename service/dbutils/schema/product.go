@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -18,17 +19,16 @@ type Product struct {
 	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"required"`
 	Image           string      `db:"image" json:"image" validate:"required"`
 	Details         string      `db:"details" json:"details" validate:"required,lte=555"`
-	Reviews         []*Review   `db:"reviews" json:"reviews"`
 	ProductDiscount float64     `db:"productDiscount" json:"productDiscount"`
 }
 
 type Review struct {
-	Rid          uuid.UUID   `db:"rid" json:"rid" validate:"required,uuid"`
-	AuditInfo    AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
-	Rating       int         `db:"rating" json:"rating" validate:"min=1,max=5"`
-	ReviewerName string      `db:"reviewerName" json:"reviewerName" validate:"required"`
-	Comment      string      `db:"comment" json:"comment"  validate:"required"`
-	Email        string      `db:"email" json:"email" validate:"required,email"`
+	Rid          uuid.UUID  `db:"rid" json:"rid" validate:"required,uuid"`
+	CreatedAt    *time.Time `db:"createdAt" json:"createdAt"`
+	Rating       int        `db:"rating" json:"rating" validate:"min=1,max=5"`
+	ReviewerName string     `db:"reviewerName" json:"reviewerName" validate:"required"`
+	Comment      string     `db:"comment" json:"comment"  validate:"required"`
+	Email        string     `db:"email" json:"email" validate:"required,email"`
 }
 
 // This method simply returns the JSON-encoded representation of the struct.

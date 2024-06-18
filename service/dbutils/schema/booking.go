@@ -1,12 +1,17 @@
 package schema
-import "github.com/google/uuid"
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Booking struct {
-	Oid             uuid.UUID    `json:"oid" validate:"required,uuid"`
-	AuditInfo       AuditEntity  `json:"auditInfo"`
-	ShippingDetails UserAddress  `json:"shippingDetails"`
-	TotalPrice      float64      `json:"totalPrice"`
-	Cart            []ItemIncart `json:"cart"`
+	Oid             uuid.UUID    `db:"oid" json:"oid" validate:"required,uuid"`
+	ShippingDetails UserAddress  `db:"shippingDetails" json:"shippingDetails" validate:"required,dive"`
+	CreatedAt       *time.Time   `db:"createdAt" json:"createdAt"  validate:"required"`
+	TotalPrice      float64      `db:"totalPrice" json:"totalPrice"  validate:"required"`
+	Cart            []ItemIncart `db:"cart" json:"cart" validate:"required,dive"`
 }
 
 type ItemIncart struct {
@@ -18,6 +23,6 @@ type ItemIncart struct {
 	StockQuantity   int       `json:"stockQuantity"`
 	Image           string    `json:"image" validate:"required,lte=255"`
 	Details         string    `json:"details" validate:"required,lte=555"`
-	CalculatedPrice float64   `json:"calculatedPrice"`
-	Quantity        int       `json:"quantity"`
+	CalculatedPrice float64   `json:"calculatedPrice" validate:"required"`
+	Quantity        int       `json:"quantity"  validate:"min=1"`
 }

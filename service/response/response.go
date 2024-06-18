@@ -3,12 +3,18 @@ package response
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	d "github.com/mcuadros/go-defaults"
 )
 
 type NoContent struct {
+}
+type RecordNotFoundError struct{}
+
+func (e *RecordNotFoundError) Error() string {
+	return "record not found"
 }
 
 type RequestResponse struct {

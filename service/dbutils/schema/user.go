@@ -1,18 +1,13 @@
 package schema
 
 import (
-	"errors"
 	"time"
-
-	"database/sql/driver"
-	"encoding/json"
 
 	"github.com/google/uuid"
 )
 
 type UserAddress struct {
 	AddressId     uuid.UUID   `db:"addressId" json:"addressId" validate:"required,uuid"`
-	AuditInfo     AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	FullName      string      `json:"fullName"`
 	StreetAddress string      `db:"fullName" json:"streetAddress"`
 	Country       string      `db:"country" json:"country"`
@@ -20,7 +15,7 @@ type UserAddress struct {
 	Zip           string      `db:"zip" json:"zip"`
 }
 
-type Userlocation struct {
+type Userlocations struct {
 	LocationId uuid.UUID   `db:"locationId" json:"locationId" validate:"required,uuid"`
 	AuditInfo  AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	Country    string      `db:"country" json:"country" validate:"required"`
@@ -29,7 +24,6 @@ type Userlocation struct {
 
 type Otp struct {
 	OtpId      uuid.UUID   `db:"otpId" json:"otpId" validate:"required,uuid"`
-	AuditInfo  AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	Email      string      `db:"email" json:"email" validate:"required"`
 	OtpString  string      `db:"otpString" json:"otpString" validate:"required"`
 	ExpiryDate time.Time   `db:"expiryDate" json:"expiryDate" validate:"required"`
@@ -52,20 +46,4 @@ type User struct {
 	// Address          *UserAddress    `db:"address" json:"address"`
 	// Locations        []*Userlocation `db:"locations" json:"locations"`
 	// Bookings         []*Booking      `db:"bookings" json:"bookings"`
-}
-
-// This method simply returns the JSON-encoded representation of the struct.
-func (otp Otp) Value() (driver.Value, error) {
-	return json.Marshal(otp)
-}
-
-// Scan make the Otp struct implement the sql.Scanner interface.
-// This method simply decodes a JSON-encoded value into the struct fields.
-func (otp *Otp) Scan(value interface{}) error {
-	j, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
-	}
-
-	return json.Unmarshal(j, &otp)
 }

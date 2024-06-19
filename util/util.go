@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
 	"runtime"
@@ -26,6 +27,11 @@ func TimeElapsed(start time.Time, name string) string {
 }
 func TimeNow() time.Time {
 	return time.Now().UTC()
+}
+
+func TimeThen() time.Time {
+	return time.Date(
+		1970, 11, 17, 20, 34, 58, 651387237, time.UTC)
 }
 
 func NullTime() time.Time {
@@ -111,7 +117,7 @@ func InitValidator() *validator.Validate {
 }
 
 // ValidatorErrors func for show validation errors for each invalid fields.
-func ValidatorErrors(err error) map[string]string {
+func ValidatorErrors(err error) string {
 	// Define fields map.
 	fields := map[string]string{}
 
@@ -124,8 +130,16 @@ func ValidatorErrors(err error) map[string]string {
 
 	// Make error message for each invalid field.
 	for _, err := range err.(validator.ValidationErrors) {
-		fields[err.Field()] = err.Tag()
+		fields[err.Field()] = err.Param()
 	}
 
-	return fields
+	return CreateKeyValuePairs(fields)
+}
+
+func CreateKeyValuePairs(m map[string]string) string {
+	b := new(bytes.Buffer)
+	for key, value := range m {
+		fmt.Fprintf(b, "%s=\"%s\"\n", key, value)
+	}
+	return b.String()
 }

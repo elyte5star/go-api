@@ -1,67 +1,69 @@
 package dbutils
 
 import (
-	"log/slog"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 )
 
 const users = `CREATE TABLE IF NOT EXISTS users (
-	userid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	userid CHAR(36) PRIMARY KEY,
 	username VARCHAR(64) NOT NULL UNIQUE,
-	password VARCHAR(64) NOT NULL,
+	password VARBINARY(255) NOT NULL,
 	email VARCHAR(64) NOT NULL UNIQUE,
 	accountNonLocked BOOLEAN DEFAULT false,
 	admin BOOLEAN DEFAULT false,
-	enabled BOOLEAN DEFAULT false,
+	enabled BOOLEAN DEFAULT false ,
+	isUsing2FA BOOLEAN DEFAULT false ,
 	telephone VARCHAR(64) NOT NULL UNIQUE,
-	discount   DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	failedAttempt INT UNSIGNED  DEFAULT '0000' NOT NULL,
-	LockTime TIMESTAMP(0),
+	discount  DECIMAL(16,2) DEFAULT '0.00',
+	failedAttempt INT UNSIGNED  DEFAULT '0000',
+	lockTime TIMESTAMP(0),
 	auditInfo JSON NOT NULL
-	) 
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8
 	`
+
 const otp = `CREATE TABLE IF NOT EXISTS otp (
-		userid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+		userid CHAR(36) PRIMARY KEY,
 		email VARCHAR(64) NOT NULL UNIQUE,
 		otpString VARCHAR(64) NOT NULL,
-		expiryDate TIMESTAMP(0)
-		FOREIGN KEY (USER_ID) REFERENCES users(userid),
-		)
+		expiryDate TIMESTAMP(0),
+		FOREIGN KEY(userid) REFERENCES users(userid)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
 `
 
 const userAddress = `CREATE TABLE IF NOT EXISTS user_address (
-	userid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	userid CHAR(36) PRIMARY KEY,
 	fullName VARCHAR(64) NOT NULL UNIQUE,
 	streetAddress VARCHAR(64) NOT NULL,
 	country VARCHAR(64) NOT NULL,
 	state VARCHAR(64) NOT NULL,
 	zip VARCHAR(64) NOT NULL,
-	FOREIGN KEY (userid) REFERENCES users(userid),
-	)
+	FOREIGN KEY (userid) REFERENCES users(userid)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8
 `
 
 const userLocations = `CREATE TABLE IF NOT EXISTS user_locations (
-	locationId CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	locationId CHAR(36) PRIMARY KEY,
 	country VARCHAR(64) NOT NULL UNIQUE,
 	enabled BOOLEAN DEFAULT false,
 	userid CHAR(36) NOT NULL,
-	FOREIGN KEY (userid) REFERENCES users(userid),
-	)
+	FOREIGN KEY (userid) REFERENCES users(userid)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8
 `
 
 const bookings = `CREATE TABLE IF NOT EXISTS bookings (
-	oId CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	oId CHAR(36) PRIMARY KEY,
 	createdAt TIMESTAMP(0),
 	userid CHAR(36) NOT NULL,
 	cart JSON NOT NULL,
 	shippingDetails JSON NOT NULL,
 	totalPrice DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	FOREIGN KEY (userid) REFERENCES users(userid),
-	)
+	FOREIGN KEY (userid) REFERENCES users(userid)
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 `
 const products = `CREATE TABLE IF NOT EXISTS products (
-	pid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	pid CHAR(36) PRIMARY KEY,
 	name VARCHAR(64) NOT NULL,
 	description VARCHAR(264) NOT NULL,
 	category VARCHAR(264) NOT NULL,
@@ -70,34 +72,40 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	image VARCHAR(64) NOT NULL,
 	details VARCHAR(664) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	auditInfo JSON NOT NULL,
-	)
+	auditInfo JSON NOT NULL
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8
 `
 const productReview = `CREATE TABLE IF NOT EXISTS reviews (
-	rid CHAR(36) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
+	rid CHAR(36) PRIMARY KEY,
 	createdAt TIMESTAMP(0),
 	rating INT UNSIGNED  DEFAULT '0000' NOT NULL,
 	reviewerName VARCHAR(264) NOT NULL,
 	comment VARCHAR(500) NOT NULL,
 	email VARCHAR(64) NOT NULL,
 	pid CHAR(36) NOT NULL,
-	FOREIGN KEY (pid) REFERENCES products(pid),
-		)
+	FOREIGN KEY (pid) REFERENCES products(pid)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
 	`
 
-func CreateTables(logger *slog.Logger, dbDriver *sqlx.DB) {
+func CreateTables(dbDriver *sqlx.DB) {
+
+	defer dbDriver.Close()
+
+	DropTable(dbDriver)
+
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {
-		logger.Warn(driverError.Error())
-
+		log.Println(driverError)
 	}
 	// Create table
 	_, statementError := statement.Exec()
 	if statementError != nil {
-		logger.Warn("Table already exists!")
+		log.Println("Table already exists!")
 	}
+
 	statement, _ = dbDriver.Prepare(otp)
 	statement.Exec()
+
 	statement, _ = dbDriver.Prepare(userAddress)
 	statement.Exec()
 	statement, _ = dbDriver.Prepare(userLocations)
@@ -108,5 +116,26 @@ func CreateTables(logger *slog.Logger, dbDriver *sqlx.DB) {
 	statement.Exec()
 	statement, _ = dbDriver.Prepare(productReview)
 	statement.Exec()
-	logger.Info("All tables created/initialized successfully!")
+	statement.Close()
+
+	log.Println("All tables created/initialized successfully!")
+}
+
+const dropUsersTable = `DROP TABLE IF EXISTS users`
+
+func DropTable(dbDriver *sqlx.DB) {
+
+	statement, driverError := dbDriver.Prepare(dropUsersTable)
+	if driverError != nil {
+		log.Fatal(driverError.Error())
+
+	}
+	_, statementError := statement.Exec()
+	if statementError != nil {
+		log.Println("Couldnt drop table!")
+	} else {
+		log.Println("users table dropped")
+
+	}
+
 }

@@ -1,8 +1,19 @@
 package request
 
+import "github.com/api/service/dbutils/schema"
+
 type CreateUserRequest struct {
-	UserName  string `db:"username" json:"username" validate:"required,lte=255"`
-	Password  string `db:"password" json:"password"  validate:"min=5,max=30"`
-	Email     string `db:"email" json:"email" validate:"required,email"`
-	Telephone string `db:"telephone" json:"telephone" validate:"min=5,max=16"`
+	UserName        string `json:"username" validate:"min=5,max=30"`
+	Password        string `json:"password"  validate:"eqfield=ConfirmPassword,min=5,max=30"`
+	ConfirmPassword string `json:"confirmPassword"  validate:"min=5,max=30"`
+	Email           string `json:"email" validate:"required,email"`
+	Telephone       string `json:"telephone" validate:"min=5,max=16"`
+}
+
+type ModifyUser struct {
+	UserName        string             `json:"username" validate:"min=5,max=30"`
+	Password        string             `json:"password" validate:"eqfield=ConfirmPassword,min=5,max=30"`
+	ConfirmPassword string             `json:"confirmPassword"  validate:"min=5,max=30"`
+	Telephone       string             `json:"telephone" validate:"min=5,max=16"`
+	Address         schema.UserAddress `json:"address"`
 }

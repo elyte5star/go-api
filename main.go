@@ -57,7 +57,7 @@ func main() {
 	h := Handler(cfg)
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
-		dbutils.CreateTables(cfg.Logger, db)
+		dbutils.CreateTables(db)
 	}
 	address := fmt.Sprintf(":%v", cfg.ServicePort)
 

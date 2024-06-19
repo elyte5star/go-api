@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"strings"
-
 	"github.com/api/service/dbutils/schema"
 	"github.com/api/service/request"
 	"github.com/api/service/response"
@@ -72,15 +71,24 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	// Check, if received JSON data is valid.
 	if err := c.BodyParser(createUser); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
-		cfg.Logger.Error(err.Error())
+		newErr.Message = err.Error()
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 
+	}
+	// Validate createUser fields.
+	if err := cfg.Validate.Struct(createUser); err != nil {
+		// Return, if some fields are not valid.
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = util.ValidatorErrors(err)
+		cfg.Logger.Error(newErr.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	// Create new User struct
@@ -88,32 +96,30 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	// Set initialized default data for user:
 	user.Userid = util.Ident()
 	user.UserName = createUser.UserName
-	user.Password = createUser.Password
+	user.SetPassword(createUser.Password)
 	user.Email = createUser.Email
+	user.LockTime = util.TimeThen()
 	user.Telephone = createUser.Telephone
-	user.Discount = 0.0
-	user.Admin = false
-	user.Enabled = false
-	user.FailedAttempt = 0
-	user.AccountNonLocked = false
-	audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: createUser.Email}
+	audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
+
 	// Validate user fields.
 	if err := cfg.Validate.Struct(user); err != nil {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = fmt.Sprintf("Errors : %v", util.ValidatorErrors(err))
-		cfg.Logger.Error(fmt.Sprintf("%+v\n", newErr))
+		newErr.Message = util.ValidatorErrors(err)
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err := db.CreateUser(user); err != nil {
-		if strings.Contains(err.Error(), "Error 1062") {
-			newErr.Message = "Duplicate key"
-		}
 		newErr.Message = err.Error()
-		cfg.Logger.Error(fmt.Sprintf("%+v\n", newErr))
+		if strings.Contains(err.Error(), "Error 1062") {
+			newErr.Message = "Duplicate key: user alreay exist"
+		}
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
+	//fmt.Printf("%+v\n", user)
 	response := response.NewResponse(c)
 	response.Result = user.Userid
 	return c.Status(fiber.StatusOK).JSON(response)

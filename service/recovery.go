@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/api/service/response"
+	"github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
 )
 

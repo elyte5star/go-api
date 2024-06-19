@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"time"
-
+	
 	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/response"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -12,27 +12,8 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-type GetUserResponse struct {
-	Userid           uuid.UUID           `json:"userid"`
-	LastModifiedAt   time.Time           `json:"lastModifiedAt"`
-	CreatedAt        time.Time           `json:"createdAt"`
-	Username         string              `json:"username"`
-	Email            string              `json:"email"`
-	AccountNonLocked bool                `json:"account_not_locked"`
-	Admin            bool                `json:"admin"`
-	Enabled          bool                `json:"enabled"`
-	IsUsing2FA       bool                `json:"isUsing2FA"`
-	Telephone        string              `json:"telephone"`
-	LockTime         time.Time           `json:"lockTime"`
-	Address          *schema.UserAddress `json:"address"`
-	Bookings         []*schema.Booking   `json:"bookings"`
-}
 
-type GetUsersResponse struct {
-	Users []GetUserResponse `json:"users"`
-}
-
-func (q *UserQueries) GetUserById(userid uuid.UUID) (*GetUserResponse, error) {
+func (q *UserQueries) GetUserById(userid uuid.UUID) (*response.GetUserResponse, error) {
 
 	var user schema.User
 	// Define query string.
@@ -42,9 +23,9 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (*GetUserResponse, error) {
 	err := q.Get(&user, query, userid)
 	if err != nil {
 		// Return empty object and error.
-		return &GetUserResponse{}, err
+		return &response.GetUserResponse{}, err
 	}
-	result := &GetUserResponse{Userid: user.Userid,
+	result := &response.GetUserResponse{Userid: user.Userid,
 		LastModifiedAt:   user.AuditInfo.LastModifiedAt,
 		CreatedAt:        user.AuditInfo.CreatedAt,
 		Username:         user.UserName,
@@ -59,10 +40,10 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (*GetUserResponse, error) {
 	return result, nil
 }
 
-func (q *UserQueries) GetUsers() (GetUsersResponse, error) {
+func (q *UserQueries) GetUsers() (response.GetUsersResponse, error) {
 	// Define users variable.
 
-	var users GetUsersResponse
+	var users response.GetUsersResponse
 	// Define query string.
 	query := `SELECT * FROM users`
 

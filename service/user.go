@@ -1,11 +1,11 @@
 package service
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/api/repository/request"
+	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
-	"github.com/api/service/request"
-	"github.com/api/service/response"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -28,19 +28,19 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = "invalid user id"
-		cfg.Logger.Error(fmt.Sprintf("invalid user id: %s", err))
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(fmt.Sprintf("Couldnt connect to DB!: %s", err))
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	user, err := db.GetUserById(userid)
 	if err != nil {
-		cfg.Logger.Error(fmt.Sprintf("Error while searching: %s", err))
 		newErr.Message = "user with the given ID is not found!"
+		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
 	response := response.NewResponse(c)
@@ -122,5 +122,27 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	//fmt.Printf("%+v\n", user)
 	response := response.NewResponse(c)
 	response.Result = user.Userid
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// GetUsers method for getting all users.
+func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
+
+	newErr := response.NewErrorResponse()
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		newErr.Message = "Couldnt connect to DB!"
+		cfg.Logger.Error(newErr.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	}
+	users, err := db.GetUsers()
+	if err != nil {
+		newErr.Message = "users not found!"
+		cfg.Logger.Error(newErr.Error())
+		return c.Status(fiber.StatusNotFound).JSON(newErr)
+	}
+	response := response.NewResponse(c)
+	response.Result = users
 	return c.Status(fiber.StatusOK).JSON(response)
 }

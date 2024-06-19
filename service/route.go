@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"os"
-	res "github.com/api/service/response"
+	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 )
@@ -54,7 +54,7 @@ func RouteSetup(app *fiber.App, cfg *AppConfig) {
 	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
 
 	userRoutes := app.Group("/api/users")
-	// userRoutes.Get("/")
+	userRoutes.Get("/",cfg.GetUsers)
 	userRoutes.Get("/:userid", cfg.GetUser)
 	userRoutes.Post("create", cfg.CreateUser)
 	// userRoutes.Delete("/:userid")

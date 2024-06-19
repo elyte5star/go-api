@@ -2,8 +2,9 @@ package repository
 
 import (
 	
-	"github.com/api/service/dbutils/schema"
+
 	"github.com/api/repository/response"
+	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -11,7 +12,6 @@ import (
 type UserQueries struct {
 	*sqlx.DB
 }
-
 
 func (q *UserQueries) GetUserById(userid uuid.UUID) (*response.GetUserResponse, error) {
 
@@ -40,22 +40,45 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (*response.GetUserResponse, 
 	return result, nil
 }
 
-func (q *UserQueries) GetUsers() (response.GetUsersResponse, error) {
-	// Define users variable.
+func (q *UserQueries) GetUsers() (*response.GetUsersResponse, error) {
 
-	var users response.GetUsersResponse
+	// Define users variable.
+	result := response.GetUsersResponse{}
+
 	// Define query string.
 	query := `SELECT * FROM users`
 
 	// Send query to database.
-	err := q.Get(&users, query)
+	rows, err := q.Queryx(query)
 	if err != nil {
 		// Return empty object and error.
-		return users, err
+		return &result, err
+	}
+	for rows.Next() {
+		user := schema.User{}
+		err := rows.StructScan(&user)
+		if err != nil {
+			// Return empty object and error.
+			return &result, err
+		}
+		result.Users = append(result.Users,response.GetUserResponse{Userid: user.Userid,
+			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
+			CreatedAt:        user.AuditInfo.CreatedAt,
+			Username:         user.UserName,
+			Email:            user.Email,
+			AccountNonLocked: user.AccountNonLocked,
+			Admin:            user.Admin,
+			IsUsing2FA:       user.IsUsing2FA,
+			Enabled:          user.Enabled,
+			Telephone:        user.Telephone,
+			LockTime:         user.LockTime,
+		})
+		
 	}
 
+	
 	// Return query result.
-	return users, nil
+	return &result, nil
 }
 
 // Createuser method for creating User by given User object.

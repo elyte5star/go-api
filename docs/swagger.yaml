@@ -44,13 +44,34 @@ info:
   title: Elyte Realm API
   version: 1.0.1
 paths:
+  /api/users/:
+    get:
+      consumes:
+      - application/json
+      description: Get all existing users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.RequestResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get all existing users
+      tags:
+      - Users
   /api/users/{userid}:
     get:
       consumes:
       - application/json
       description: Get User by given ID.
       parameters:
-      - description: User ID
+      - description: userid
         in: path
         name: userid
         required: true
@@ -70,9 +91,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      summary: get user by given ID
+      summary: Get user by given userid
       tags:
-      - User
+      - Users
   /api/users/create:
     post:
       consumes:
@@ -88,6 +109,12 @@ paths:
       - description: Password
         in: body
         name: password
+        required: true
+        schema:
+          type: string
+      - description: ConfirmPassword
+        in: body
+        name: confirmPassword
         required: true
         schema:
           type: string
@@ -110,9 +137,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.RequestResponse'
-      summary: create a new user
+      summary: Create a new user
       tags:
-      - User
+      - Users
 securityDefinitions:
   ApiKeyAuth:
     description: Jwt Bearer Token

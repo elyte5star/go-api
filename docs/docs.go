@@ -24,6 +24,38 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/users/": {
+            "get": {
+                "description": "Get all existing users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all existing users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.RequestResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/create": {
             "post": {
                 "description": "Create a new user.",
@@ -34,9 +66,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
-                "summary": "create a new user",
+                "summary": "Create a new user",
                 "parameters": [
                     {
                         "description": "Username",
@@ -50,6 +82,15 @@ const docTemplate = `{
                     {
                         "description": "Password",
                         "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "ConfirmPassword",
+                        "name": "confirmPassword",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -95,13 +136,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
-                "summary": "get user by given ID",
+                "summary": "Get user by given userid",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
+                        "description": "userid",
                         "name": "userid",
                         "in": "path",
                         "required": true

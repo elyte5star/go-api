@@ -13,11 +13,11 @@ import (
 
 // GetUser func gets User by given ID or 404 error.
 // @Description Get User by given ID.
-// @Summary get user by given ID
-// @Tags User
+// @Summary Get user by given userid
+// @Tags Users
 // @Accept json
 // @Produce json
-// @Param userid path string true "User ID"
+// @Param userid path string true "userid"
 // @Success 200 {object} response.RequestResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
@@ -50,12 +50,13 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 
 // CreateUser func creates a new user.
 // @Description Create a new user.
-// @Summary create a new user
-// @Tags User
+// @Summary Create a new user
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param username body string true "Username"
 // @Param password body string true "Password"
+// @Param confirmPassword body string true "ConfirmPassword"
 // @Param email body string true "Email"
 // @Param telephone body string true "telephone"
 // @Success 200 {object} response.RequestResponse
@@ -125,7 +126,15 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
-// GetUsers method for getting all users.
+// GetUsers method for getting all existing users.
+// @Description Get all existing users.
+// @Summary Get all existing users
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Failure 500 {object} response.ErrorResponse	
+// @Success 200 {array} response.RequestResponse
+// @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 
 	newErr := response.NewErrorResponse()

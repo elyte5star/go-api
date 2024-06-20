@@ -2,6 +2,7 @@ package service
 
 import (
 	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -10,6 +11,10 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	user := c.FormValue("username")
 	pass := c.FormValue("password")
 
+	secret := cfg.JwtSecretKey
+
+	// Set expires minutes count for secret key from .env file.
+	minutesCount := cfg.JwtExpireMinutesCount
 	// Throws Unauthorized error
 	if user != "john" || pass != "doe" {
 		return c.SendStatus(fiber.StatusUnauthorized)
@@ -19,14 +24,14 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	claims := jwt.MapClaims{
 		"name":  "John Doe",
 		"admin": true,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+		"exp":   time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 	}
 
 	// Create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}

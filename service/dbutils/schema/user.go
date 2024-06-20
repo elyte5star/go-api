@@ -10,11 +10,11 @@ import (
 
 type UserAddress struct {
 	AddressId     uuid.UUID `db:"addressId" json:"addressId" validate:"required,uuid"`
-	FullName      string    `json:"fullName"`
-	StreetAddress string    `db:"fullName" json:"streetAddress"`
-	Country       string    `db:"country" json:"country"`
-	State         string    `db:"state" json:"state"`
-	Zip           string    `db:"zip" json:"zip"`
+	FullName      string    `db:"fullName" json:"fullName" validate:"required"`
+	StreetAddress string    `db:"fullName" json:"streetAddress" validate:"required"`
+	Country       string    `db:"country" json:"country" validate:"required"`
+	State         string    `db:"state" json:"state" validate:"required"`
+	Zip           string    `db:"zip" json:"zip" validate:"required"`
 }
 
 type Userlocations struct {
@@ -33,14 +33,14 @@ type Otp struct {
 
 type User struct {
 	Userid           uuid.UUID   `db:"userid" json:"userid" validate:"required,uuid"`
-	UserName         string      `db:"username" json:"username" validate:"required,lte=255"`
+	UserName         string      `db:"username" json:"username" validate:"required,max=10"`
 	Password         []byte      `db:"password" json:"password"  validate:"required"`
 	Email            string      `db:"email" json:"email" validate:"required,email"`
 	AccountNonLocked bool        `db:"accountNonLocked" json:"accountNonLocked"`
 	Admin            bool        `db:"admin" json:"admin"`
 	Enabled          bool        `db:"enabled" json:"enabled"`
 	IsUsing2FA       bool        `db:"isUsing2FA" json:"isUsing2FA"`
-	Telephone        string      `db:"telephone" json:"telephone" validate:"required"`
+	Telephone        string      `db:"telephone" json:"telephone" validate:"required,tel"`
 	Discount         float64     `db:"discount" json:"discount"`
 	FailedAttempt    int         `db:"failedAttempt" json:"failedAttempt"`
 	LockTime         time.Time   `db:"lockTime" json:"lockTime"`

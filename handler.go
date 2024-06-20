@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/service"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
@@ -35,7 +36,8 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 
 	// Add a CORS middleware handler
 	fb.Use(cors.New(cors.Config{
-		AllowOrigins: cfg.CorsOrigins,
+		AllowCredentials: true,
+		AllowOrigins:     cfg.CorsOrigins,
 	}))
 
 	// Add a Favicon middleware handler
@@ -50,7 +52,7 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	fb.Use(slogfiber.New(logger))
 
 	//Add routes
-	service.RouteSetup(fb, cfg)
+	service.MapUrls(fb, cfg)
 
 	return fb
 }

@@ -4,21 +4,9 @@ import (
 	"time"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
-
-type TokenResponse struct {
-	UserId      uuid.UUID `json:"userid"`
-	UserName    string    `json:"username"`
-	Email       string    `json:"email"`
-	Enabled     bool      `json:"enabled"`
-	Admin       bool      `json:"admin"`
-	AccessToken string    `json:"accessToken"`
-	TokenType   string    `json:"tokenType"`
-}
-
-func Login(c *fiber.Ctx) error {
+func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	user := c.FormValue("username")
 	pass := c.FormValue("password")
 

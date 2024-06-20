@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"os"
+
+	//"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -17,7 +19,6 @@ func healthCheck(c *fiber.Ctx) error {
 
 	return nil
 }
-
 
 func SwaggerHandler(cfg *AppConfig) fiber.Handler {
 	// Add the handler to serve the redoc
@@ -37,7 +38,7 @@ func NotFoundRoute(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotFound).JSON(response)
 }
 
-func RouteSetup(app *fiber.App, cfg *AppConfig) {
+func MapUrls(app *fiber.App, cfg *AppConfig) {
 
 	//logger middleware
 	logger := cfg.Logger
@@ -46,21 +47,21 @@ func RouteSetup(app *fiber.App, cfg *AppConfig) {
 	serverStatus.Get("/status", healthCheck)
 
 	//middleware
-	// jwt := middleware.NewAuthMiddleware(util.JwtSecret)
+	//jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
 
 	// productRoutes := app.Group("/api/products")
 	// productRoutes.Get("/", service.GetAllProducts)
 	// productRoutes.Get("/:pid", service.GetSingleProduct)
 	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
-
-	userRoutes := app.Group("/api/users")
-	userRoutes.Get("/",cfg.GetUsers)
-	userRoutes.Get("/:userid", cfg.GetUser)
-	userRoutes.Post("create", cfg.CreateUser)
+	api := app.Group("api")
+	users := api.Group("users")
+	users.Get("/", cfg.GetUsers)
+	users.Get("/:userid", cfg.GetUser)
+	users.Post("create", cfg.CreateUser)
 	// userRoutes.Delete("/:userid")
 
-	// authRoute := app.Group("/api/auth")
-	// authRoute.Post("/login")
+	//authRoute := app.Group("/api/auth")
+	//authRoute.Post("/login")
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")

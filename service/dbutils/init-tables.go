@@ -91,7 +91,7 @@ func CreateTables(dbDriver *sqlx.DB) {
 
 	defer dbDriver.Close()
 
-	DropTable(dbDriver)
+	//DropTable(dbDriver)
 
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {

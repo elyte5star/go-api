@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -10,6 +11,7 @@ import (
 
 type Queries struct {
 	*repository.UserQueries
+	*repository.AuthQueries
 }
 
 func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
@@ -54,6 +56,7 @@ func DbWithQueries(cfg *AppConfig) (*Queries, error) {
 	}
 	return &Queries{
 		UserQueries: &repository.UserQueries{DB: db},
+		AuthQueries: &repository.AuthQueries{DB: db},
 	}, nil
 
 }

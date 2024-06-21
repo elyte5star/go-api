@@ -60,8 +60,8 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	users.Post("create", cfg.CreateUser)
 	// userRoutes.Delete("/:userid")
 
-	//authRoute := app.Group("/api/auth")
-	//authRoute.Post("/login")
+	authRoute := api.Group("auth")
+	authRoute.Post("/login", cfg.Login)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")

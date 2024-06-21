@@ -1,8 +1,6 @@
 package repository
 
 import (
-	
-
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
@@ -61,7 +59,7 @@ func (q *UserQueries) GetUsers() (*response.GetUsersResponse, error) {
 			// Return empty object and error.
 			return &result, err
 		}
-		result.Users = append(result.Users,response.GetUserResponse{Userid: user.Userid,
+		result.Users = append(result.Users, response.GetUserResponse{Userid: user.Userid,
 			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
 			CreatedAt:        user.AuditInfo.CreatedAt,
 			Username:         user.UserName,
@@ -73,10 +71,9 @@ func (q *UserQueries) GetUsers() (*response.GetUsersResponse, error) {
 			Telephone:        user.Telephone,
 			LockTime:         user.LockTime,
 		})
-		
+
 	}
 
-	
 	// Return query result.
 	return &result, nil
 }
@@ -116,8 +113,7 @@ func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 // DeleteUser method for delete user by given ID.
 func (q *UserQueries) DeleteUser(userid uuid.UUID) error {
 	// Define query string.
-	query := `DELETE FROM books WHERE id = $1`
-
+	query := `DELETE FROM users WHERE userid=?`
 	// Send query to database.
 	_, err := q.Exec(query, userid)
 	if err != nil {

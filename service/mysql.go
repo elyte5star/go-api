@@ -34,6 +34,7 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxIdleTime(5 * time.Minute)

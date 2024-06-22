@@ -147,7 +147,7 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	}
 	users, err := db.GetUsers()
 	if err != nil {
-		newErr.Message = "users not found!"
+		newErr.Message = "Users not found!"
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}

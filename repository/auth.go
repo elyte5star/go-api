@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/api/service/dbutils/schema"
 	"github.com/jmoiron/sqlx"
 )
@@ -20,6 +18,5 @@ func (auth *AuthQueries) FindByCredentials(username string) (schema.User, error)
 		// Return empty object and error.
 		return user, err
 	}
-	fmt.Printf("%+v\n", user)
 	return user, nil
 }

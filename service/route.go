@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	//"github.com/api/common/middleware"
+	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -47,7 +47,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	serverStatus.Get("/status", healthCheck)
 
 	//middleware
-	//jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
+	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
 
 	// productRoutes := app.Group("/api/products")
 	// productRoutes.Get("/", service.GetAllProducts)
@@ -56,7 +56,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	api := app.Group("api")
 	users := api.Group("users")
 	users.Get("/", cfg.GetUsers)
-	users.Get("/:userid", cfg.GetUser)
+	users.Get("/:userid", cfg.GetUser,jwt)
 	users.Post("create", cfg.CreateUser)
 	// userRoutes.Delete("/:userid")
 

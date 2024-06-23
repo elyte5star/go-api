@@ -2,7 +2,6 @@ package service
 
 import (
 	"strings"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
@@ -132,11 +131,12 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Failure 500 {object} response.ErrorResponse	
+// @Failure 500 {object} response.ErrorResponse
 // @Success 200 {array} response.RequestResponse
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
-
+	s, _ := ExtractJwtCredentials(c, cfg)
+	cfg.Logger.Info(s)
 	newErr := response.NewErrorResponse()
 	// Create database connection.
 	db, err := DbWithQueries(cfg)

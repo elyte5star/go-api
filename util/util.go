@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -43,6 +41,8 @@ func NullTime() time.Time {
 func Ident() uuid.UUID {
 	return uuid.New()
 }
+
+
 
 type TimestampTime struct {
 	time.Time
@@ -94,12 +94,6 @@ func SysRequirment(logger *slog.Logger) bool {
 
 }
 
-const JwtSecret = "7a3c54660456ff1137b652e498624dfa09a0ec12b4fc49d38b85465da15027a1"
-
-var RequestLogConfig = logger.Config{
-	Format:   "${pid} | ${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
-	TimeZone: "UTC",
-}
 
 func InitValidator() *validator.Validate {
 	// Create a new validator for a Book model.
@@ -151,3 +145,5 @@ func CreateKeyValuePairs(m map[string]string) string {
 	}
 	return b.String()
 }
+
+

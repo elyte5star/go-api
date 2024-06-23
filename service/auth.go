@@ -1,6 +1,9 @@
 package service
 
 import (
+	//"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/api/repository/request"
@@ -24,6 +27,7 @@ type UserPrincipal struct {
 	TokenId                 string    `json:"tokenId"`
 }
 
+const bearerPrefix = "Bearer "
 
 func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	// user := c.FormValue("username")
@@ -90,11 +94,16 @@ func GenerateJWT(user schema.User, cfg *AppConfig) (response.TokenResponse, erro
 		IsCredentialsNonExpired: true,
 		TokenId:                 util.Ident().String(),
 	}
+	//credentials, err := json.Marshal(principal)
+	// if err != nil {
+	// 	cfg.Logger.Error(err.Error())
+	// 	return response.TokenResponse{}, err
+	// }
 	// Create the Claims
 	claims := jwt.MapClaims{
 		"name": "Elyte Application",
 		"exp":  time.Now().Add(time.Minute * time.Duration(cfg.JwtExpireMinutesCount)).Unix(),
-		"data": *principal,
+		"data": principal,
 	}
 
 	// Create token
@@ -111,5 +120,47 @@ func GenerateJWT(user schema.User, cfg *AppConfig) (response.TokenResponse, erro
 		AccessToken:      t,
 		TokenType:        "bearer",
 	}, err
+
+}
+
+func ExtractJwtCredentials(c *fiber.Ctx, cfg *AppConfig) (string, error) {
+	token, err := verifyToken(c, cfg)
+	if err != nil {
+		return "", err
+	}
+	//principal := new(UserPrincipal)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		fmt.Println(claims["data"])
+		return claims["data"].(string), nil
+	}
+	return "", err
+
+}
+
+func GetTokenFromHeader(c *fiber.Ctx, cfg *AppConfig) string {
+	authHeaderValue := c.Get("Authorization")
+	if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
+		cfg.Logger.Error("No bearer token found in Authorization header")
+		return ""
+	}
+	tokenString := strings.TrimPrefix(authHeaderValue, bearerPrefix)
+	if len(tokenString) == 0 {
+		cfg.Logger.Error("No bearer token found in Authorization header")
+		return ""
+	}
+	return tokenString
+
+}
+
+func verifyToken(c *fiber.Ctx, cfg *AppConfig) (*jwt.Token, error) {
+	tokenString := GetTokenFromHeader(c, cfg)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(cfg.JwtSecretKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 
 }

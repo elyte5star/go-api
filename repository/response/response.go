@@ -3,7 +3,6 @@ package response
 import (
 	"fmt"
 	"time"
-
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	d "github.com/mcuadros/go-defaults"

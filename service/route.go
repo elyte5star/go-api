@@ -48,7 +48,6 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 
 	//middleware
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
-
 	// productRoutes := app.Group("/api/products")
 	// productRoutes.Get("/", service.GetAllProducts)
 	// productRoutes.Get("/:pid", service.GetSingleProduct)

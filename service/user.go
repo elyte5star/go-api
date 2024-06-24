@@ -2,11 +2,13 @@ package service
 
 import (
 	"strings"
+
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -135,9 +137,22 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Success 200 {array} response.RequestResponse
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
-	s, _ := ExtractJwtCredentials(c, cfg)
-	cfg.Logger.Info(s)
+
 	newErr := response.NewErrorResponse()
+	// Get claims from JWT.
+	loggedInUser := c.Locals("jwt").(*jwt.Token)
+	claims := loggedInUser.Claims.(jwt.MapClaims)
+	data := claims["data"].(map[string]interface{})
+
+	isAdmin := data["isAdmin"].(bool)
+
+	if !isAdmin {
+		newErr.Message = "Admin rights needed"
+		newErr.Code = fiber.StatusForbidden
+		cfg.Logger.Warn(newErr.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {

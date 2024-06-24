@@ -1,9 +1,6 @@
 package service
 
 import (
-	//"encoding/json"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/api/repository/request"
@@ -15,11 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserPrincipal struct {
+type UserCredentials struct {
 	Userid                  uuid.UUID `json:"userid"`
 	Username                string    `json:"username"`
 	Email                   string    `json:"email"`
-	Exp                     time.Time `json:"exp,omitempty"`
 	IsEnabled               bool      `json:"isEnabled "`
 	IsAccountNonLocked      bool      `json:"isAccountNonLocked"`
 	IsCredentialsNonExpired bool      `json:"isCredentialsNonExpired"`
@@ -27,7 +23,7 @@ type UserPrincipal struct {
 	TokenId                 string    `json:"tokenId"`
 }
 
-const bearerPrefix = "Bearer "
+//const bearerPrefix = "Bearer "
 
 func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	// user := c.FormValue("username")
@@ -40,7 +36,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&tokenReq); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = "Invalid JSON body"
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 
 	}
@@ -49,7 +45,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = util.ValidatorErrors(err)
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
@@ -62,7 +58,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	user, err := db.FindByCredentials(tokenReq.Username)
 	if err != nil {
 		newErr.Message = "user with the given username is not found!"
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
@@ -71,20 +67,40 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	tokenResponse, err := GenerateJWT(user, cfg)
+	tokenResponse, err := GetTokenResponse(user, cfg)
 	if err != nil {
 		newErr.Message = "We could not log you in at this time, please try again later"
-		return c.JSON(newErr)
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	response := response.NewResponse(c)
 	response.Result = tokenResponse
+	c.Locals("isAdmin", tokenResponse.Admin)
 	return c.Status(fiber.StatusOK).JSON(response)
 
 }
+func (cfg *AppConfig) ExtractJwtCredentials(c *fiber.Ctx) {
 
-func GenerateJWT(user schema.User, cfg *AppConfig) (response.TokenResponse, error) {
+}
+func GetTokenResponse(user schema.User, cfg *AppConfig) (response.TokenResponse, error) {
+	tokenResponse := response.TokenResponse{}
+	token, err := GenerateJWT(user, cfg)
+	if err == nil {
+		return response.TokenResponse{
+			Userid:           user.Userid,
+			Username:         user.UserName,
+			Email:            user.Email,
+			AccountNonLocked: user.AccountNonLocked,
+			Admin:            user.Admin,
+			AccessToken:      token,
+			TokenType:        "bearer",
+		}, nil
+	}
+	return tokenResponse, err
+}
+func GenerateJWT(user schema.User, cfg *AppConfig) (string, error) {
 
-	principal := &UserPrincipal{
+	principal := &UserCredentials{
 		Userid:                  user.Userid,
 		Username:                user.UserName,
 		Email:                   user.Email,
@@ -94,11 +110,6 @@ func GenerateJWT(user schema.User, cfg *AppConfig) (response.TokenResponse, erro
 		IsCredentialsNonExpired: true,
 		TokenId:                 util.Ident().String(),
 	}
-	//credentials, err := json.Marshal(principal)
-	// if err != nil {
-	// 	cfg.Logger.Error(err.Error())
-	// 	return response.TokenResponse{}, err
-	// }
 	// Create the Claims
 	claims := jwt.MapClaims{
 		"name": "Elyte Application",
@@ -110,57 +121,51 @@ func GenerateJWT(user schema.User, cfg *AppConfig) (response.TokenResponse, erro
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(cfg.JwtSecretKey))
-	return response.TokenResponse{
-		Userid:           principal.Userid,
-		Username:         principal.Username,
-		Email:            principal.Email,
-		AccountNonLocked: principal.IsAccountNonLocked,
-		Admin:            principal.IsAdmin,
-		AccessToken:      t,
-		TokenType:        "bearer",
-	}, err
+	return token.SignedString([]byte(cfg.JwtSecretKey))
 
 }
 
-func ExtractJwtCredentials(c *fiber.Ctx, cfg *AppConfig) (string, error) {
-	token, err := verifyToken(c, cfg)
-	if err != nil {
-		return "", err
-	}
-	//principal := new(UserPrincipal)
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		fmt.Println(claims["data"])
-		return claims["data"].(string), nil
-	}
-	return "", err
+// func ExtractJwtCredentials(c *fiber.Ctx, cfg *AppConfig) (*UserCredentials, error) {
+// 	userCredentials := UserCredentials{}
+// 	token, err := verifyToken(c, cfg)
+// 	if err != nil {
+// 		return &userCredentials, err
+// 	}
+// 	claims, ok := token.Claims.(jwt.MapClaims)
+// 	if ok && token.Valid {
+// 		userCredMap := claims["data"].(map[string]interface{})
+// 		if err := m.Decode(userCredMap, &userCredentials); err != nil {
+// 			cfg.Logger.Error(err.Error())
+// 			return &userCredentials, err
+// 		}
+// 		return &userCredentials, nil
+// 	}
+// 	return &userCredentials, err
+// }
 
-}
+// func GetTokenFromHeader(c *fiber.Ctx, cfg *AppConfig) string {
+// 	authHeaderValue := c.Get("Authorization")
+// 	if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
+// 		cfg.Logger.Error("No bearer token found in Authorization header")
+// 		return ""
+// 	}
+// 	tokenString := strings.TrimPrefix(authHeaderValue, bearerPrefix)
+// 	if len(tokenString) == 0 {
+// 		cfg.Logger.Error("No bearer token found in Authorization header")
+// 		return ""
+// 	}
+// 	return tokenString
 
-func GetTokenFromHeader(c *fiber.Ctx, cfg *AppConfig) string {
-	authHeaderValue := c.Get("Authorization")
-	if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
-		cfg.Logger.Error("No bearer token found in Authorization header")
-		return ""
-	}
-	tokenString := strings.TrimPrefix(authHeaderValue, bearerPrefix)
-	if len(tokenString) == 0 {
-		cfg.Logger.Error("No bearer token found in Authorization header")
-		return ""
-	}
-	return tokenString
+// }
 
-}
+// func verifyToken(c *fiber.Ctx, cfg *AppConfig) (*jwt.Token, error) {
+// 	tokenString := GetTokenFromHeader(c, cfg)
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		return []byte(cfg.JwtSecretKey), nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return token, nil
 
-func verifyToken(c *fiber.Ctx, cfg *AppConfig) (*jwt.Token, error) {
-	tokenString := GetTokenFromHeader(c, cfg)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(cfg.JwtSecretKey), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return token, nil
-
-}
+// }

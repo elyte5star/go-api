@@ -2,26 +2,25 @@ package service
 
 import (
 	"strings"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
 // GetUser func gets User by given ID or 404 error.
 // @Description Get User by given ID.
 // @Summary Get user by given userid
-// @Tags Users
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param userid path string true "userid"
 // @Success 200 {object} response.RequestResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
+// @Security Authorization
 // @Router /api/users/{userid} [get]
 func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -52,14 +51,10 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 // CreateUser func creates a new user.
 // @Description Create a new user.
 // @Summary Create a new user
-// @Tags Users
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param username body string true "Username"
-// @Param password body string true "Password"
-// @Param confirmPassword body string true "ConfirmPassword"
-// @Param email body string true "Email"
-// @Param telephone body string true "telephone"
+// @Param create_user body request.CreateUserRequest true "Create User"
 // @Success 200 {object} response.RequestResponse
 // @Router /api/users/create [post]
 func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
@@ -130,20 +125,19 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // GetUsers method for getting all existing users.
 // @Description Get all existing users.
 // @Summary Get all existing users
-// @Tags Users
+// @Tags User
 // @Accept json
 // @Produce json
 // @Failure 500 {object} response.ErrorResponse
 // @Success 200 {array} response.RequestResponse
+// @Security Authorization
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 
 	newErr := response.NewErrorResponse()
-	// Get claims from JWT.
-	loggedInUser := c.Locals("jwt").(*jwt.Token)
-	claims := loggedInUser.Claims.(jwt.MapClaims)
-	data := claims["data"].(map[string]interface{})
 
+	// Get claims from JWT.
+	data := cfg.JwtCredentials(c)
 	isAdmin := data["isAdmin"].(bool)
 
 	if !isAdmin {

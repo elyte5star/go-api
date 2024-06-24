@@ -1,5 +1,40 @@
 basePath: /
 definitions:
+  request.CreateUserRequest:
+    properties:
+      confirmPassword:
+        maxLength: 30
+        minLength: 5
+        type: string
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 5
+        type: string
+      telephone:
+        type: string
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - email
+    - telephone
+    type: object
+  request.LoginRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 5
+        type: string
+      username:
+        maxLength: 10
+        minLength: 5
+        type: string
+    required:
+    - username
+    type: object
   response.ErrorResponse:
     properties:
       cause:
@@ -44,6 +79,33 @@ info:
   title: Elyte Realm API
   version: 1.0.1
 paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Create a new access token.
+      parameters:
+      - description: Login data
+        in: body
+        name: credential
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      summary: Create a new access token
+      tags:
+      - Auth
+  /api/status:
+    get:
+      responses: {}
+      tags:
+      - App
   /api/users/:
     get:
       consumes:
@@ -62,9 +124,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - Authorization: []
       summary: Get all existing users
       tags:
-      - Users
+      - User
   /api/users/{userid}:
     get:
       consumes:
@@ -91,45 +155,23 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - Authorization: []
       summary: Get user by given userid
       tags:
-      - Users
+      - User
   /api/users/create:
     post:
       consumes:
       - application/json
       description: Create a new user.
       parameters:
-      - description: Username
+      - description: Create User
         in: body
-        name: username
+        name: create_user
         required: true
         schema:
-          type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
-      - description: ConfirmPassword
-        in: body
-        name: confirmPassword
-        required: true
-        schema:
-          type: string
-      - description: Email
-        in: body
-        name: email
-        required: true
-        schema:
-          type: string
-      - description: telephone
-        in: body
-        name: telephone
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/request.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -139,7 +181,7 @@ paths:
             $ref: '#/definitions/response.RequestResponse'
       summary: Create a new user
       tags:
-      - Users
+      - User
 securityDefinitions:
   ApiKeyAuth:
     description: Jwt Bearer Token

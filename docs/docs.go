@@ -24,8 +24,55 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/login": {
+            "post": {
+                "description": "Create a new access token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create a new access token",
+                "parameters": [
+                    {
+                        "description": "Login data",
+                        "name": "credential",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/status": {
+            "get": {
+                "tags": [
+                    "App"
+                ],
+                "responses": {}
+            }
+        },
         "/api/users/": {
             "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
                 "description": "Get all existing users.",
                 "consumes": [
                     "application/json"
@@ -34,7 +81,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "User"
                 ],
                 "summary": "Get all existing users",
                 "responses": {
@@ -66,53 +113,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "User"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "Username",
-                        "name": "username",
+                        "description": "Create User",
+                        "name": "create_user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Password",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "ConfirmPassword",
-                        "name": "confirmPassword",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "telephone",
-                        "name": "telephone",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/request.CreateUserRequest"
                         }
                     }
                 ],
@@ -128,6 +139,11 @@ const docTemplate = `{
         },
         "/api/users/{userid}": {
             "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
                 "description": "Get User by given ID.",
                 "consumes": [
                     "application/json"
@@ -136,7 +152,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "User"
                 ],
                 "summary": "Get user by given userid",
                 "parameters": [
@@ -172,6 +188,54 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "request.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "telephone"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
+                },
+                "telephone": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
+                }
+            }
+        },
+        "request.LoginRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 5
+                }
+            }
+        },
         "response.ErrorResponse": {
             "type": "object",
             "properties": {

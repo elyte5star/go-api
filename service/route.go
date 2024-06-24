@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/swagger"
 )
 
+// @tags App
+// @router /api/status [get]
 func healthCheck(c *fiber.Ctx) error {
 	response := res.NewResponse(c)
 	response.Message = "Server is up and running"
@@ -43,7 +45,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	//logger middleware
 	logger := cfg.Logger
 
-	serverStatus := app.Group("/")
+	serverStatus := app.Group("/api")
 	serverStatus.Get("/status", healthCheck)
 
 	//middleware

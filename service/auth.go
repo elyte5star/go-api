@@ -2,7 +2,6 @@ package service
 
 import (
 	"time"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
@@ -25,6 +24,18 @@ type UserCredentials struct {
 
 //const bearerPrefix = "Bearer "
 
+
+
+
+// Login method for create a new access token.
+// @Description Create a new access token.
+// @Summary Create a new access token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param credential body request.LoginRequest true "Login data"
+// @Success 200 {object} response.RequestResponse
+// @Router /api/auth/login [post]
 func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	// user := c.FormValue("username")
 	// pass := c.FormValue("password")
@@ -75,11 +86,14 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = tokenResponse
-	c.Locals("isAdmin", tokenResponse.Admin)
 	return c.Status(fiber.StatusOK).JSON(response)
 
 }
-func (cfg *AppConfig) ExtractJwtCredentials(c *fiber.Ctx) {
+func (cfg *AppConfig) JwtCredentials(c *fiber.Ctx) map[string]interface{} {
+	loggedInUser := c.Locals("jwt").(*jwt.Token)
+	claims := loggedInUser.Claims.(jwt.MapClaims)
+	userCredentials := claims["data"].(map[string]interface{})
+	return userCredentials
 
 }
 func GetTokenResponse(user schema.User, cfg *AppConfig) (response.TokenResponse, error) {

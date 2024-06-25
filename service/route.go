@@ -36,7 +36,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	serverStatus := app.Group("/api")
 	serverStatus.Get("/status", healthCheck)
 
-	//middleware
+	// JWT middleware
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
 	// productRoutes := app.Group("/api/products")
 	// productRoutes.Get("/", service.GetAllProducts)

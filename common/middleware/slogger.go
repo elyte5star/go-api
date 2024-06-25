@@ -3,13 +3,9 @@ package middleware
 import (
 	"log/slog"
 	"os"
-	//"github.com/gofiber/fiber/v2/middleware/logger"
+	
 )
 
-//	var RequestLogConfig = logger.Config{
-//		Format:   "${pid} | ${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
-//		TimeZone: "UTC",
-//	}
 var programLevel = new(slog.LevelVar) // Info by default
 
 func DefaultLogger() *slog.Logger {

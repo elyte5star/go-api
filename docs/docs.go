@@ -5,6 +5,12 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -70,7 +76,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "Authorization": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get all existing users.",
@@ -141,7 +147,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "Authorization": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get User by given ID.",
@@ -280,8 +286,8 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
-            "description": "Jwt Bearer Token",
+        "BearerAuth": {
+            "description": "Bearer Token",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -294,7 +300,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.1",
 	Host:             "localhost:8080",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "Elyte Realm API",
 	Description:      "Interactive Documentation for Elyte-Realm API",
 	InfoInstanceName: "swagger",

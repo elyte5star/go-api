@@ -26,12 +26,19 @@ import (
 @host localhost:8080
 @BasePath /
 
-@securityDefinitions.apikey ApiKeyAuth
+@accept json
+
+@produce json
+
+@schemes http https
+
+@securityDefinitions.apikey BearerAuth
 @in header
 @name Authorization
-@description Jwt Bearer Token
+@description Bearer Token
 
-@accept json
+@externalDocs.description  elyte5star
+@externalDocs.url          https://github.com/elyte5star/go-api
 */
 func main() {
 

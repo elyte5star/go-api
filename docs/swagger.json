@@ -1,4 +1,14 @@
 {
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "Interactive Documentation for Elyte-Realm API",
@@ -64,7 +74,7 @@
             "get": {
                 "security": [
                     {
-                        "Authorization": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get all existing users.",
@@ -135,7 +145,7 @@
             "get": {
                 "security": [
                     {
-                        "Authorization": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get User by given ID.",
@@ -274,8 +284,8 @@
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
-            "description": "Jwt Bearer Token",
+        "BearerAuth": {
+            "description": "Bearer Token",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

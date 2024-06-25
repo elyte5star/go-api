@@ -20,7 +20,7 @@ import (
 // @Success 200 {object} response.RequestResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
-// @Security Authorization
+// @Security BearerAuth
 // @Router /api/users/{userid} [get]
 func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -130,7 +130,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Produce json
 // @Failure 500 {object} response.ErrorResponse
 // @Success 200 {array} response.RequestResponse
-// @Security Authorization
+// @Security BearerAuth
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 

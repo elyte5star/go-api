@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"log"
+
 	"github.com/api/repository/response"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Middleware JWT function
@@ -33,5 +36,10 @@ func abortAuthenticationFailed(c *fiber.Ctx, err error) error {
 
 func AuthSuccess(c *fiber.Ctx) error {
 	//reset failed attempt counter
+	loggedInUser := c.Locals("jwt").(*jwt.Token)
+	claims := loggedInUser.Claims.(jwt.MapClaims)
+	userCredentials := claims["data"].(map[string]interface{})
+	username := userCredentials["username"].(string)
+	log.Printf("user '%s' accessing to '%s'", username, c.Request().URI().String())
 	return c.Next()
 }

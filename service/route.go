@@ -2,12 +2,10 @@ package service
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/swagger"
+	
 )
 
 // @tags App
@@ -22,17 +20,7 @@ func healthCheck(c *fiber.Ctx) error {
 	return nil
 }
 
-func SwaggerHandler(cfg *AppConfig) fiber.Handler {
-	// Add the handler to serve the redoc
-	swaggerConfig := swagger.Config{
-		DeepLinking: false,
-		// Expand ("list") or Collapse ("none") tag groups by default
-		DocExpansion: "none",
-		Title:        fmt.Sprintf("%s:%s Documentation", cfg.ServiceName, cfg.Version),
-	}
-	return swagger.New(swaggerConfig)
 
-}
 func NotFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
 	response.Message = "Sorry, endpoint is not found"
@@ -43,7 +31,7 @@ func NotFoundRoute(c *fiber.Ctx) error {
 func MapUrls(app *fiber.App, cfg *AppConfig) {
 
 	//logger middleware
-	logger := cfg.Logger
+	//logger := cfg.Logger
 
 	serverStatus := app.Group("/api")
 	serverStatus.Get("/status", healthCheck)
@@ -74,13 +62,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	// jobRoute.Get("/:jid")
 	// jobRoute.Delete("/:jid")
 
-	specFile := cfg.Doc
-	if _, err := os.Stat(specFile); err == nil {
-		swaggerRoute := app.Group("/docs")
-		swaggerRoute.Get("*", SwaggerHandler(cfg))
-	} else {
-		logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", specFile))
-	}
+
 	// NotFoundRoute func for describe 404 Error route.
 	app.Use(NotFoundRoute)
 

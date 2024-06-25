@@ -2,6 +2,7 @@ package service
 
 import (
 	"time"
+
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
@@ -23,9 +24,6 @@ type UserCredentials struct {
 }
 
 //const bearerPrefix = "Bearer "
-
-
-
 
 // Login method for create a new access token.
 // @Description Create a new access token.
@@ -68,9 +66,10 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	}
 	user, err := db.FindByCredentials(tokenReq.Username)
 	if err != nil {
-		newErr.Message = "user with the given username is not found!"
+		newErr.Message = "User with the given username is not found!"
+		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
 		newErr.Message = "Invalid password!"

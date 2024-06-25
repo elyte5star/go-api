@@ -1,4 +1,6 @@
 basePath: /
+consumes:
+- application/json
 definitions:
   request.CreateUserRequest:
     properties:
@@ -125,7 +127,7 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       security:
-      - Authorization: []
+      - BearerAuth: []
       summary: Get all existing users
       tags:
       - User
@@ -156,7 +158,7 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       security:
-      - Authorization: []
+      - BearerAuth: []
       summary: Get user by given userid
       tags:
       - User
@@ -182,9 +184,14 @@ paths:
       summary: Create a new user
       tags:
       - User
+produces:
+- application/json
+schemes:
+- http
+- https
 securityDefinitions:
-  ApiKeyAuth:
-    description: Jwt Bearer Token
+  BearerAuth:
+    description: Bearer Token
     in: header
     name: Authorization
     type: apiKey

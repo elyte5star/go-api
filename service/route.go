@@ -43,17 +43,17 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	// productRoutes.Get("/:pid", service.GetSingleProduct)
 	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
 	api := app.Group("api")
-	users := api.Group("users")
-	users.Post("create", cfg.CreateUser)
-	authenticated := users.Use(jwt)
-	authenticated.Get("/", cfg.GetUsers)
-	authenticated.Get("/:userid", cfg.GetUser)
-
-	// userRoutes.Delete("/:userid")
-
+	
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)
 
+	users := api.Group("users")
+	users.Post("create", cfg.CreateUser)
+	authenticated := users.Use(jwt)
+	authenticated.Get("", cfg.GetUsers)
+	authenticated.Get("/:userid", cfg.GetUser)
+	authenticated.Delete("/:userid",cfg.DeleteUser)
+	
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")
 

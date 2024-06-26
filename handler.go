@@ -82,7 +82,6 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	if _, err := os.Stat(cfg.Doc); err == nil {
 		//fb.Use(DocumentationHandler(cfg))
 		fb.Use(SwaggerHandler(cfg))
-
 	} else {
 		logger.Warn(fmt.Sprintf("Swagger file not found at %s, skipping redoc init", cfg.Doc))
 	}

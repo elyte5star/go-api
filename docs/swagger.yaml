@@ -132,6 +132,28 @@ paths:
       tags:
       - User
   /api/users/{userid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by a given userid.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete user by given userid
+      tags:
+      - User
     get:
       consumes:
       - application/json

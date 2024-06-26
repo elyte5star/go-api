@@ -40,6 +40,6 @@ func AuthSuccess(c *fiber.Ctx) error {
 	claims := loggedInUser.Claims.(jwt.MapClaims)
 	userCredentials := claims["data"].(map[string]interface{})
 	username := userCredentials["username"].(string)
-	log.Printf("user '%s' accessing to '%s'", username, c.Request().URI().String())
+	log.Printf("user '%s' accessed '%s'", username, c.Request().URI().String())
 	return c.Next()
 }

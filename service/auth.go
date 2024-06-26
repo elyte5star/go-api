@@ -53,15 +53,14 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	if err := cfg.Validate.Struct(tokenReq); err != nil {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = util.ValidatorErrors(err)
-		cfg.Logger.Error(err.Error())
+		newErr.Message = "Invalid Field(s)"
+		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	user, err := db.FindByCredentials(tokenReq.Username)
@@ -77,7 +76,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	tokenResponse, err := GetTokenResponse(user, cfg)
+	tokenResponse, err := cfg.GetTokenResponse(user)
 	if err != nil {
 		newErr.Message = "We could not log you in at this time, please try again later"
 		cfg.Logger.Error(err.Error())
@@ -95,9 +94,9 @@ func (cfg *AppConfig) JwtCredentials(c *fiber.Ctx) map[string]interface{} {
 	return userCredentials
 
 }
-func GetTokenResponse(user schema.User, cfg *AppConfig) (response.TokenResponse, error) {
+func (cfg *AppConfig) GetTokenResponse(user schema.User) (response.TokenResponse, error) {
 	tokenResponse := response.TokenResponse{}
-	token, err := GenerateJWT(user, cfg)
+	token, err := cfg.GenerateJWT(user)
 	if err == nil {
 		return response.TokenResponse{
 			Userid:           user.Userid,
@@ -111,7 +110,7 @@ func GetTokenResponse(user schema.User, cfg *AppConfig) (response.TokenResponse,
 	}
 	return tokenResponse, err
 }
-func GenerateJWT(user schema.User, cfg *AppConfig) (string, error) {
+func (cfg *AppConfig) GenerateJWT(user schema.User) (string, error) {
 
 	principal := &UserCredentials{
 		Userid:                  user.Userid,

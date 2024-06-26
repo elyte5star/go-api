@@ -2,6 +2,7 @@ package service
 
 import (
 	"strings"
+
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
@@ -27,25 +28,74 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	userid, err := uuid.Parse(c.Params("userid"))
 	if err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = "invalid user id"
-		cfg.Logger.Error(newErr.Error())
+		newErr.Message = "Invalid userid"
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(newErr.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	user, err := db.GetUserById(userid)
 	if err != nil {
-		newErr.Message = "user with the given ID is not found!"
-		cfg.Logger.Error(newErr.Error())
+		newErr.Message = "User with userid is not found!"
+		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
 	response := response.NewResponse(c)
 	response.Result = user
 	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
+
+	// Get now time.
+	now := util.TimeNow()
+
+	newErr := response.NewErrorResponse()
+
+	userid, err := uuid.Parse(c.Params("userid"))
+	if err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid userid"
+		cfg.Logger.Error(newErr.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	modifyUser := request.ModifyUser{}
+	// Check, if received JSON data is valid.
+	if err := c.BodyParser(modifyUser); err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid JSON body"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+
+	}
+	// Validate modifyUser fields.
+	if err := cfg.Validate.Struct(modifyUser); err != nil {
+		// Return, if some fields are not valid.
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid Field(s)"
+		cfg.Logger.Error(util.ValidatorErrors(err))
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	}
+	foundUser, err := db.GetUserById(userid)
+	if err != nil {
+		newErr.Message = "User with the given userid is not found!"
+		cfg.Logger.Error(err.Error())
+		return c.Status(fiber.StatusNotFound).JSON(newErr)
+	}
+
+	response := response.NewResponse(c)
+	response.Code = fiber.StatusCreated
+	return c.Status(response.Code).JSON(response)
+
 }
 
 // CreateUser func creates a new user.
@@ -68,8 +118,8 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	// Check, if received JSON data is valid.
 	if err := c.BodyParser(createUser); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = err.Error()
-		cfg.Logger.Error(newErr.Error())
+		newErr.Message = "Invalid JSON body"
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 
 	}
@@ -77,22 +127,21 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	if err := cfg.Validate.Struct(createUser); err != nil {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = util.ValidatorErrors(err)
-		cfg.Logger.Error(newErr.Error())
+		newErr.Message = "Invalid Field(s)"
+		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
 		cfg.Logger.Error(newErr.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create new User struct
 	user := new(schema.User)
 	// Set initialized default data for user:
 	user.Userid = util.Ident()
-	user.UserName = createUser.UserName
+	user.UserName = createUser.Username
 	user.SetPassword(createUser.Password)
 	user.Email = createUser.Email
 	user.LockTime = util.TimeThen()
@@ -105,7 +154,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = util.ValidatorErrors(err)
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err := db.CreateUser(user); err != nil {
@@ -150,9 +199,8 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(newErr.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	users, err := db.GetUsers()
 	if err != nil {
@@ -163,4 +211,45 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	response := response.NewResponse(c)
 	response.Result = users
 	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// DeleteUser func deletes user by a given userid.
+// @Description Delete user by a given userid.
+// @Summary Delete user by given userid
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param userid path string true "userid"
+// @Success 204 {object} response.RequestResponse
+// @Security BearerAuth
+// @Router /api/users/{userid} [delete]
+func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {
+	newErr := response.NewErrorResponse()
+	userid, err := uuid.Parse(c.Params("userid"))
+	if err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid userid"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		newErr.Message = "Couldnt connect to DB!"
+		cfg.Logger.Error(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	}
+	foundUser, err := db.GetUserById(userid)
+	if err != nil {
+		newErr.Message = "User with the given ID is not found!"
+		cfg.Logger.Error(err.Error())
+		return c.Status(fiber.StatusNotFound).JSON(newErr)
+	}
+	// Delete User by given user.
+	if err := db.DeleteUser(foundUser.Userid); err != nil {
+		newErr.Message = "Couldnt delete user!"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	return c.SendStatus(fiber.StatusNoContent)
+
 }

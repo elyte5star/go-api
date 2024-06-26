@@ -98,10 +98,9 @@ func (q *UserQueries) CreateUser(user *schema.User) error {
 // UpdateUser method for updating user by given User object.
 func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 	// Define query string.
-	query := `UPDATE users SET lastModifiedAt = $2, LastModifiedBy = $3, telephone = $4, email = $5, address = $6 WHERE userid=?`
-
+	query := `UPDATE users SET username=:username,telephone=:telephone,auditInfo=:auditInfo, WHERE userid=?`
 	// Send query to database.
-	_, err := q.Exec(query, userid, user.AuditInfo.LastModifiedAt, user.AuditInfo.LastModifiedBy, user.Telephone, user.Email)
+	_, err := q.Exec(query, userid, user.UserName, user.Telephone, user.AuditInfo)
 	if err != nil {
 		// Return only error.
 		return err

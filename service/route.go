@@ -48,7 +48,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	authRoute.Post("/login", cfg.Login)
 
 	users := api.Group("users")
-	users.Post("create", cfg.CreateUser)
+	users.Post("signup", cfg.CreateUser)
 	authenticated := users.Use(jwt)
 	authenticated.Get("", cfg.GetUsers)
 	authenticated.Get("/:userid", cfg.GetUser)

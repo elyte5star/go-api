@@ -1,8 +1,8 @@
-package service
+package routes
 
 import (
 	"fmt"
-
+	"github.com/api/service"
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +27,7 @@ func NotFoundRoute(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotFound).JSON(response)
 }
 
-func MapUrls(app *fiber.App, cfg *AppConfig) {
+func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 
 	//logger middleware
 	//logger := cfg.Logger

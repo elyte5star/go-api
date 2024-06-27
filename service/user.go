@@ -124,7 +124,7 @@ func (cfg *AppConfig) CreateUpdateUserAddress(userid uuid.UUID, address *request
 		cfg.Logger.Error(err.Error())
 		return err
 	}
-	userAddress := &schema.UserAddress{AddressId: util.Ident(), OwnerId: userid,
+	userAddress := &schema.UserAddress{Userid: userid,
 		FullName: address.FullName, StreetAddress: address.StreetAddress, Country: address.Country, State: address.State, Zip: address.Zip}
 	if err := cfg.Validate.Struct(userAddress); err != nil {
 		cfg.Logger.Error(util.ValidatorErrors(err))

@@ -9,8 +9,7 @@ import (
 )
 
 type UserAddress struct {
-	AddressId     uuid.UUID `db:"addressId" json:"addressId" validate:"required,uuid"`
-	OwnerId       uuid.UUID `db:"ownerId" json:"ownerId" validate:"required,uuid"`
+	Userid       uuid.UUID `db:"userid" json:"userid" validate:"required,uuid"`
 	FullName      string    `db:"fullName" json:"fullName" validate:"required"`
 	StreetAddress string    `db:"streetAddress" json:"streetAddress" validate:"required"`
 	Country       string    `db:"country" json:"country" validate:"required"`

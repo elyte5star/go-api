@@ -26,19 +26,19 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserAddressId(addressId uuid.UUID) (*response.GetUserAdressResponse, error) {
+func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (*response.GetUserAdressResponse, error) {
 
 	userAddress := schema.UserAddress{}
 	// Define query string.
 	query := `SELECT * FROM address WHERE addressId=?`
 
 	// Send query to database.
-	err := q.Get(&userAddress, query, addressId)
+	err := q.Get(&userAddress, query, userid)
 	if err != nil {
 		// Return empty object and error.
 		return &response.GetUserAdressResponse{}, err
 	}
-	result := &response.GetUserAdressResponse{AddressId: userAddress.AddressId,
+	result := &response.GetUserAdressResponse{
 		FullName: userAddress.FullName, StreetAddress: userAddress.StreetAddress,
 		Country: userAddress.StreetAddress, State: userAddress.State, Zip: userAddress.Zip,
 	}
@@ -48,8 +48,8 @@ func (q *UserQueries) GetUserAddressId(addressId uuid.UUID) (*response.GetUserAd
 // Createuser method for creating UserAddress by given UserAddress object.
 func (q *UserQueries) CreateUserAdress(address *schema.UserAddress) error {
 	// Define query string.
-	query := `INSERT INTO address (addressId,ownerId,fullName,streetAddress,country,state,zip)
-	 VALUES (:addressId,:ownerId,:fullName,:streetAddress,:country,:state,:zip) 
+	query := `INSERT INTO address (userid,fullName,streetAddress,country,state,zip)
+	 VALUES (:userid,:fullName,:streetAddress,:country,:state,:zip) 
 	 ON DUPLICATE KEY UPDATE fullName=:fullName,streetAddress=:streetAddress,country=:country,state=:state,zip=:zip`
 
 	// Send query to database.

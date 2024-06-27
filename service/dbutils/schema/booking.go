@@ -9,7 +9,7 @@ import (
 type Booking struct {
 	Oid             uuid.UUID       `db:"oid" json:"oid" validate:"required,uuid"`
 	ShippingDetails ShippingDetails `db:"shippingDetails" json:"shippingDetails" validate:"required,dive"`
-	CreatedAt       *time.Time      `db:"createdAt" json:"createdAt"  validate:"required"`
+	Created       *time.Time      `db:"created" json:"created"  validate:"required"`
 	TotalPrice      float64         `db:"totalPrice" json:"totalPrice"  validate:"required"`
 	Cart            []ItemIncart    `db:"cart" json:"cart" validate:"required,dive"`
 }

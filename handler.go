@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/mvrilo/go-redoc"
+	"github.com/api/service/routes"
 	fiberredoc "github.com/mvrilo/go-redoc/fiber"
 	slogfiber "github.com/samber/slog-fiber"
 )
@@ -87,7 +88,7 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	}
 
 	//Add routes
-	service.MapUrls(fb, cfg)
+	routes.MapRoutes(fb,cfg)
 
 	return fb
 }

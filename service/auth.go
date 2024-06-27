@@ -73,7 +73,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
 		newErr.Message = "Invalid password!"
 		newErr.Code = fiber.StatusUnauthorized
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	tokenResponse, err := cfg.GetTokenResponse(user)

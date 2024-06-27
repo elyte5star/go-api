@@ -2,10 +2,10 @@ package service
 
 import (
 	"fmt"
+
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
-	
 )
 
 // @tags App
@@ -19,7 +19,6 @@ func healthCheck(c *fiber.Ctx) error {
 
 	return nil
 }
-
 
 func NotFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
@@ -43,7 +42,7 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	// productRoutes.Get("/:pid", service.GetSingleProduct)
 	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
 	api := app.Group("api")
-	
+
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)
 
@@ -52,8 +51,9 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	authenticated := users.Use(jwt)
 	authenticated.Get("", cfg.GetUsers)
 	authenticated.Get("/:userid", cfg.GetUser)
-	authenticated.Delete("/:userid",cfg.DeleteUser)
-	
+	authenticated.Delete("/:userid", cfg.DeleteUser)
+	authenticated.Put("/:userid", cfg.UpdateUser)
+
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")
 
@@ -61,7 +61,6 @@ func MapUrls(app *fiber.App, cfg *AppConfig) {
 	// jobRoute.Get("/")
 	// jobRoute.Get("/:jid")
 	// jobRoute.Delete("/:jid")
-
 
 	// NotFoundRoute func for describe 404 Error route.
 	app.Use(NotFoundRoute)

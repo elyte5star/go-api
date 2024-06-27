@@ -43,16 +43,27 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
+	result := &response.GetUserResponse{Userid: user.Userid,
+		LastModifiedAt:   user.AuditInfo.LastModifiedAt,
+		CreatedAt:        user.AuditInfo.CreatedAt,
+		Username:         user.UserName,
+		Email:            user.Email,
+		AccountNonLocked: user.AccountNonLocked,
+		Admin:            user.Admin,
+		IsUsing2FA:       user.IsUsing2FA,
+		Enabled:          user.Enabled,
+		Telephone:        user.Telephone,
+		LockTime:         user.LockTime,
+	}
 	response := response.NewResponse(c)
-	response.Result = user
+	response.Result = result
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
-
-	// Get now time.
-	now := util.TimeNow()
-
+	// Get claims from JWT.
+	data := cfg.JwtCredentials(c)
+	loggedInUser := data["username"].(string)
 	newErr := response.NewErrorResponse()
 
 	userid, err := uuid.Parse(c.Params("userid"))
@@ -91,10 +102,39 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
-
+	foundUser.Telephone = modifyUser.Telephone
+	foundUser.UserName = modifyUser.Username
+	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
+	foundUser.AuditInfo.LastModifiedBy = loggedInUser
+	if err := db.UpdateUser(foundUser); err != nil {
+		newErr.Message = err.Error()
+		cfg.Logger.Error(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	}
 	response := response.NewResponse(c)
 	response.Code = fiber.StatusCreated
 	return c.Status(response.Code).JSON(response)
+
+}
+
+func (cfg *AppConfig) CreateUpdateUserAddress(userid uuid.UUID, address *request.CreateAddressReq) error {
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error(err.Error())
+		return err
+	}
+	userAddress := &schema.UserAddress{AddressId: util.Ident(), OwnerId: userid,
+		FullName: address.FullName, StreetAddress: address.StreetAddress, Country: address.Country, State: address.State, Zip: address.Zip}
+	if err := cfg.Validate.Struct(userAddress); err != nil {
+		cfg.Logger.Error(util.ValidatorErrors(err))
+		return err
+	}
+	if err := db.CreateUserAdress(userAddress); err != nil {
+		cfg.Logger.Error(err.Error())
+		return err
+	}
+	return nil
 
 }
 
@@ -220,7 +260,7 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param userid path string true "userid"
-// @Success 204 {object} response.RequestResponse
+// @Success 200 {object} response.RequestResponse
 // @Security BearerAuth
 // @Router /api/users/{userid} [delete]
 func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {
@@ -250,6 +290,7 @@ func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	return c.SendStatus(fiber.StatusNoContent)
+	response := response.NewResponse(c)
+	return c.Status(response.Code).JSON(response)
 
 }

@@ -90,52 +90,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update User.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Update user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "userid",
-                        "name": "userid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Modify User",
-                        "name": "modify_user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.ModifyUser"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/response.RequestResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/users/": {
             "get": {
                 "security": [
@@ -251,6 +205,50 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update User.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Modify User",
+                        "name": "modify_user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ModifyUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
                         }
                     }
                 }
@@ -392,13 +390,13 @@ const docTemplate = `{
         "response.ErrorResponse": {
             "type": "object",
             "properties": {
-                "cause": {
-                    "type": "string",
-                    "default": "Something went wrong"
-                },
                 "code": {
                     "type": "integer",
                     "default": 500
+                },
+                "message": {
+                    "type": "string",
+                    "default": "Something went wrong"
                 },
                 "success": {
                     "type": "boolean",

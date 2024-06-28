@@ -18,6 +18,9 @@ import (
 type Wrapper struct {
 	Data string
 }
+type Msg struct {
+	Err string
+}
 
 // TimeElapsed measures the time it takes to execute a function.
 // Use it as like this with defer:
@@ -138,19 +141,17 @@ func ValidatorErrors(err error) string {
 	}
 	mJson, err := json.Marshal(fields)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("  | Errors:", err.Error())
 		return ""
 	}
 	return string(mJson)
 }
 
-func RemoveBackSlash(s string) {
 
-}
 func CreateKeyValuePairs(m map[string]string) string {
 	b := new(bytes.Buffer)
 	for key, value := range m {
-		fmt.Fprintf(b, "%s:\"%s\t", key, value)
+		fmt.Fprintf(b, "%s:\"%s\n", key, value)
 	}
 	return b.String()
 }

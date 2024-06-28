@@ -73,12 +73,12 @@ definitions:
     type: object
   response.ErrorResponse:
     properties:
-      cause:
-        default: Something went wrong
-        type: string
       code:
         default: 500
         type: integer
+      message:
+        default: Something went wrong
+        type: string
       success:
         default: false
         type: boolean
@@ -154,35 +154,6 @@ paths:
       summary: Health Check
       tags:
       - API
-  /api/users:
-    put:
-      consumes:
-      - application/json
-      description: Update User.
-      parameters:
-      - description: userid
-        in: path
-        name: userid
-        required: true
-        type: string
-      - description: Modify User
-        in: body
-        name: modify_user
-        required: true
-        schema:
-          $ref: '#/definitions/request.ModifyUser'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/response.RequestResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Update user
-      tags:
-      - User
   /api/users/:
     get:
       consumes:
@@ -257,6 +228,34 @@ paths:
       security:
       - BearerAuth: []
       summary: Get user by given userid
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update User.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Modify User
+        in: body
+        name: modify_user
+        required: true
+        schema:
+          $ref: '#/definitions/request.ModifyUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
       tags:
       - User
   /api/users/signup:

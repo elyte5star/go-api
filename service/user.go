@@ -70,14 +70,13 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 // @Param userid path string true "userid"
 // @Param modify_user body request.ModifyUser true "Modify User"
 // @Success 201 {object} response.RequestResponse
-// @Security ApiKeyAuth
-// @Router /api/users [put]
+// @Security BearerAuth
+// @Router /api/users/{userid} [put]
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	// Get claims from JWT.
 	data := cfg.JwtCredentials(c)
-	loggedInUser := data["username"].(string)
+	loggedInUser := data["userid"].(string)
 	newErr := response.NewErrorResponse()
-
 	userid, err := uuid.Parse(c.Params("userid"))
 	if err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code

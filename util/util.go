@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -9,9 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
+
+type Wrapper struct {
+	Data string
+}
 
 // TimeElapsed measures the time it takes to execute a function.
 // Use it as like this with defer:
@@ -41,8 +47,6 @@ func NullTime() time.Time {
 func Ident() uuid.UUID {
 	return uuid.New()
 }
-
-
 
 type TimestampTime struct {
 	time.Time
@@ -94,7 +98,6 @@ func SysRequirment(logger *slog.Logger) bool {
 
 }
 
-
 func InitValidator() *validator.Validate {
 	// Create a new validator for a Book model.
 	validate := validator.New()
@@ -121,8 +124,7 @@ func InitValidator() *validator.Validate {
 // ValidatorErrors func for show validation errors for each invalid fields.
 func ValidatorErrors(err error) string {
 	// Define fields map.
-	fields := map[string]string{}
-
+	fields := make(map[string]string)
 	// this check is only needed when your code could produce
 	// an invalid value for validation such as interface with nil
 	// value most including myself do not usually have code like this.
@@ -132,18 +134,23 @@ func ValidatorErrors(err error) string {
 
 	// Make error message for each invalid field.
 	for _, err := range err.(validator.ValidationErrors) {
-		fields[err.Field()] = err.Param()
+		fields[err.Field()] = err.Value().(string)
 	}
-
-	return CreateKeyValuePairs(fields)
+	mJson, err := json.Marshal(fields)
+	if err != nil {
+		fmt.Println(err.Error())
+		return ""
+	}
+	return string(mJson)
 }
 
+func RemoveBackSlash(s string) {
+
+}
 func CreateKeyValuePairs(m map[string]string) string {
 	b := new(bytes.Buffer)
 	for key, value := range m {
-		fmt.Fprintf(b, "%s=\"%s\"\n", key, value)
+		fmt.Fprintf(b, "%s:\"%s\t", key, value)
 	}
 	return b.String()
 }
-
-

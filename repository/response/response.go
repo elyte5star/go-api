@@ -36,7 +36,7 @@ func NewResponse(c *fiber.Ctx) *RequestResponse {
 
 type ErrorResponse struct {
 	Code    int    `default:"500" json:"code"`
-	Message string `default:"Something went wrong" json:"cause"`
+	Message string `default:"Something went wrong" json:"message"`
 	Success bool   `default:"false" json:"success"`
 }
 

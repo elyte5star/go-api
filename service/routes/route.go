@@ -8,7 +8,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @tags App
+// @Summary Health Check
+// @Description API status check
+// @Tags API
+// @Produce json
+// @Success 200 {object} response.RequestResponse
+// @Failure 500 {object} response.ErrorResponse
 // @router /api/status [get]
 func healthCheck(c *fiber.Ctx) error {
 	response := res.NewResponse(c)
@@ -19,7 +24,7 @@ func healthCheck(c *fiber.Ctx) error {
 
 	return nil
 }
-
+// NotFoundRoute func for describe 404 Error route.
 func NotFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
 	response.Message = "Sorry, endpoint is not found"

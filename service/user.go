@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/api/repository/request"
@@ -60,6 +61,17 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
+// UpdateUser func for updating a user by userid.
+// @Description Update User.
+// @Summary Update user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param userid path string true "userid"
+// @Param modify_user body request.ModifyUser true "Modify User"
+// @Success 201 {object} response.RequestResponse
+// @Security ApiKeyAuth
+// @Router /api/users [put]
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	// Get claims from JWT.
 	data := cfg.JwtCredentials(c)
@@ -146,10 +158,8 @@ func (cfg *AppConfig) CreateUpdateUserAddress(userid uuid.UUID, address *request
 // @Produce json
 // @Param create_user body request.CreateUserRequest true "Create User"
 // @Success 200 {object} response.RequestResponse
-// @Router /api/users/create [post]
+// @Router /api/users/signup [post]
 func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
-	// Get now time.
-	now := util.TimeNow()
 
 	newErr := response.NewErrorResponse()
 
@@ -167,7 +177,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	if err := cfg.Validate.Struct(createUser); err != nil {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = "Invalid Field(s)"
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
@@ -186,14 +196,12 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.Email = createUser.Email
 	user.LockTime = util.TimeThen()
 	user.Telephone = createUser.Telephone
-	audit := &schema.AuditEntity{CreatedAt: now, LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
 
 	// Validate user fields.
 	if err := cfg.Validate.Struct(user); err != nil {
 		// Return, if some fields are not valid.
-		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = util.ValidatorErrors(err)
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}

@@ -25,9 +25,9 @@ type UserCredentials struct {
 
 //const bearerPrefix = "Bearer "
 
-// Login method for create a new access token.
-// @Description Create a new access token.
-// @Summary Create a new access token
+// Login method for create a new bearer token.
+// @Description Create a new bearer token.
+// @Summary Create a new bearer token
 // @Tags Auth
 // @Accept json
 // @Produce json

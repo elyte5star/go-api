@@ -2,6 +2,25 @@ basePath: /
 consumes:
 - application/json
 definitions:
+  request.CreateAddressReq:
+    properties:
+      country:
+        type: string
+      fullName:
+        type: string
+      state:
+        type: string
+      streetAddress:
+        type: string
+      zip:
+        type: string
+    required:
+    - country
+    - fullName
+    - state
+    - streetAddress
+    - zip
+    type: object
   request.CreateUserRequest:
     properties:
       confirmPassword:
@@ -36,6 +55,21 @@ definitions:
         type: string
     required:
     - username
+    type: object
+  request.ModifyUser:
+    properties:
+      address:
+        $ref: '#/definitions/request.CreateAddressReq'
+      telephone:
+        maxLength: 16
+        minLength: 5
+        type: string
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - address
     type: object
   response.ErrorResponse:
     properties:
@@ -85,7 +119,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new access token.
+      description: Create a new bearer token.
       parameters:
       - description: Login data
         in: body
@@ -100,14 +134,55 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.RequestResponse'
-      summary: Create a new access token
+      summary: Create a new bearer token
       tags:
       - Auth
   /api/status:
     get:
-      responses: {}
+      description: API status check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Health Check
       tags:
-      - App
+      - API
+  /api/users:
+    put:
+      consumes:
+      - application/json
+      description: Update User.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Modify User
+        in: body
+        name: modify_user
+        required: true
+        schema:
+          $ref: '#/definitions/request.ModifyUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user
+      tags:
+      - User
   /api/users/:
     get:
       consumes:
@@ -145,8 +220,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/response.RequestResponse'
       security:
@@ -184,7 +259,7 @@ paths:
       summary: Get user by given userid
       tags:
       - User
-  /api/users/create:
+  /api/users/signup:
     post:
       consumes:
       - application/json

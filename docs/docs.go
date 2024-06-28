@@ -32,7 +32,7 @@ const docTemplate = `{
     "paths": {
         "/api/auth/login": {
             "post": {
-                "description": "Create a new access token.",
+                "description": "Create a new bearer token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -42,7 +42,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Create a new access token",
+                "summary": "Create a new bearer token",
                 "parameters": [
                     {
                         "description": "Login data",
@@ -66,10 +66,74 @@ const docTemplate = `{
         },
         "/api/status": {
             "get": {
-                "tags": [
-                    "App"
+                "description": "API status check",
+                "produces": [
+                    "application/json"
                 ],
-                "responses": {}
+                "tags": [
+                    "API"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update User.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Modify User",
+                        "name": "modify_user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ModifyUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/users/": {
@@ -109,7 +173,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/create": {
+        "/api/users/signup": {
             "post": {
                 "description": "Create a new user.",
                 "consumes": [
@@ -218,8 +282,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.RequestResponse"
                         }
@@ -229,6 +293,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "request.CreateAddressReq": {
+            "type": "object",
+            "required": [
+                "country",
+                "fullName",
+                "state",
+                "streetAddress",
+                "zip"
+            ],
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "streetAddress": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
         "request.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -273,6 +364,27 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "maxLength": 10,
+                    "minLength": 5
+                }
+            }
+        },
+        "request.ModifyUser": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/request.CreateAddressReq"
+                },
+                "telephone": {
+                    "type": "string",
+                    "maxLength": 16,
+                    "minLength": 5
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
                     "minLength": 5
                 }
             }

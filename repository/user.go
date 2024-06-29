@@ -63,44 +63,20 @@ func (q *UserQueries) CreateUserAdress(address *schema.UserAddress) error {
 	return nil
 }
 
-func (q *UserQueries) GetUsers() (*response.GetUsersResponse, error) {
+func (q *UserQueries) GetUsers() ([]schema.User, error) {
 
 	// Define users variable.
-	result := response.GetUsersResponse{}
-
+	users := []schema.User{}
 	// Define query string.
 	query := `SELECT * FROM users`
-
 	// Send query to database.
-	rows, err := q.Queryx(query)
+	err := q.Select(&users, query)
 	if err != nil {
 		// Return empty object and error.
-		return &result, err
+		return users, err
 	}
-	for rows.Next() {
-		user := schema.User{}
-		err := rows.StructScan(&user)
-		if err != nil {
-			// Return empty object and error.
-			return &result, err
-		}
-		result.Users = append(result.Users, response.GetUserResponse{Userid: user.Userid,
-			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
-			CreatedAt:        user.AuditInfo.CreatedAt,
-			Username:         user.UserName,
-			Email:            user.Email,
-			AccountNonLocked: user.AccountNonLocked,
-			Admin:            user.Admin,
-			IsUsing2FA:       user.IsUsing2FA,
-			Enabled:          user.Enabled,
-			Telephone:        user.Telephone,
-			LockTime:         user.LockTime,
-		})
+	return users, nil
 
-	}
-
-	// Return query result.
-	return &result, nil
 }
 
 // Createuser method for creating User by given User object.
@@ -121,11 +97,11 @@ func (q *UserQueries) CreateUser(user *schema.User) error {
 }
 
 // UpdateUser method for updating user by given User object.
-func (q *UserQueries) UpdateUser(user schema.User) error {
+func (q *UserQueries) UpdateUser(userid uuid.UUID,user schema.User) error {
 	// Define query string.
 	query := `UPDATE users SET username=:username,telephone=:telephone,auditInfo=:auditInfo, WHERE userid=?`
 	// Send query to database.
-	_, err := q.Exec(query, user.Userid, user.UserName, user.Telephone, user.AuditInfo)
+	_, err := q.Exec(query, userid,user.UserName,user.Telephone,user.AuditInfo)
 	if err != nil {
 		// Return only error.
 		return err

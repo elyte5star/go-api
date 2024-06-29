@@ -84,7 +84,7 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	modifyUser := request.ModifyUser{}
+	modifyUser := new(request.ModifyUser)
 	// Check, if received JSON data is valid.
 	if err := c.BodyParser(modifyUser); err != nil {
 		newErr.Code = fiber.ErrBadRequest.Code
@@ -117,8 +117,7 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	foundUser.UserName = modifyUser.Username
 	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
 	foundUser.AuditInfo.LastModifiedBy = loggedInUser
-	if err := db.UpdateUser(foundUser); err != nil {
-		newErr.Message = err.Error()
+	if err := db.UpdateUser(foundUser.Userid,foundUser); err != nil {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
@@ -229,20 +228,17 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Security BearerAuth
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
-
 	newErr := response.NewErrorResponse()
+	// // Get claims from JWT.
+	// data := cfg.JwtCredentials(c)
+	// isAdmin := data["isAdmin"].(bool)
 
-	// Get claims from JWT.
-	data := cfg.JwtCredentials(c)
-	isAdmin := data["isAdmin"].(bool)
-
-	if !isAdmin {
-		newErr.Message = "Admin rights needed"
-		newErr.Code = fiber.StatusForbidden
-		cfg.Logger.Warn(newErr.Error())
-		return c.Status(newErr.Code).JSON(newErr)
-	}
-
+	// if !isAdmin {
+	// 	newErr.Message = "Admin rights needed"
+	// 	newErr.Code = fiber.StatusForbidden
+	// 	cfg.Logger.Warn(newErr.Error())
+	// 	return c.Status(newErr.Code).JSON(newErr)
+	// }
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
@@ -252,11 +248,27 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	users, err := db.GetUsers()
 	if err != nil {
 		newErr.Message = "Users not found!"
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(newErr)
 	}
+	// Define users variable.
+	result := response.GetUsersResponse{}
+	for _, user := range users {
+		result.Users = append(result.Users, response.GetUserResponse{Userid: user.Userid,
+			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
+			CreatedAt:        user.AuditInfo.CreatedAt,
+			Username:         user.UserName,
+			Email:            user.Email,
+			AccountNonLocked: user.AccountNonLocked,
+			Admin:            user.Admin,
+			IsUsing2FA:       user.IsUsing2FA,
+			Enabled:          user.Enabled,
+			Telephone:        user.Telephone,
+			LockTime:         user.LockTime,
+		})
+	}
 	response := response.NewResponse(c)
-	response.Result = users
+	response.Result = result
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 

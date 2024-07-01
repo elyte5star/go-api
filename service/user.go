@@ -117,12 +117,13 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	foundUser.UserName = modifyUser.Username
 	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
 	foundUser.AuditInfo.LastModifiedBy = loggedInUser
-	if err := db.UpdateUser(foundUser.Userid,foundUser); err != nil {
+	if err := db.UpdateUser(foundUser.Userid, &foundUser); err != nil {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	response := response.NewResponse(c)
 	response.Code = fiber.StatusCreated
+	response.Result = fmt.Sprintf("User with ID : %v was updated.", userid)
 	return c.Status(response.Code).JSON(response)
 
 }
@@ -182,7 +183,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create new User struct
@@ -206,7 +207,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	if err := db.CreateUser(user); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
-			newErr.Message = "Duplicate key: user alreay exist"
+			newErr.Message = "Duplicate key: user already exist"
 		}
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
@@ -229,16 +230,16 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Router /api/users/ [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
-	// // Get claims from JWT.
-	// data := cfg.JwtCredentials(c)
-	// isAdmin := data["isAdmin"].(bool)
+	//Get claims from JWT.
+	data := cfg.JwtCredentials(c)
+	isAdmin := data["isAdmin"].(bool)
 
-	// if !isAdmin {
-	// 	newErr.Message = "Admin rights needed"
-	// 	newErr.Code = fiber.StatusForbidden
-	// 	cfg.Logger.Warn(newErr.Error())
-	// 	return c.Status(newErr.Code).JSON(newErr)
-	// }
+	if !isAdmin {
+		newErr.Message = "Admin rights needed"
+		newErr.Code = fiber.StatusForbidden
+		cfg.Logger.Warn(newErr.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {

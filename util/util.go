@@ -2,7 +2,6 @@ package util
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -14,13 +13,6 @@ import (
 	"github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
-
-type Wrapper struct {
-	Data string
-}
-type Msg struct {
-	Err string
-}
 
 // TimeElapsed measures the time it takes to execute a function.
 // Use it as like this with defer:
@@ -130,23 +122,24 @@ func ValidatorErrors(err error) string {
 	fields := make(map[string]string)
 	// this check is only needed when your code could produce
 	// an invalid value for validation such as interface with nil
-	// value most including myself do not usually have code like this.
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		fmt.Println(err)
 	}
-
 	// Make error message for each invalid field.
 	for _, err := range err.(validator.ValidationErrors) {
 		fields[err.Field()] = err.Value().(string)
 	}
-	mJson, err := json.Marshal(fields)
-	if err != nil {
-		fmt.Println("  | Errors:", err.Error())
-		return ""
-	}
-	return string(mJson)
+	//s := fmt.Sprintf("%v", fields)
+	return FormatErrStr(fields)
 }
 
+func FormatErrStr(m map[string]string) string {
+	var s = ""
+	for k, v := range m {
+		s += k + " -> '" + v + "' "
+	}
+	return s
+}
 
 func CreateKeyValuePairs(m map[string]string) string {
 	b := new(bytes.Buffer)

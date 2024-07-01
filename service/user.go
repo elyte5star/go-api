@@ -75,7 +75,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	// Get claims from JWT.
 	data := cfg.JwtCredentials(c)
-	loggedInUser := data["userid"].(string)
+	loggedInUserid := data["userid"].(string)
 	newErr := response.NewErrorResponse()
 	userid, err := uuid.Parse(c.Params("userid"))
 	if err != nil {
@@ -116,7 +116,7 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	foundUser.Telephone = modifyUser.Telephone
 	foundUser.UserName = modifyUser.Username
 	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
-	foundUser.AuditInfo.LastModifiedBy = loggedInUser
+	foundUser.AuditInfo.LastModifiedBy = loggedInUserid 
 	if err := db.UpdateUser(foundUser.Userid, &foundUser); err != nil {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)

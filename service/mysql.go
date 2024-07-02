@@ -12,6 +12,7 @@ import (
 type Queries struct {
 	*repository.UserQueries
 	*repository.AuthQueries
+	*repository.ProductQueries
 }
 
 func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
@@ -56,8 +57,9 @@ func DbWithQueries(cfg *AppConfig) (*Queries, error) {
 		return nil, err
 	}
 	return &Queries{
-		UserQueries: &repository.UserQueries{DB: db},
-		AuthQueries: &repository.AuthQueries{DB: db},
+		UserQueries:    &repository.UserQueries{DB: db},
+		AuthQueries:    &repository.AuthQueries{DB: db},
+		ProductQueries: &repository.ProductQueries{DB: db},
 	}, nil
 
 }

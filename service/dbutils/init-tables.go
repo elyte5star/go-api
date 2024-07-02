@@ -3,6 +3,7 @@ package dbutils
 import (
 	"log"
 
+	"github.com/api/service/dbutils/schema"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -86,8 +87,8 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	reviewerName VARCHAR(264) NOT NULL,
 	comment VARCHAR(500) NOT NULL,
 	email VARCHAR(64) NOT NULL,
-	prodId CHAR(36) NOT NULL,
-	FOREIGN KEY (prodId) REFERENCES products(pid) ON DELETE CASCADE
+	pid CHAR(36) NOT NULL,
+	FOREIGN KEY (pid) REFERENCES products(pid) ON DELETE CASCADE
 		) 
 	`
 
@@ -121,4 +122,12 @@ func CreateTables(dbDriver *sqlx.DB) {
 	statement.Close()
 
 	log.Println("All tables created/initialized successfully!")
+}
+
+func CreateAdminAccount(user *schema.User) {
+
+}
+
+func CreateProducts(user *[]schema.User) {
+
 }

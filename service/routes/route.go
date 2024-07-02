@@ -2,9 +2,10 @@ package routes
 
 import (
 	"fmt"
-	"github.com/api/service"
+
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
+	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,6 +25,7 @@ func healthCheck(c *fiber.Ctx) error {
 
 	return nil
 }
+
 // NotFoundRoute func for describe 404 Error route.
 func NotFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
@@ -37,16 +39,12 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	//logger middleware
 	//logger := cfg.Logger
 
-	serverStatus := app.Group("/api")
+	api := app.Group("api")
+	serverStatus := api.Group("server")
 	serverStatus.Get("/status", healthCheck)
 
 	// JWT middleware
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
-	// productRoutes := app.Group("/api/products")
-	// productRoutes.Get("/", service.GetAllProducts)
-	// productRoutes.Get("/:pid", service.GetSingleProduct)
-	// productRoutes.Delete("/:pid",jwt, service.DeleteProduct)
-	api := app.Group("api")
 
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)
@@ -58,6 +56,13 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	authenticated.Get("/:userid", cfg.GetUser)
 	authenticated.Delete("/:userid", cfg.DeleteUser)
 	authenticated.Put("/:userid", cfg.UpdateUser)
+
+	productRoutes := app.Group("products")
+	productRoutes.Get("/", cfg.GetAllProducts)
+	productRoutes.Get("/:pid", cfg.GetSingleProduct)
+	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
+	productRoutes.Post("/create", cfg.CreateProduct)
+	productRoutes.Post("/create/review", cfg.CreateProduct)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")

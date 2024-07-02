@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"strings"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
@@ -227,7 +226,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Failure 500 {object} response.ErrorResponse
 // @Success 200 {array} response.RequestResponse
 // @Security BearerAuth
-// @Router /api/users/ [get]
+// @Router /api/users [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
 	//Get claims from JWT.

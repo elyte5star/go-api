@@ -101,7 +101,7 @@ func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 	// Define query string.
 	query := `UPDATE users SET username=?,telephone=?, auditInfo=? WHERE userid=?`
 	// Send query to database.
-	_, err := q.Exec(query, userid, user.UserName, user.Telephone, user.AuditInfo)
+	_, err := q.Exec(query, user.UserName, user.Telephone, user.AuditInfo, userid)
 	if err != nil {
 		// Return only error.
 		return err

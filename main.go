@@ -65,6 +65,7 @@ func main() {
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
 		dbutils.CreateTables(db)
+		dbutils.CreateAdminAccount("elyte",cfg)
 	}
 	address := fmt.Sprintf(":%v", cfg.ServicePort)
 

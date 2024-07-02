@@ -26,6 +26,21 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, error) {
 	return user, nil
 }
 
+func (q *UserQueries) GetUserByUsername(username string) (schema.User, error) {
+
+	user := schema.User{}
+	// Define query string.
+	query := `SELECT * FROM users WHERE username=?`
+
+	// Send query to database.
+	err := q.Get(&user, query, username)
+	if err != nil {
+		// Return empty object and error.
+		return user, err
+	}
+	return user, nil
+}
+
 func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (*response.GetUserAdressResponse, error) {
 
 	userAddress := schema.UserAddress{}

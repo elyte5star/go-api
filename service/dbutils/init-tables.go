@@ -2,8 +2,11 @@ package dbutils
 
 import (
 	"log"
+	"strings"
 
+	"github.com/api/service"
 	"github.com/api/service/dbutils/schema"
+	"github.com/api/util"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -124,7 +127,33 @@ func CreateTables(dbDriver *sqlx.DB) {
 	log.Println("All tables created/initialized successfully!")
 }
 
-func CreateAdminAccount(user *schema.User) {
+func CreateAdminAccount(username string, cfg *service.AppConfig) {
+	db, err := service.DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error(err.Error())
+		return
+	}
+	user := new(schema.User)
+	user.Userid = util.Ident()
+	user.UserName = username
+	user.SetPassword("string")
+	user.Email = "elyte5star@gmail.com"
+	user.LockTime = util.TimeThen()
+	user.Telephone = "234802394"
+	user.AccountNonLocked = true
+	user.Admin = true
+	user.Enabled = true
+	user.Discount = 0.0
+	user.FailedAttempt = 2
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: username}
+	user.AuditInfo = *audit
+	if err := db.CreateUser(user); err != nil {
+		if strings.Contains(err.Error(), "Error 1062") {
+			cfg.Logger.Warn("Admin user already exist")
+		}
+		cfg.Logger.Error(err.Error())
+	}
+	cfg.Logger.Info("Admin account created")
 
 }
 

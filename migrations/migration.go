@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -15,6 +16,9 @@ var filenameRegexp = regexp.MustCompile(`V(\d+)__(.*).sql$`)
 type Migration struct {
 	Path string
 	Data []byte
+}
+func (m Migration) String() string {
+	return fmt.Sprintf("%s: %d", m.Path, m.Data)
 }
 
 // Migrations is a sortable collection of migrations.

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/api/api"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/service"
@@ -71,6 +72,7 @@ func main() {
 
 	logger.Info("Listening on " + address)
 	// start server
-	h.Listen(address)
+	//h.Listen(address)
+	api.StartServerWithGracefulShutdown(h,cfg)
 
 }

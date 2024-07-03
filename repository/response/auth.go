@@ -7,7 +7,7 @@ type TokenResponse struct {
 	Username         string    `json:"username"`
 	Email            string    `json:"email"`
 	Enabled          bool      `json:"enabled"`
-	AccountNonLocked bool      `json:"account_not_locked"`
+	AccountNonLocked bool      `json:"accountNonLocked"`
 	Admin            bool      `json:"admin"`
 	AccessToken      string    `json:"accessToken"`
 	TokenType        string    `json:"tokenType"`

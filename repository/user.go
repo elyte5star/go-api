@@ -97,16 +97,15 @@ func (q *UserQueries) GetUsers() ([]schema.User, error) {
 // Createuser method for creating User by given User object.
 func (q *UserQueries) CreateUser(user *schema.User) error {
 	// Define query string.
-	query := `INSERT INTO users (userid,username,password,email,telephone,lockTime,auditInfo)
-	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:auditInfo)`
-
+	query := `INSERT INTO users (userid,username,password,email,telephone,lockTime,discount,
+	accountNonLocked,admin,enabled,isUsing2FA,failedAttempt,auditInfo)
+	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:discount,:accountNonLocked,:admin,:enabled,:isUsing2FA,:failedAttempt,:auditInfo)`
 	// Send query to database.
 	_, err := q.NamedExec(query, user)
 	if err != nil {
 		// Return only error.
 		return err
 	}
-
 	// This query returns nothing.
 	return nil
 }

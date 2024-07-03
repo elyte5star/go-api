@@ -19,16 +19,16 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	username VARCHAR(64) NOT NULL UNIQUE,
 	password VARBINARY(255) NOT NULL,
 	email VARCHAR(64) NOT NULL UNIQUE,
-	accountNonLocked BOOLEAN DEFAULT false,
-	admin BOOLEAN DEFAULT false,
-	enabled BOOLEAN DEFAULT false ,
-	isUsing2FA BOOLEAN DEFAULT false ,
+	accountNonLocked BOOLEAN DEFAULT false NOT NULL,
+	admin BOOLEAN DEFAULT false NOT NULL,
+	enabled BOOLEAN DEFAULT false  NOT NULL,
+	isUsing2FA BOOLEAN DEFAULT false NOT NULL,
 	telephone VARCHAR(64) NOT NULL UNIQUE,
-	discount  DECIMAL(16,2) DEFAULT '0.00',
+	discount DECIMAL(16,2) DEFAULT '0.00',
 	failedAttempt INT UNSIGNED  DEFAULT '0000',
 	lockTime TIMESTAMP(0),
 	auditInfo JSON NOT NULL
-	);
+	) ENGINE=INNODB;
 `
 
 const otp = `CREATE TABLE IF NOT EXISTS otp (
@@ -36,8 +36,8 @@ const otp = `CREATE TABLE IF NOT EXISTS otp (
 		email VARCHAR(64) NOT NULL UNIQUE,
 		otpString VARCHAR(64) NOT NULL,
 		expiryDate TIMESTAMP(0),
-		FOREIGN KEY(userid) REFERENCES users(userid)
-		);
+		FOREIGN KEY(userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
+		) ENGINE=INNODB;
 `
 
 const userAddress = `CREATE TABLE IF NOT EXISTS address (
@@ -48,16 +48,16 @@ const userAddress = `CREATE TABLE IF NOT EXISTS address (
 	state VARCHAR(64) NOT NULL,
 	zip VARCHAR(64) NOT NULL,
 	PRIMARY KEY (userid),
-	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
-	)
+	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=INNODB;
 `
 const userLocations = `CREATE TABLE IF NOT EXISTS user_locations (
 	locationId CHAR(36) PRIMARY KEY,
 	country VARCHAR(64) NOT NULL UNIQUE,
 	enabled BOOLEAN DEFAULT false,
 	userid CHAR(36) NOT NULL,
-	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
-	);
+	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=INNODB;
 `
 
 const bookings = `CREATE TABLE IF NOT EXISTS bookings (
@@ -67,8 +67,8 @@ const bookings = `CREATE TABLE IF NOT EXISTS bookings (
 	cart JSON NOT NULL,
 	shippingDetails JSON NOT NULL,
 	totalPrice DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
-	)
+	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=INNODB;
 `
 const products = `CREATE TABLE IF NOT EXISTS products (
 	pid CHAR(36) PRIMARY KEY,
@@ -81,7 +81,7 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	details VARCHAR(664) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	auditInfo JSON NOT NULL
-	);
+	) ENGINE=INNODB;
 `
 const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	rid CHAR(36) PRIMARY KEY,
@@ -91,8 +91,8 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	comment VARCHAR(500) NOT NULL,
 	email VARCHAR(64) NOT NULL,
 	pid CHAR(36) NOT NULL,
-	FOREIGN KEY (pid) REFERENCES products(pid) ON DELETE CASCADE
-		) 
+	FOREIGN KEY (pid) REFERENCES products(pid) ON DELETE CASCADE ON UPDATE CASCADE
+		) ENGINE=INNODB;
 	`
 
 func CreateTables(dbDriver *sqlx.DB) {
@@ -142,21 +142,22 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	user.Telephone = "234802394"
 	user.AccountNonLocked = true
 	user.Admin = true
+	user.IsUsing2FA = true
 	user.Enabled = true
-	user.Discount = 0.0
-	user.FailedAttempt = 2
 	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: username}
 	user.AuditInfo = *audit
 	if err := db.CreateUser(user); err != nil {
 		if strings.Contains(err.Error(), "Error 1062") {
 			cfg.Logger.Warn("Admin user already exist")
+			return
 		}
 		cfg.Logger.Error(err.Error())
+		return
 	}
 	cfg.Logger.Info("Admin account created")
 
 }
 
-func CreateProducts(user *[]schema.User) {
+func CreateProducts(user *[]schema.Product) {
 
 }

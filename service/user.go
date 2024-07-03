@@ -208,7 +208,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 		if strings.Contains(err.Error(), "Error 1062") {
 			newErr.Message = "Duplicate key: user already exist"
 		}
-		cfg.Logger.Error(newErr.Error())
+		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	//fmt.Printf("%+v\n", user)

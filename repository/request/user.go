@@ -2,8 +2,8 @@ package request
 
 type CreateUserRequest struct {
 	Username        string `json:"username" validate:"min=5,max=30"`
-	Password        string `json:"password"  validate:"eqfield=ConfirmPassword,min=5,max=30"`
-	ConfirmPassword string `json:"confirmPassword"  validate:"min=5,max=30"`
+	Password        string `json:"password" validate:"eqfield=ConfirmPassword,min=5,max=30"`
+	ConfirmPassword string `json:"confirmPassword" validate:"min=5,max=30"`
 	Email           string `json:"email" validate:"required,email"`
 	Telephone       string `json:"telephone" validate:"required,tel"`
 }

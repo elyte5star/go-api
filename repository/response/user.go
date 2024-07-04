@@ -28,3 +28,12 @@ type GetUserResponse struct {
 type GetUsersResponse struct {
 	Users []GetUserResponse `json:"users"`
 }
+
+type GetUserAdressResponse struct {
+	AddressId     uuid.UUID `json:"addressId"`
+	FullName      string    ` json:"fullName" validate:"required"`
+	StreetAddress string    `json:"streetAddress"`
+	Country       string    `json:"country"`
+	State         string    `json:"state"`
+	Zip           string    `json:"zip"`
+}

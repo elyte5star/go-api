@@ -1,13 +1,135 @@
 basePath: /
+consumes:
+- application/json
 definitions:
+  request.CreateAddressReq:
+    properties:
+      country:
+        type: string
+      fullName:
+        type: string
+      state:
+        type: string
+      streetAddress:
+        type: string
+      zip:
+        type: string
+    required:
+    - country
+    - fullName
+    - state
+    - streetAddress
+    - zip
+    type: object
+  request.CreateProductRequest:
+    properties:
+      category:
+        maxLength: 255
+        type: string
+      description:
+        maxLength: 555
+        type: string
+      details:
+        maxLength: 555
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      productDiscount:
+        type: number
+      stockQuantity:
+        type: integer
+    required:
+    - category
+    - description
+    - details
+    - image
+    - name
+    - price
+    - productDiscount
+    - stockQuantity
+    type: object
+  request.CreateProductReviewRequest:
+    properties:
+      comment:
+        type: string
+      email:
+        type: string
+      pid:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      reviewerName:
+        type: string
+    required:
+    - comment
+    - email
+    - pid
+    - reviewerName
+    type: object
+  request.CreateUserRequest:
+    properties:
+      confirmPassword:
+        maxLength: 30
+        minLength: 5
+        type: string
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 5
+        type: string
+      telephone:
+        type: string
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - email
+    - telephone
+    type: object
+  request.LoginRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 5
+        type: string
+      username:
+        maxLength: 10
+        minLength: 5
+        type: string
+    required:
+    - username
+    type: object
+  request.ModifyUser:
+    properties:
+      address:
+        $ref: '#/definitions/request.CreateAddressReq'
+      telephone:
+        maxLength: 16
+        minLength: 5
+        type: string
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - address
+    type: object
   response.ErrorResponse:
     properties:
-      cause:
-        default: Something went wrong
-        type: string
       code:
         default: 500
         type: integer
+      message:
+        default: Something went wrong
+        type: string
       success:
         default: false
         type: boolean
@@ -44,7 +166,164 @@ info:
   title: Elyte Realm API
   version: 1.0.1
 paths:
-  /api/users/:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Create a new bearer token.
+      parameters:
+      - description: Login data
+        in: body
+        name: credential
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      summary: Create a new bearer token
+      tags:
+      - Auth
+  /api/products:
+    get:
+      consumes:
+      - application/json
+      description: Get all existing products.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.RequestResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get all existing products
+      tags:
+      - Product
+  /api/products/{pid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete product by a given pid.
+      parameters:
+      - description: pid
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Product by given pid
+      tags:
+      - Product
+    get:
+      consumes:
+      - application/json
+      description: Get Product by given ID.
+      parameters:
+      - description: pid
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get product by given pid
+      tags:
+      - Product
+  /api/products/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product.
+      parameters:
+      - description: Create product
+        in: body
+        name: create_product
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      summary: Create a new product
+      tags:
+      - Product
+  /api/products/create/review:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product review.
+      parameters:
+      - description: Create a product review
+        in: body
+        name: product_review
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProductReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      summary: Create a new product review
+      tags:
+      - Product
+  /api/status:
+    get:
+      description: API status check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Health Check
+      tags:
+      - API
+  /api/users:
     get:
       consumes:
       - application/json
@@ -62,10 +341,34 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get all existing users
       tags:
-      - Users
+      - User
   /api/users/{userid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by a given userid.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete user by given userid
+      tags:
+      - User
     get:
       consumes:
       - application/json
@@ -91,45 +394,51 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get user by given userid
       tags:
-      - Users
-  /api/users/create:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update User.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Modify User
+        in: body
+        name: modify_user
+        required: true
+        schema:
+          $ref: '#/definitions/request.ModifyUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - User
+  /api/users/signup:
     post:
       consumes:
       - application/json
       description: Create a new user.
       parameters:
-      - description: Username
+      - description: Create User
         in: body
-        name: username
+        name: create_user
         required: true
         schema:
-          type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
-      - description: ConfirmPassword
-        in: body
-        name: confirmPassword
-        required: true
-        schema:
-          type: string
-      - description: Email
-        in: body
-        name: email
-        required: true
-        schema:
-          type: string
-      - description: telephone
-        in: body
-        name: telephone
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/request.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -139,10 +448,15 @@ paths:
             $ref: '#/definitions/response.RequestResponse'
       summary: Create a new user
       tags:
-      - Users
+      - User
+produces:
+- application/json
+schemes:
+- http
+- https
 securityDefinitions:
-  ApiKeyAuth:
-    description: Jwt Bearer Token
+  BearerAuth:
+    description: Bearer Token
     in: header
     name: Authorization
     type: apiKey

@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/api/api"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/service"
-	"github.com/api/service/dbutils"
 	"github.com/api/util"
 )
 
@@ -26,12 +24,19 @@ import (
 @host localhost:8080
 @BasePath /
 
-@securityDefinitions.apikey ApiKeyAuth
+@accept json
+
+@produce json
+
+@schemes http https
+
+@securityDefinitions.apikey BearerAuth
 @in header
 @name Authorization
-@description Jwt Bearer Token
+@description Bearer Token
 
-@accept json
+@externalDocs.description  elyte5star
+@externalDocs.url          https://github.com/elyte5star/go-api
 */
 func main() {
 
@@ -57,12 +62,8 @@ func main() {
 	h := Handler(cfg)
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
-		dbutils.CreateTables(db)
-	}
-	address := fmt.Sprintf(":%v", cfg.ServicePort)
+		api.StartApiWithGracefulShutdown(h, cfg, db)
 
-	logger.Info("Listening on " + address)
-	// start server
-	h.Listen(address)
+	}
 
 }

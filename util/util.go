@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -75,7 +74,7 @@ func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
 // }
 
 func SysRequirment(logger *slog.Logger) bool {
-	defer TimeElapsed(time.Now(), "Checking your Go environment")
+	defer TimeElapsed(TimeNow(), "Checking your Go environment")
 	myVersion := runtime.Version()
 	major := strings.Split(myVersion, ".")[0][2]
 	minor := strings.Split(myVersion, ".")[1]
@@ -92,13 +91,6 @@ func SysRequirment(logger *slog.Logger) bool {
 	logger.Debug("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true
 
-}
-
-const JwtSecret = "7a3c54660456ff1137b652e498624dfa09a0ec12b4fc49d38b85465da15027a1"
-
-var RequestLogConfig = logger.Config{
-	Format:   "${pid} | ${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
-	TimeZone: "UTC",
 }
 
 func InitValidator() *validator.Validate {
@@ -127,27 +119,32 @@ func InitValidator() *validator.Validate {
 // ValidatorErrors func for show validation errors for each invalid fields.
 func ValidatorErrors(err error) string {
 	// Define fields map.
-	fields := map[string]string{}
-
+	fields := make(map[string]string)
 	// this check is only needed when your code could produce
 	// an invalid value for validation such as interface with nil
-	// value most including myself do not usually have code like this.
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		fmt.Println(err)
 	}
-
 	// Make error message for each invalid field.
 	for _, err := range err.(validator.ValidationErrors) {
-		fields[err.Field()] = err.Param()
+		fields[err.Field()] = err.Value().(string)
 	}
+	//s := fmt.Sprintf("%v", fields)
+	return FormatErrStr(fields)
+}
 
-	return CreateKeyValuePairs(fields)
+func FormatErrStr(m map[string]string) string {
+	var s = ""
+	for k, v := range m {
+		s += k + " -> '" + v + "' "
+	}
+	return s
 }
 
 func CreateKeyValuePairs(m map[string]string) string {
 	b := new(bytes.Buffer)
 	for key, value := range m {
-		fmt.Fprintf(b, "%s=\"%s\"\n", key, value)
+		fmt.Fprintf(b, "%s:\"%s\n", key, value)
 	}
 	return b.String()
 }

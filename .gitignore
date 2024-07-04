@@ -156,8 +156,8 @@ $RECYCLE.BIN/
 
 # Go workspace file
 go.work
-
-
+migrations/data/*
+doc/*
 core
 *.cgo*.go
 *.cgo*.c

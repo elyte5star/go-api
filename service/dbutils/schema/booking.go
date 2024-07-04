@@ -2,17 +2,22 @@ package schema
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 )
 
 type Booking struct {
-	Oid             uuid.UUID    `db:"oid" json:"oid" validate:"required,uuid"`
-	ShippingDetails UserAddress  `db:"shippingDetails" json:"shippingDetails" validate:"required,dive"`
-	CreatedAt       *time.Time   `db:"createdAt" json:"createdAt"  validate:"required"`
-	TotalPrice      float64      `db:"totalPrice" json:"totalPrice"  validate:"required"`
-	Cart            []ItemIncart `db:"cart" json:"cart" validate:"required,dive"`
+	Oid             uuid.UUID       `db:"oid" json:"oid" validate:"required,uuid"`
+	ShippingDetails ShippingDetails `db:"shippingDetails" json:"shippingDetails" validate:"required,dive"`
+	Created       *time.Time      `db:"created" json:"created"  validate:"required"`
+	TotalPrice      float64         `db:"totalPrice" json:"totalPrice"  validate:"required"`
+	Cart            []ItemIncart    `db:"cart" json:"cart" validate:"required,dive"`
 }
 
+type ShippingDetails struct {
+	ShippingAdress UserAddress `json:"shippingAddress"`
+	ShipDate       *time.Time  `json:"shipDate"`
+}
 type ItemIncart struct {
 	Pid             uuid.UUID `json:"pid" validate:"required,uuid"`
 	Name            string    `json:"name" validate:"required"`

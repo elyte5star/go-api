@@ -11,9 +11,9 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-func (q *UserQueries) GetUserById(userid uuid.UUID) (*response.GetUserResponse, error) {
+func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, error) {
 
-	var user schema.User
+	user := schema.User{}
 	// Define query string.
 	query := `SELECT * FROM users WHERE userid=?`
 
@@ -21,71 +21,54 @@ func (q *UserQueries) GetUserById(userid uuid.UUID) (*response.GetUserResponse, 
 	err := q.Get(&user, query, userid)
 	if err != nil {
 		// Return empty object and error.
-		return &response.GetUserResponse{}, err
+		return user, err
 	}
-	result := &response.GetUserResponse{Userid: user.Userid,
-		LastModifiedAt:   user.AuditInfo.LastModifiedAt,
-		CreatedAt:        user.AuditInfo.CreatedAt,
-		Username:         user.UserName,
-		Email:            user.Email,
-		AccountNonLocked: user.AccountNonLocked,
-		Admin:            user.Admin,
-		IsUsing2FA:       user.IsUsing2FA,
-		Enabled:          user.Enabled,
-		Telephone:        user.Telephone,
-		LockTime:         user.LockTime,
+	return user, nil
+}
+
+func (q *UserQueries) GetUserByUsername(username string) (schema.User, error) {
+
+	user := schema.User{}
+	// Define query string.
+	query := `SELECT * FROM users WHERE username=?`
+
+	// Send query to database.
+	err := q.Get(&user, query, username)
+	if err != nil {
+		// Return empty object and error.
+		return user, err
+	}
+	return user, nil
+}
+
+func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (*response.GetUserAdressResponse, error) {
+
+	userAddress := schema.UserAddress{}
+	// Define query string.
+	query := `SELECT * FROM address WHERE addressId=?`
+
+	// Send query to database.
+	err := q.Get(&userAddress, query, userid)
+	if err != nil {
+		// Return empty object and error.
+		return &response.GetUserAdressResponse{}, err
+	}
+	result := &response.GetUserAdressResponse{
+		FullName: userAddress.FullName, StreetAddress: userAddress.StreetAddress,
+		Country: userAddress.StreetAddress, State: userAddress.State, Zip: userAddress.Zip,
 	}
 	return result, nil
 }
 
-func (q *UserQueries) GetUsers() (*response.GetUsersResponse, error) {
-
-	// Define users variable.
-	result := response.GetUsersResponse{}
-
+// Createuser method for creating UserAddress by given UserAddress object.
+func (q *UserQueries) CreateUserAdress(address *schema.UserAddress) error {
 	// Define query string.
-	query := `SELECT * FROM users`
+	query := `INSERT INTO address (userid,fullName,streetAddress,country,state,zip)
+	 VALUES (:userid,:fullName,:streetAddress,:country,:state,:zip) 
+	 ON DUPLICATE KEY UPDATE fullName=:fullName,streetAddress=:streetAddress,country=:country,state=:state,zip=:zip`
 
 	// Send query to database.
-	rows, err := q.Queryx(query)
-	if err != nil {
-		// Return empty object and error.
-		return &result, err
-	}
-	for rows.Next() {
-		user := schema.User{}
-		err := rows.StructScan(&user)
-		if err != nil {
-			// Return empty object and error.
-			return &result, err
-		}
-		result.Users = append(result.Users, response.GetUserResponse{Userid: user.Userid,
-			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
-			CreatedAt:        user.AuditInfo.CreatedAt,
-			Username:         user.UserName,
-			Email:            user.Email,
-			AccountNonLocked: user.AccountNonLocked,
-			Admin:            user.Admin,
-			IsUsing2FA:       user.IsUsing2FA,
-			Enabled:          user.Enabled,
-			Telephone:        user.Telephone,
-			LockTime:         user.LockTime,
-		})
-
-	}
-
-	// Return query result.
-	return &result, nil
-}
-
-// Createuser method for creating User by given User object.
-func (q *UserQueries) CreateUser(user *schema.User) error {
-	// Define query string.
-	query := `INSERT INTO users (userid,username,password,email,telephone,lockTime,auditInfo)
-	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:auditInfo)`
-
-	// Send query to database.
-	_, err := q.NamedExec(query, user)
+	_, err := q.NamedExec(query, address)
 	if err != nil {
 		// Return only error.
 		return err
@@ -95,13 +78,44 @@ func (q *UserQueries) CreateUser(user *schema.User) error {
 	return nil
 }
 
+func (q *UserQueries) GetUsers() ([]schema.User, error) {
+
+	// Define users variable.
+	users := []schema.User{}
+	// Define query string.
+	query := `SELECT * FROM users`
+	// Send query to database.
+	err := q.Select(&users, query)
+	if err != nil {
+		// Return empty object and error.
+		return users, err
+	}
+	return users, nil
+
+}
+
+// Createuser method for creating User by given User object.
+func (q *UserQueries) CreateUser(user *schema.User) error {
+	// Define query string.
+	query := `INSERT INTO users (userid,username,password,email,telephone,lockTime,discount,
+	accountNonLocked,admin,enabled,isUsing2FA,failedAttempt,auditInfo)
+	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:discount,:accountNonLocked,:admin,:enabled,:isUsing2FA,:failedAttempt,:auditInfo)`
+	// Send query to database.
+	_, err := q.NamedExec(query, user)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+	// This query returns nothing.
+	return nil
+}
+
 // UpdateUser method for updating user by given User object.
 func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 	// Define query string.
-	query := `UPDATE users SET lastModifiedAt = $2, LastModifiedBy = $3, telephone = $4, email = $5, address = $6 WHERE userid=?`
-
+	query := `UPDATE users SET username=?,telephone=?, auditInfo=? WHERE userid=?`
 	// Send query to database.
-	_, err := q.Exec(query, userid, user.AuditInfo.LastModifiedAt, user.AuditInfo.LastModifiedBy, user.Telephone, user.Email)
+	_, err := q.Exec(query, user.UserName, user.Telephone, user.AuditInfo, userid)
 	if err != nil {
 		// Return only error.
 		return err

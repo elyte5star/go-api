@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"time"
-
 	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -12,6 +11,7 @@ import (
 type Queries struct {
 	*repository.UserQueries
 	*repository.AuthQueries
+	*repository.ProductQueries
 }
 
 func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
@@ -20,6 +20,7 @@ func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
 		return nil, err
 	}
 	config.ParseTime = true
+	config.InterpolateParams = true
 
 	return config, nil
 }
@@ -32,8 +33,9 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 	// Get a database handle.
 	db, err := sqlx.Open("mysql", config.FormatDSN())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
+
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxIdleTime(5 * time.Minute)
@@ -43,9 +45,10 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 		defer db.Close() // close database connection
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
-
+	//dbutils.CreateTables(db)
+	//dbutils.CreateAdminAccount("elyte",cfg)
 	cfg.Logger.Debug(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
-
+	
 	return db, nil
 }
 
@@ -55,8 +58,9 @@ func DbWithQueries(cfg *AppConfig) (*Queries, error) {
 		return nil, err
 	}
 	return &Queries{
-		UserQueries: &repository.UserQueries{DB: db},
-		AuthQueries: &repository.AuthQueries{DB: db},
+		UserQueries:    &repository.UserQueries{DB: db},
+		AuthQueries:    &repository.AuthQueries{DB: db},
+		ProductQueries: &repository.ProductQueries{DB: db},
 	}, nil
 
 }

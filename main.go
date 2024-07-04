@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/api/api"
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
@@ -66,13 +64,8 @@ func main() {
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
 		dbutils.CreateTables(db)
-		dbutils.CreateAdminAccount("elyte",cfg)
+		dbutils.CreateAdminAccount("elyte", cfg)
 	}
-	address := fmt.Sprintf(":%v", cfg.ServicePort)
-
-	logger.Info("Listening on " + address)
-	// start server
-	//h.Listen(address)
-	api.StartServerWithGracefulShutdown(h,cfg)
+	api.StartApiWithGracefulShutdown(h, cfg)
 
 }

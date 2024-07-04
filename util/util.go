@@ -74,7 +74,7 @@ func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
 // }
 
 func SysRequirment(logger *slog.Logger) bool {
-	defer TimeElapsed(time.Now(), "Checking your Go environment")
+	defer TimeElapsed(TimeNow(), "Checking your Go environment")
 	myVersion := runtime.Version()
 	major := strings.Split(myVersion, ".")[0][2]
 	minor := strings.Split(myVersion, ".")[1]

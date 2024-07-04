@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 type AppConfig struct {
-	Debug                 bool  
+	Debug                 bool
 	ClientOrigin          string ` validate:"required"`
 	SmtpServer            string ` validate:"required"`
 	SmtpUsername          string ` validate:"required"`
@@ -31,11 +31,12 @@ type AppConfig struct {
 }
 
 type DbConfig struct {
-	User     string `envconfig:"MYSQL_USER" split_words:"true" validate:"required"`
-	Password string `envconfig:"MYSQL_PASSWORD" split_words:"true" validate:"required"`
-	Host     string `envconfig:"MYSQL_HOST" split_words:"true" validate:"required"`
-	Port     string `envconfig:"MYSQL_PORT" split_words:"true" validate:"required"`
-	Database string `envconfig:"MYSQL_DATABASE" split_words:"true" validate:"required"`
+	User                     string `envconfig:"MYSQL_USER" split_words:"true" validate:"required"`
+	Password                 string `envconfig:"MYSQL_PASSWORD" split_words:"true" validate:"required"`
+	Host                     string `envconfig:"MYSQL_HOST" split_words:"true" validate:"required"`
+	Port                     string `envconfig:"MYSQL_PORT" split_words:"true" validate:"required"`
+	Database                 string `envconfig:"MYSQL_DATABASE" validate:"required"`
+	
 }
 
 func (dbConfig *DbConfig) URL() string {

@@ -1,11 +1,13 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/api/service"
+	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -34,6 +36,12 @@ func NotFoundRoute(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNotFound).JSON(response)
 }
 
+func RouteStack(app *fiber.App) string {
+	defer util.TimeElapsed(util.TimeNow(), "Checking your API information")
+	data, _ := json.MarshalIndent(app.Stack(), "", "  ")
+	return string(data)
+}
+
 func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 
 	//logger middleware
@@ -57,8 +65,8 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	authenticated.Delete("/:userid", cfg.DeleteUser)
 	authenticated.Put("/:userid", cfg.UpdateUser)
 
-	productRoutes := app.Group("products")
-	productRoutes.Get("/", cfg.GetAllProducts)
+	productRoutes := api.Group("products")
+	productRoutes.Get("", cfg.GetAllProducts)
 	productRoutes.Get("/:pid", cfg.GetSingleProduct)
 	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
 	productRoutes.Post("/create", cfg.CreateProduct)

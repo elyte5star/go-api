@@ -21,6 +21,7 @@ func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
 		return nil, err
 	}
 	config.ParseTime = true
+	config.InterpolateParams = true
 
 	return config, nil
 }
@@ -33,7 +34,7 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 	// Get a database handle.
 	db, err := sqlx.Open("mysql", config.FormatDSN())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
 
 	db.SetMaxIdleConns(10)

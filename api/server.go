@@ -8,11 +8,12 @@ import (
 
 	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 // StartServerWithGracefulShutdown function for starting server with a graceful shutdown.
-func StartApiWithGracefulShutdown(a *fiber.App, cfg *service.AppConfig) {
-	// Create channel for idle connections.
+func StartApiWithGracefulShutdown(a *fiber.App, cfg *service.AppConfig, db *sqlx.DB) {
+	// Create channel for  connections.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
@@ -30,7 +31,8 @@ func StartApiWithGracefulShutdown(a *fiber.App, cfg *service.AppConfig) {
 	address := fmt.Sprintf(":%v", cfg.ServicePort)
 	if err := a.Listen(address); err != nil {
 		log.Panic(err)
-	} 
+	}
 	cfg.Logger.Warn("Running cleanup tasks...")
+	db.Close()
 	// Your cleanup tasks go here
 }

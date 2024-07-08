@@ -1,7 +1,6 @@
 package dbutils
 
 import (
-	"log"
 	"strings"
 
 	"github.com/api/service"
@@ -95,18 +94,20 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 		) ENGINE=INNODB;
 	`
 
-func CreateTables(dbDriver *sqlx.DB) {
+func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
+
+	log := cfg.Logger
 
 	defer dbDriver.Close()
 
 	statement, driverError := dbDriver.Prepare(users)
 	if driverError != nil {
-		log.Println(driverError)
+		log.Error(driverError.Error())
 	}
 	// Create table
 	_, statementError := statement.Exec()
 	if statementError != nil {
-		log.Println("Table already exists!")
+		log.Warn("Table already exists!")
 	}
 
 	statement, _ = dbDriver.Prepare(otp)
@@ -124,7 +125,8 @@ func CreateTables(dbDriver *sqlx.DB) {
 	statement.Exec()
 	statement.Close()
 
-	log.Println("All tables created/initialized successfully!")
+	log.Info("All tables created/initialized successfully!")
+	CreateAdminAccount("elyte", cfg)
 }
 
 func CreateAdminAccount(username string, cfg *service.AppConfig) {

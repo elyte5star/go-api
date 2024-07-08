@@ -5,6 +5,7 @@ import (
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/service"
+	"github.com/api/service/dbutils"
 	"github.com/api/util"
 )
 
@@ -62,7 +63,8 @@ func main() {
 	h := Handler(cfg)
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
-		api.StartApiWithGracefulShutdown(h, cfg, db)
+		dbutils.CreateTables(db, cfg)
+		api.StartApi(h, cfg, db)
 
 	}
 

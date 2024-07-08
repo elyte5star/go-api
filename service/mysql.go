@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/repository"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -45,8 +46,6 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 		defer db.Close() // close database connection
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
-	//dbutils.CreateTables(db)
-	//dbutils.CreateAdminAccount("elyte",cfg)
 	cfg.Logger.Debug(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
 	
 	return db, nil

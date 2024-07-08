@@ -96,7 +96,7 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	if err := cfg.Validate.Struct(modifyUser); err != nil {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = "Invalid Field(s)"
+		newErr.Message =  fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}

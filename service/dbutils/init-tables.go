@@ -27,7 +27,7 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	failedAttempt INT UNSIGNED  DEFAULT '0000',
 	lockTime TIMESTAMP(0),
 	auditInfo JSON NOT NULL
-	) ENGINE=INNODB;
+	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 
 const otp = `CREATE TABLE IF NOT EXISTS otp (
@@ -36,7 +36,7 @@ const otp = `CREATE TABLE IF NOT EXISTS otp (
 		otpString VARCHAR(64) NOT NULL,
 		expiryDate TIMESTAMP(0),
 		FOREIGN KEY(userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
-		) ENGINE=INNODB;
+		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 
 const userAddress = `CREATE TABLE IF NOT EXISTS address (
@@ -48,7 +48,7 @@ const userAddress = `CREATE TABLE IF NOT EXISTS address (
 	zip VARCHAR(64) NOT NULL,
 	PRIMARY KEY (userid),
 	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
-	) ENGINE=INNODB;
+	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 const userLocations = `CREATE TABLE IF NOT EXISTS user_locations (
 	locationId CHAR(36) PRIMARY KEY,
@@ -56,7 +56,7 @@ const userLocations = `CREATE TABLE IF NOT EXISTS user_locations (
 	enabled BOOLEAN DEFAULT false,
 	userid CHAR(36) NOT NULL,
 	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
-	) ENGINE=INNODB;
+	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 
 const bookings = `CREATE TABLE IF NOT EXISTS bookings (
@@ -67,7 +67,7 @@ const bookings = `CREATE TABLE IF NOT EXISTS bookings (
 	shippingDetails JSON NOT NULL,
 	totalPrice DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
-	) ENGINE=INNODB;
+	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 const products = `CREATE TABLE IF NOT EXISTS products (
 	pid CHAR(36) PRIMARY KEY,
@@ -80,7 +80,7 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	details VARCHAR(664) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	auditInfo JSON NOT NULL
-	) ENGINE=INNODB;
+	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	rid CHAR(36) PRIMARY KEY,
@@ -91,7 +91,7 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	email VARCHAR(64) NOT NULL,
 	pid CHAR(36) NOT NULL,
 	FOREIGN KEY (pid) REFERENCES products(pid) ON DELETE CASCADE ON UPDATE CASCADE
-		) ENGINE=INNODB;
+		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 	`
 
 func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
@@ -143,10 +143,12 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	user.LockTime = util.TimeThen()
 	user.Telephone = "234802394"
 	user.AccountNonLocked = true
+	user.FailedAttempt = 0
+	user.Discount = 0.0
 	user.Admin = true
 	user.IsUsing2FA = true
 	user.Enabled = true
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: username}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: username}
 	user.AuditInfo = *audit
 	if err := db.CreateUser(user); err != nil {
 		if strings.Contains(err.Error(), "Error 1062") {

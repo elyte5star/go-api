@@ -8,10 +8,10 @@ import (
 )
 
 type AuditEntity struct {
-	CreatedAt      time.Time `json:"createdAt"`
-	LastModifiedAt time.Time `json:"lastModifiedAt"`
-	LastModifiedBy string    `json:"lastModifiedBy"`
-	CreatedBy      string    `json:"CreatedBy"`
+	CreatedAt      time.Time `json:"createdAt" validate:"required"`
+	LastModifiedAt time.Time `json:"lastModifiedAt" validate:"required"`
+	LastModifiedBy string    `json:"lastModifiedBy" validate:"required"`
+	CreatedBy      string    `json:"CreatedBy" validate:"required"`
 }
 
 

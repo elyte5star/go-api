@@ -193,8 +193,14 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.SetPassword(createUser.Password)
 	user.Email = createUser.Email
 	user.LockTime = util.TimeThen()
+	user.Admin = false
+	user.IsUsing2FA = false
+	user.AccountNonLocked = true
+	user.Enabled = false
+	user.FailedAttempt=0
+	user.Discount=0.0
 	user.Telephone = createUser.Telephone
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
 
 	// Validate user fields.

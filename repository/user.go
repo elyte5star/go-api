@@ -99,7 +99,7 @@ func (q *UserQueries) CreateUser(user *schema.User) error {
 	// Define query string.
 	query := `INSERT INTO users (userid,username,password,email,telephone,lockTime,discount,
 	accountNonLocked,admin,enabled,isUsing2FA,failedAttempt,auditInfo)
-	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:discount,:accountNonLocked,:admin,:enabled,:isUsing2FA,:failedAttempt,:auditInfo)`
+	 VALUES (:userid,:username,:password,:email,:telephone,:lockTime,:discount,:accountNonLocked,:admin,:enabled,:isUsing2FA,:failedAttempt,CONVERT(:auditInfo using utf8mb4))`
 	// Send query to database.
 	_, err := q.NamedExec(query, user)
 	if err != nil {

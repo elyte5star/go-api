@@ -24,8 +24,9 @@ func abortAuthenticationFailed(c *fiber.Ctx, err error) error {
 	newErr.Message = err.Error()
 	newErr.Code = fiber.StatusUnauthorized
 	// Return status 401 and failed authentication error.
-	if err.Error() == "Missing or malformed JWT" {
+	if err.Error() == "missing or malformed JWT" {
 		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message="Authentication needed"
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Send back the Unauthorized message

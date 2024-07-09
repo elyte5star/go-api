@@ -20,6 +20,7 @@ import (
 // @Produce json
 // @Param create_product body request.CreateProductRequest true "Create product"
 // @Success 200 {object} response.RequestResponse
+// @Security BearerAuth
 // @Router /api/products/create [post]
 func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -47,7 +48,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
-		cfg.Logger.Error(util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
@@ -56,21 +57,30 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	loggedInUserid := data["userid"].(string)
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: loggedInUserid}
-	newProduct := &schema.Product{Pid: util.Ident(), Name: createProduct.Name,
-		Description: createProduct.Description, Category: createProduct.Category,
-		Price: createProduct.Price, StockQuantity: createProduct.StockQuantity,
-		Image: createProduct.Image, Details: createProduct.Details,
-		ProductDiscount: createProduct.ProductDiscount, AuditInfo: *audit,
+	discount := 0.0
+	if createProduct.ProductDiscount == nil {
+		createProduct.ProductDiscount = &discount
 	}
+	product := new(schema.Product)
+	product.Pid = util.Ident()
+	product.Name = createProduct.Name
+	product.Description = createProduct.Description
+	product.Category = createProduct.Category
+	product.Price = createProduct.Price
+	product.StockQuantity = createProduct.StockQuantity
+	product.Image = createProduct.Image
+	product.Details = createProduct.Details
+	product.ProductDiscount = *createProduct.ProductDiscount
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["userid"].(string)}
+	product.AuditInfo = *audit
 	// Validate product fields.
-	if err := cfg.Validate.Struct(newProduct); err != nil {
+	if err := cfg.Validate.Struct(product); err != nil {
 		// Return, if some fields are not valid.
-		cfg.Logger.Error(util.ValidatorErrors(err))
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	if err := db.CreateProduct(newProduct); err != nil {
+	if err := db.CreateProduct(product); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
 			newErr.Message = "Duplicate key: product already exist"
@@ -79,12 +89,9 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}
 	response := response.NewResponse(c)
-	response.Result = newProduct.Pid
+	response.Result = product.Pid
 	return c.Status(fiber.StatusOK).JSON(response)
 }
-
-
-
 
 // CreateReview func creates a new product review.
 // @Description Create a new product review.
@@ -111,7 +118,7 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
-		cfg.Logger.Error(util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
@@ -204,7 +211,6 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 // @Success 200 {object} response.RequestResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
-// @Security BearerAuth
 // @Router /api/products/{pid} [get]
 func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()

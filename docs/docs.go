@@ -98,6 +98,11 @@ const docTemplate = `{
         },
         "/api/products/create": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new product.",
                 "consumes": [
                     "application/json"
@@ -166,11 +171,6 @@ const docTemplate = `{
         },
         "/api/products/{pid}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get Product by given ID.",
                 "consumes": [
                     "application/json"
@@ -248,9 +248,17 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/status": {
+        "/api/server/status": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "API status check",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -505,14 +513,9 @@ const docTemplate = `{
         "request.CreateProductRequest": {
             "type": "object",
             "required": [
-                "category",
-                "description",
-                "details",
                 "image",
                 "name",
-                "price",
-                "productDiscount",
-                "stockQuantity"
+                "price"
             ],
             "properties": {
                 "category": {
@@ -540,7 +543,8 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "stockQuantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -691,7 +695,21 @@ const docTemplate = `{
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "API"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "User"
+        },
+        {
+            "name": "Product"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

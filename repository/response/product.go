@@ -10,7 +10,7 @@ type GetProductResponse struct {
 	Name            string           `json:"name"`
 	Description     string           `json:"description"`
 	Category        string           `json:"category"`
-	Price           float32          `json:"price"`
+	Price           float64          `json:"price"`
 	StockQuantity   int              `json:"stockQuantity"`
 	Image           string           `json:"image"`
 	Details         string           `json:"details"`

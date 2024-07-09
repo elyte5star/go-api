@@ -10,6 +10,8 @@ import (
 
 func (cfg *AppConfig) PanicRecovery(c *fiber.Ctx, err error) error {
 
+	cfg.Logger.Error(err.Error())
+
 	newErr := response.NewErrorResponse()
 	// Status code defaults to 500
 	statusCode := newErr.Code
@@ -24,7 +26,6 @@ func (cfg *AppConfig) PanicRecovery(c *fiber.Ctx, err error) error {
 	err = c.Status(statusCode).SendFile(fmt.Sprintf("./%d.html", statusCode))
 
 	if err != nil {
-		cfg.Logger.Error(newErr.Error())
 		// In case the SendFile fails
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
 	}

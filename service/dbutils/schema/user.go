@@ -9,7 +9,7 @@ import (
 )
 
 type UserAddress struct {
-	Userid       uuid.UUID `db:"userid" json:"userid" validate:"required,uuid"`
+	Userid        uuid.UUID `db:"userid" json:"userid" validate:"required,uuid"`
 	FullName      string    `db:"fullName" json:"fullName" validate:"required"`
 	StreetAddress string    `db:"streetAddress" json:"streetAddress" validate:"required"`
 	Country       string    `db:"country" json:"country" validate:"required"`
@@ -41,10 +41,10 @@ type User struct {
 	Enabled          bool        `db:"enabled" json:"enabled"`
 	IsUsing2FA       bool        `db:"isUsing2FA" json:"isUsing2FA"`
 	Telephone        string      `db:"telephone" json:"telephone" validate:"required,tel"`
-	Discount         float64     `db:"discount" json:"discount"`
+	Discount         float64     `db:"discount" json:"discount" validate:"percentage"`
 	FailedAttempt    int         `db:"failedAttempt" json:"failedAttempt"`
 	LockTime         time.Time   `db:"lockTime" json:"lockTime"`
-	AuditInfo        AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
+	AuditInfo        AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required"`
 }
 
 // SetPassword: sets the hashed password to the user struct defined above

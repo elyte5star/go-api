@@ -96,6 +96,11 @@
         },
         "/api/products/create": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new product.",
                 "consumes": [
                     "application/json"
@@ -164,11 +169,6 @@
         },
         "/api/products/{pid}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get Product by given ID.",
                 "consumes": [
                     "application/json"
@@ -246,9 +246,17 @@
                 }
             }
         },
-        "/api/status": {
+        "/api/server/status": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "API status check",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -503,14 +511,9 @@
         "request.CreateProductRequest": {
             "type": "object",
             "required": [
-                "category",
-                "description",
-                "details",
                 "image",
                 "name",
-                "price",
-                "productDiscount",
-                "stockQuantity"
+                "price"
             ],
             "properties": {
                 "category": {
@@ -538,7 +541,8 @@
                     "type": "number"
                 },
                 "stockQuantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -689,5 +693,19 @@
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "API"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "User"
+        },
+        {
+            "name": "Product"
+        }
+    ]
 }

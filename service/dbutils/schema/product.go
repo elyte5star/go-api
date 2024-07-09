@@ -11,15 +11,15 @@ import (
 
 type Product struct {
 	Pid             uuid.UUID   `db:"pid" json:"pid" validate:"required,uuid"`
-	AuditInfo       AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	Name            string      `db:"name" json:"name" validate:"required"`
-	Description     string      `db:"description" json:"description" validate:"required,lte=555"`
-	Category        string      `db:"category" json:"category" validate:"required,lte=255"`
-	Price           float32     `db:"price" json:"price" validate:"required"`
-	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"required"`
+	Description     string      `db:"description" json:"description" validate:"lte=555"`
+	Category        string      `db:"category" json:"category" validate:"lte=255"`
+	Price           float64     `db:"price" json:"price" validate:"required"`
+	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"gte=0,lte=1200"`
 	Image           string      `db:"image" json:"image" validate:"required"`
-	Details         string      `db:"details" json:"details" validate:"required,lte=555"`
-	ProductDiscount float64     `db:"productDiscount" json:"productDiscount"`
+	Details         string      `db:"details" json:"details" validate:"lte=555"`
+	ProductDiscount float64     `db:"productDiscount" json:"productDiscount" validate:"percentage"`
+	AuditInfo       AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required"`
 }
 
 type Review struct {

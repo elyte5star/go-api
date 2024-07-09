@@ -27,7 +27,7 @@ func (q *ProductQueries) GetProducts() ([]schema.Product, error) {
 	// Define products variable.
 	products := []schema.Product{}
 	// Define query string.
-	query := `SELECT * FROM productss`
+	query := `SELECT * FROM products`
 	// Send query to database.
 	err := q.Select(&products, query)
 	if err != nil {
@@ -54,7 +54,7 @@ func (q *ProductQueries) DeleteProduct(pid uuid.UUID) error {
 func (q *ProductQueries) CreateProduct(product *schema.Product) error {
 	// Define query string.
 	query := `INSERT INTO products (pid,name,description,category,price,stockQuantity,image,details,productDiscount,auditInfo)
-	 VALUES (:pid,:name,:description,:category,:price,:stockQuantity,:image,:details,:productDiscount,:auditInfo)`
+	 VALUES (:pid,:name,:description,:category,:price,:stockQuantity,:image,:details,:productDiscount,CONVERT(:auditInfo using utf8mb4))`
 	// Send query to database.
 	_, err := q.NamedExec(query, product)
 	if err != nil {

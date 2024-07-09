@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/shopspring/decimal"
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -94,7 +96,8 @@ func SysRequirment(logger *slog.Logger) bool {
 }
 
 func InitValidator() *validator.Validate {
-	// Create a new validator for a Book model.
+
+	// use a single instance of Validate, it caches struct info
 	validate := validator.New()
 
 	// Custom validation for uuid.UUID fields.
@@ -112,13 +115,42 @@ func InitValidator() *validator.Validate {
 		field := fl.Field().String()
 		return re.MatchString(field)
 	})
+	// // Custom validation for float fields.
+	_ = validate.RegisterValidation("percentage", PercentageValidator)
 
 	return validate
+}
+func PercentageValidator(fl validator.FieldLevel) bool {
+	maxPercent := decimal.NewFromInt(100)
+	minPercent := decimal.NewFromInt(0)
+
+	switch v := fl.Field(); v.Kind() {
+	case reflect.String:
+		val, err := decimal.NewFromString(v.String())
+		if err == nil && val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		val := decimal.NewFromInt(v.Int())
+		if val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	case reflect.Float32, reflect.Float64:
+		val := decimal.NewFromFloat(v.Float())
+		if val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	default:
+		return false
+	}
+
+	return false
 }
 
 // ValidatorErrors func for show validation errors for each invalid fields.
 func ValidatorErrors(err error) string {
 	// Define fields map.
+
 	fields := make(map[string]string)
 	// this check is only needed when your code could produce
 	// an invalid value for validation such as interface with nil
@@ -131,6 +163,7 @@ func ValidatorErrors(err error) string {
 	}
 	//s := fmt.Sprintf("%v", fields)
 	return FormatErrStr(fields)
+
 }
 
 func FormatErrStr(m map[string]string) string {

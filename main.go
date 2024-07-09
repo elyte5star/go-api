@@ -5,6 +5,7 @@ import (
 	"github.com/api/common/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/service"
+	"github.com/api/service/dbutils"
 	"github.com/api/util"
 )
 
@@ -24,11 +25,16 @@ import (
 @host localhost:8080
 @BasePath /
 
-@accept json
+@Accept json
 
-@produce json
+@Produce json
 
 @schemes http https
+
+@tag.name API
+@tag.name Auth
+@tag.name User
+@tag.name Product
 
 @securityDefinitions.apikey BearerAuth
 @in header
@@ -62,7 +68,8 @@ func main() {
 	h := Handler(cfg)
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
-		api.StartApiWithGracefulShutdown(h, cfg, db)
+		dbutils.CreateTables(db, cfg)
+		api.StartApi(h, cfg, db)
 
 	}
 

@@ -1,4 +1,6 @@
 basePath: /
+consumes:
+- application/json
 definitions:
   request.CreateAddressReq:
     properties:
@@ -39,16 +41,12 @@ definitions:
       productDiscount:
         type: number
       stockQuantity:
+        minimum: 0
         type: integer
     required:
-    - category
-    - description
-    - details
     - image
     - name
     - price
-    - productDiscount
-    - stockQuantity
     type: object
   request.CreateProductReviewRequest:
     properties:
@@ -320,6 +318,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Health Check
       tags:
       - API
@@ -449,6 +449,8 @@ paths:
       summary: Create a new user
       tags:
       - User
+produces:
+- application/json
 schemes:
 - http
 - https

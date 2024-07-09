@@ -27,7 +27,7 @@ func (q *ProductQueries) GetProducts() ([]schema.Product, error) {
 	// Define products variable.
 	products := []schema.Product{}
 	// Define query string.
-	query := `SELECT * FROM productss`
+	query := `SELECT * FROM products`
 	// Send query to database.
 	err := q.Select(&products, query)
 	if err != nil {

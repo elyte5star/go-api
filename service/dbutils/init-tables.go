@@ -148,7 +148,7 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	user.Admin = true
 	user.IsUsing2FA = true
 	user.Enabled = true
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: username}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
 	if err := db.CreateUser(user); err != nil {
 		if strings.Contains(err.Error(), "Error 1062") {

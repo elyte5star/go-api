@@ -18,6 +18,7 @@ import (
 // @Produce json
 // @Success 200 {object} response.RequestResponse
 // @Failure 500 {object} response.ErrorResponse
+// @Security BearerAuth
 // @Router /api/server/status [get]
 func healthCheck(c *fiber.Ctx) error {
 	response := res.NewResponse(c)
@@ -48,12 +49,11 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	//logger middleware
 	//logger := cfg.Logger
 
-	api := app.Group("api")
-	serverStatus := api.Group("server")
-	serverStatus.Get("/status", healthCheck)
-
 	// JWT middleware
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
+	api := app.Group("api")
+	serverStatus := api.Group("server")
+	serverStatus.Get("/status",jwt, healthCheck)
 
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)

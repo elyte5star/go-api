@@ -5,6 +5,12 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -244,6 +250,11 @@ const docTemplate = `{
         },
         "/api/server/status": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "API status check",
                 "consumes": [
                     "application/json"
@@ -502,14 +513,9 @@ const docTemplate = `{
         "request.CreateProductRequest": {
             "type": "object",
             "required": [
-                "category",
-                "description",
-                "details",
                 "image",
                 "name",
-                "price",
-                "productDiscount",
-                "stockQuantity"
+                "price"
             ],
             "properties": {
                 "category": {
@@ -537,7 +543,8 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "stockQuantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },

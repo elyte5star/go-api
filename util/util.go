@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // TimeElapsed measures the time it takes to execute a function.
@@ -96,7 +96,8 @@ func SysRequirment(logger *slog.Logger) bool {
 }
 
 func InitValidator() *validator.Validate {
-	// Create a new validator for a Book model.
+
+	// use a single instance of Validate, it caches struct info
 	validate := validator.New()
 
 	// Custom validation for uuid.UUID fields.
@@ -107,8 +108,6 @@ func InitValidator() *validator.Validate {
 		}
 		return false
 	})
-	// Custom validation for float fields.
-	_ = validate.RegisterValidation("percentage", PercentageValidator)
 
 	// Validate the phone number using a regular expression
 	re := regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
@@ -116,6 +115,8 @@ func InitValidator() *validator.Validate {
 		field := fl.Field().String()
 		return re.MatchString(field)
 	})
+	// // Custom validation for float fields.
+	_ = validate.RegisterValidation("percentage", PercentageValidator)
 
 	return validate
 }
@@ -149,6 +150,7 @@ func PercentageValidator(fl validator.FieldLevel) bool {
 // ValidatorErrors func for show validation errors for each invalid fields.
 func ValidatorErrors(err error) string {
 	// Define fields map.
+
 	fields := make(map[string]string)
 	// this check is only needed when your code could produce
 	// an invalid value for validation such as interface with nil
@@ -161,6 +163,7 @@ func ValidatorErrors(err error) string {
 	}
 	//s := fmt.Sprintf("%v", fields)
 	return FormatErrStr(fields)
+
 }
 
 func FormatErrStr(m map[string]string) string {

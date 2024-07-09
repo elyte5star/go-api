@@ -14,10 +14,11 @@ import (
 // @Summary Health Check
 // @Description API status check
 // @Tags API
+// @Accept json
 // @Produce json
 // @Success 200 {object} response.RequestResponse
 // @Failure 500 {object} response.ErrorResponse
-// @router /api/status [get]
+// @Router /api/server/status [get]
 func healthCheck(c *fiber.Ctx) error {
 	response := res.NewResponse(c)
 	response.Message = "Server is up and running"
@@ -69,7 +70,7 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	productRoutes.Get("", cfg.GetAllProducts)
 	productRoutes.Get("/:pid", cfg.GetSingleProduct)
 	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
-	productRoutes.Post("/create", cfg.CreateProduct)
+	productRoutes.Post("/create", jwt,cfg.CreateProduct)
 	productRoutes.Post("/create/review", cfg.CreateProduct)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)

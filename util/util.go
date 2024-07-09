@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -105,6 +107,8 @@ func InitValidator() *validator.Validate {
 		}
 		return false
 	})
+	// Custom validation for float fields.
+	_ = validate.RegisterValidation("percentage", PercentageValidator)
 
 	// Validate the phone number using a regular expression
 	re := regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
@@ -114,6 +118,32 @@ func InitValidator() *validator.Validate {
 	})
 
 	return validate
+}
+func PercentageValidator(fl validator.FieldLevel) bool {
+	maxPercent := decimal.NewFromInt(100)
+	minPercent := decimal.NewFromInt(0)
+
+	switch v := fl.Field(); v.Kind() {
+	case reflect.String:
+		val, err := decimal.NewFromString(v.String())
+		if err == nil && val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		val := decimal.NewFromInt(v.Int())
+		if val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	case reflect.Float32, reflect.Float64:
+		val := decimal.NewFromFloat(v.Float())
+		if val.Abs().GreaterThanOrEqual(minPercent) && val.Abs().LessThanOrEqual(maxPercent) {
+			return true
+		}
+	default:
+		return false
+	}
+
+	return false
 }
 
 // ValidatorErrors func for show validation errors for each invalid fields.

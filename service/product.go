@@ -20,6 +20,7 @@ import (
 // @Produce json
 // @Param create_product body request.CreateProductRequest true "Create product"
 // @Success 200 {object} response.RequestResponse
+// @Security BearerAuth
 // @Router /api/products/create [post]
 func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -50,26 +51,30 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+
 	loggedInUserid := data["userid"].(string)
 	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: loggedInUserid}
 	newProduct := &schema.Product{Pid: util.Ident(), Name: createProduct.Name,
 		Description: createProduct.Description, Category: createProduct.Category,
 		Price: createProduct.Price, StockQuantity: createProduct.StockQuantity,
 		Image: createProduct.Image, Details: createProduct.Details,
-		ProductDiscount: createProduct.ProductDiscount, AuditInfo: *audit,
+		ProductDiscount: 0.0, AuditInfo: *audit,
 	}
 	// Validate product fields.
 	if err := cfg.Validate.Struct(newProduct); err != nil {
 		// Return, if some fields are not valid.
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+	fmt.Printf("%#v\n", newProduct)
 	if err := db.CreateProduct(newProduct); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
@@ -82,9 +87,6 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	response.Result = newProduct.Pid
 	return c.Status(fiber.StatusOK).JSON(response)
 }
-
-
-
 
 // CreateReview func creates a new product review.
 // @Description Create a new product review.
@@ -204,7 +206,6 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 // @Success 200 {object} response.RequestResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
-// @Security BearerAuth
 // @Router /api/products/{pid} [get]
 func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()

@@ -1,6 +1,4 @@
 basePath: /
-consumes:
-- application/json
 definitions:
   request.CreateAddressReq:
     properties:
@@ -257,8 +255,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      security:
-      - BearerAuth: []
       summary: Get product by given pid
       tags:
       - Product
@@ -281,6 +277,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new product
       tags:
       - Product
@@ -306,8 +304,10 @@ paths:
       summary: Create a new product review
       tags:
       - Product
-  /api/status:
+  /api/server/status:
     get:
+      consumes:
+      - application/json
       description: API status check
       produces:
       - application/json
@@ -449,8 +449,6 @@ paths:
       summary: Create a new user
       tags:
       - User
-produces:
-- application/json
 schemes:
 - http
 - https
@@ -461,3 +459,8 @@ securityDefinitions:
     name: Authorization
     type: apiKey
 swagger: "2.0"
+tags:
+- name: API
+- name: Auth
+- name: User
+- name: Product

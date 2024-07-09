@@ -5,12 +5,6 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
-    "consumes": [
-        "application/json"
-    ],
-    "produces": [
-        "application/json"
-    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -98,6 +92,11 @@ const docTemplate = `{
         },
         "/api/products/create": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new product.",
                 "consumes": [
                     "application/json"
@@ -166,11 +165,6 @@ const docTemplate = `{
         },
         "/api/products/{pid}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get Product by given ID.",
                 "consumes": [
                     "application/json"
@@ -248,9 +242,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/status": {
+        "/api/server/status": {
             "get": {
                 "description": "API status check",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -691,7 +688,21 @@ const docTemplate = `{
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "API"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "User"
+        },
+        {
+            "name": "Product"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

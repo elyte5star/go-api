@@ -61,6 +61,7 @@ require (
 	github.com/mvrilo/go-redoc v0.1.5
 	github.com/mvrilo/go-redoc/fiber v0.0.0-20240120021923-101384bb3acd
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/shopspring/decimal v1.4.0
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.54.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

@@ -25,11 +25,16 @@ import (
 @host localhost:8080
 @BasePath /
 
-@accept json
+@Accept json
 
-@produce json
+@Produce json
 
 @schemes http https
+
+@tag.name API
+@tag.name Auth
+@tag.name User
+@tag.name Product
 
 @securityDefinitions.apikey BearerAuth
 @in header

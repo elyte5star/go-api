@@ -11,15 +11,15 @@ import (
 
 type Product struct {
 	Pid             uuid.UUID   `db:"pid" json:"pid" validate:"required,uuid"`
-	AuditInfo       AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 	Name            string      `db:"name" json:"name" validate:"required"`
-	Description     string      `db:"description" json:"description" validate:"required,lte=555"`
+	Description     string      `db:"description" json:"description" validate:"required,lte=255"`
 	Category        string      `db:"category" json:"category" validate:"required,lte=255"`
-	Price           float32     `db:"price" json:"price" validate:"required"`
-	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"required"`
-	Image           string      `db:"image" json:"image" validate:"required"`
+	Price           float64     `db:"price" json:"price" validate:"required,percentage"`
+	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"gte=0"`
+	Image           string      `db:"image" json:"image"  validate:"required,lte=55"`
 	Details         string      `db:"details" json:"details" validate:"required,lte=555"`
-	ProductDiscount float64     `db:"productDiscount" json:"productDiscount"`
+	ProductDiscount float64     `db:"productDiscount" json:"productDiscount" validate:"required,percentage"`
+	AuditInfo       AuditEntity `db:"auditInfo" json:"auditInfo" validate:"required,dive"`
 }
 
 type Review struct {

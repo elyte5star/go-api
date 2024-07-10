@@ -54,7 +54,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	discount := 0.0
@@ -124,14 +124,15 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	foundProduct, err := db.GetProductById(createReview.Pid)
 	if err != nil {
 		newErr.Message = "Product with the given ID is not found!"
+		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	newReview := schema.Review{
 		Rid:          util.Ident(),
@@ -145,16 +146,72 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 	// Validate product review fields.
 	if err := cfg.Validate.Struct(newReview); err != nil {
 		// Return, if some fields are not valid.
-		cfg.Logger.Error(util.ValidatorErrors(err))
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err := db.CreateProductReview(&newReview); err != nil {
-		newErr.Message = err.Error()
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	response := response.NewResponse(c)
 	response.Result = newReview.Rid
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// Get Product reviews from db
+// @Description Get Product reviews by given product ID.
+// @Summary Get Product reviews by a given pid
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param pid path string true "pid"
+// @Success 200 {object} response.RequestResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Router /api/products/{pid}/reviews [get]
+func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
+	newErr := response.NewErrorResponse()
+	pid, err := uuid.Parse(c.Params("pid"))
+	if err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid product ID"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	product, err := db.GetProductById(pid)
+	if err != nil {
+		newErr.Message = "Product with pid is not found!"
+		cfg.Logger.Error(err.Error())
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	reviews, err := db.GetReviewsByPid(product.Pid)
+	if err != nil {
+		newErr.Message = "Reviews not found for this Product!"
+		cfg.Logger.Error(err.Error())
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	result := response.GetProductReviewsResponse{}
+	for _, review := range reviews {
+		result.Reviews = append(result.Reviews, response.GetProductReviewResponse{
+			Rid:          review.Rid,
+			CreatedAt:    review.CreatedAt,
+			Rating:       review.Rating,
+			ReviewerName: review.ReviewerName,
+			Comment:      review.Comment,
+			Email:        review.Email,
+		})
+
+	}
+	response := response.NewResponse(c)
+	response.Result = result
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
@@ -172,14 +229,15 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	products, err := db.GetProducts()
 	if err != nil {
 		newErr.Message = "Products not found!"
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	result := response.GetProductsResponse{}
 	for _, product := range products {
@@ -223,14 +281,15 @@ func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	product, err := db.GetProductById(pid)
 	if err != nil {
 		newErr.Message = "Product with pid is not found!"
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	result := &response.GetProductResponse{
 		Pid:             product.Pid,
@@ -278,15 +337,15 @@ func (cfg *AppConfig) DeleteProduct(c *fiber.Ctx) error {
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	foundProduct, err := db.GetProductById(pid)
 	if err != nil {
 		newErr.Message = "Product with the given ID is not found!"
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Delete product by given pid.
 	if err := db.DeleteProduct(foundProduct.Pid); err != nil {

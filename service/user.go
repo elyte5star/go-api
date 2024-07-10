@@ -43,11 +43,10 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	// Create database connection.
-	db, err := DbWithQueries(cfg)
-	if err != nil {
-		cfg.Logger.Error(err.Error())
-		return c.Status(newErr.Code).JSON(newErr)
+
+	discount := 0.0
+	if createUser.Discount == nil {
+		createUser.Discount = &discount
 	}
 	// Create new User struct
 	user := new(schema.User)
@@ -62,7 +61,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.AccountNonLocked = true
 	user.Enabled = false
 	user.FailedAttempt = 0
-	user.Discount = 0.0
+	user.Discount = *createUser.Discount
 	user.Telephone = createUser.Telephone
 	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
@@ -74,13 +73,19 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
 	if err := db.CreateUser(user); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
 			newErr.Message = "Duplicate key: user already exist"
 		}
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	//fmt.Printf("%+v\n", user)
 	response := response.NewResponse(c)
@@ -111,7 +116,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	user, err := db.GetUserById(userid)
@@ -151,7 +156,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	// Get claims from JWT.
 	data := cfg.JwtCredentials(c)
-	loggedInUserid := data["userid"].(string)
+
 	newErr := response.NewErrorResponse()
 	userid, err := uuid.Parse(c.Params("userid"))
 	if err != nil {
@@ -174,25 +179,45 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		newErr.Code = fiber.ErrBadRequest.Code
 		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
-		cfg.Logger.Error(util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	foundUser, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given userid is not found!"
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	if modifyUser.Address != nil {
+		// Validate User Address fields.
+		if err := cfg.Validate.Struct(modifyUser.Address); err != nil {
+			// Return, if some fields are not valid.
+			newErr.Code = fiber.ErrBadRequest.Code
+			newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
+			cfg.Logger.Error(newErr.Message)
+			return c.Status(newErr.Code).JSON(newErr)
+		}
+		modifyAddress := modifyUser.Address
+		address := &schema.UserAddress{Userid: foundUser.Userid, FullName: modifyAddress.FullName,
+			StreetAddress: modifyAddress.StreetAddress, Country: modifyAddress.Country,
+			State: modifyAddress.State, Zip: modifyAddress.Zip}
+		if err := db.CreateUserAdress(address); err != nil {
+			cfg.Logger.Error(err.Error())
+			return c.Status(newErr.Code).JSON(newErr)
+		}
+		//announce change of address
 	}
 	foundUser.Telephone = modifyUser.Telephone
 	foundUser.UserName = modifyUser.Username
 	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
-	foundUser.AuditInfo.LastModifiedBy = loggedInUserid
+	foundUser.AuditInfo.LastModifiedBy = data["userid"].(string)
 	if err := db.UpdateUser(foundUser.Userid, &foundUser); err != nil {
 		cfg.Logger.Error(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
@@ -204,25 +229,53 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 
 }
 
-func (cfg *AppConfig) CreateUpdateUserAddress(userid uuid.UUID, address *request.CreateAddressReq) error {
-	// Create database connection.
+// GetAddressByUserid func for getting a user's address by userid.
+// @Description Ger User Address.
+// @Summary Ger User Address
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param userid path string true "userid"
+// @Success 200 {object} response.RequestResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Security BearerAuth
+// @Router /api/users/{userid}/address [get]
+func (cfg *AppConfig) GetAddressByUserid(c *fiber.Ctx) error {
+	newErr := response.NewErrorResponse()
+	userid, err := uuid.Parse(c.Params("userid"))
+	if err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid userid"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	_, err = db.GetUserById(userid)
+	if err != nil {
+		newErr.Message = "User with the given ID is not found!"
+		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
-		return err
+		return c.Status(newErr.Code).JSON(newErr)
 	}
-	userAddress := &schema.UserAddress{Userid: userid,
-		FullName: address.FullName, StreetAddress: address.StreetAddress, Country: address.Country, State: address.State, Zip: address.Zip}
-	if err := cfg.Validate.Struct(userAddress); err != nil {
-		cfg.Logger.Error(util.ValidatorErrors(err))
-		return err
-	}
-	if err := db.CreateUserAdress(userAddress); err != nil {
+	userAddress, err := db.GetUserAddressById(userid)
+	if err != nil {
+		newErr.Message = "No Address found for the user!"
+		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
-		return err
+		return c.Status(newErr.Code).JSON(newErr)
 	}
-	return nil
-
+	result := &response.GetUserAdressResponse{
+		FullName: userAddress.FullName, StreetAddress: userAddress.StreetAddress,
+		Country: userAddress.Country, State: userAddress.State, Zip: userAddress.Zip,
+	}
+	response := response.NewResponse(c)
+	response.Result = result
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 // GetUsers method for getting all existing users.
@@ -256,8 +309,9 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	users, err := db.GetUsers()
 	if err != nil {
 		newErr.Message = "Users not found!"
-		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Define users variable.
 	result := response.GetUsersResponse{}
@@ -301,15 +355,15 @@ func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {
 	}
 	db, err := DbWithQueries(cfg)
 	if err != nil {
-		newErr.Message = "Couldnt connect to DB!"
-		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	foundUser, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given ID is not found!"
+		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Delete User by given user.
 	if err := db.DeleteUser(foundUser.Userid); err != nil {

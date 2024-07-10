@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -113,6 +114,10 @@ func InitValidator() *validator.Validate {
 	re := regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
 	_ = validate.RegisterValidation("tel", func(fl validator.FieldLevel) bool {
 		field := fl.Field().String()
+		runes := utf8.RuneCountInString(field)
+		if runes < 5 || runes < 16 {
+			return true
+		}
 		return re.MatchString(field)
 	})
 	// // Custom validation for float fields.

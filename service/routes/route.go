@@ -53,7 +53,7 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
 	api := app.Group("api")
 	serverStatus := api.Group("server")
-	serverStatus.Get("/status",jwt, healthCheck)
+	serverStatus.Get("/status", jwt, healthCheck)
 
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)
@@ -63,14 +63,16 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	authenticated := users.Use(jwt)
 	authenticated.Get("", cfg.GetUsers)
 	authenticated.Get("/:userid", cfg.GetUser)
+	authenticated.Get("/:userid/address", cfg.GetAddressByUserid)
 	authenticated.Delete("/:userid", cfg.DeleteUser)
 	authenticated.Put("/:userid", cfg.UpdateUser)
 
 	productRoutes := api.Group("products")
 	productRoutes.Get("", cfg.GetAllProducts)
 	productRoutes.Get("/:pid", cfg.GetSingleProduct)
+	productRoutes.Get("/:pid/reviews", cfg.GetProductReviewsByPid)
 	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
-	productRoutes.Post("/create", jwt,cfg.CreateProduct)
+	productRoutes.Post("/create", jwt, cfg.CreateProduct)
 	productRoutes.Post("/create/review", cfg.CreateProduct)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)

@@ -22,6 +22,15 @@ func (q *ProductQueries) GetProductById(pid uuid.UUID) (schema.Product, error) {
 	}
 	return product, nil
 }
+func (q *ProductQueries) GetReviewsByPid(pid uuid.UUID) ([]schema.Review, error) {
+	reviews := []schema.Review{}
+	query := `SELECT * FROM reviews WHERE pid=?`
+	err := q.Select(&reviews, query, pid)
+	if err != nil {
+		return reviews, err
+	}
+	return reviews, nil
+}
 
 func (q *ProductQueries) GetProducts() ([]schema.Product, error) {
 	// Define products variable.

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/api/repository/response"
 	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -41,26 +40,22 @@ func (q *UserQueries) GetUserByUsername(username string) (schema.User, error) {
 	return user, nil
 }
 
-func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (*response.GetUserAdressResponse, error) {
+func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (schema.UserAddress, error) {
 
 	userAddress := schema.UserAddress{}
 	// Define query string.
-	query := `SELECT * FROM address WHERE addressId=?`
+	query := `SELECT * FROM address WHERE userid=?`
 
 	// Send query to database.
 	err := q.Get(&userAddress, query, userid)
 	if err != nil {
 		// Return empty object and error.
-		return &response.GetUserAdressResponse{}, err
+		return userAddress, err
 	}
-	result := &response.GetUserAdressResponse{
-		FullName: userAddress.FullName, StreetAddress: userAddress.StreetAddress,
-		Country: userAddress.StreetAddress, State: userAddress.State, Zip: userAddress.Zip,
-	}
-	return result, nil
+	return userAddress, nil
 }
 
-// Createuser method for creating UserAddress by given UserAddress object.
+// CreateUserAdress method for creating UserAddress by given UserAddress object.
 func (q *UserQueries) CreateUserAdress(address *schema.UserAddress) error {
 	// Define query string.
 	query := `INSERT INTO address (userid,fullName,streetAddress,country,state,zip)

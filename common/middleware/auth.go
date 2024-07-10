@@ -21,12 +21,12 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 
 func abortAuthenticationFailed(c *fiber.Ctx, err error) error {
 	newErr := response.NewErrorResponse()
-	newErr.Message = err.Error()
+	newErr.Message = "Invalid or expired JWT"
 	newErr.Code = fiber.StatusUnauthorized
 	// Return status 401 and failed authentication error.
 	if err.Error() == "missing or malformed JWT" {
 		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message="Authentication needed"
+		newErr.Message = "Missing or malformed JWT"
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	// Send back the Unauthorized message

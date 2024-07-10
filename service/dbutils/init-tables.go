@@ -26,7 +26,7 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	discount DECIMAL(16,2) DEFAULT '0.00',
 	failedAttempt INT UNSIGNED  DEFAULT '0000',
 	lockTime TIMESTAMP(0),
-	auditInfo JSON NOT NULL
+	auditInfo LONGTEXT NOT NULL
 	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 
@@ -76,10 +76,10 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	category VARCHAR(264) NOT NULL,
 	price DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	stockQuantity INT UNSIGNED  DEFAULT '0000' NOT NULL,
-	image VARCHAR(64) NOT NULL,
+	image VARCHAR(64) NOT NULL UNIQUE,
 	details VARCHAR(664) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	auditInfo JSON NOT NULL
+	auditInfo LONGTEXT NOT NULL
 	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 const productReview = `CREATE TABLE IF NOT EXISTS reviews (
@@ -94,6 +94,8 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 	`
 
+//const dropUserTable=`DROP TABLE IF EXISTS users;`
+
 func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 
 	log := cfg.Logger
@@ -107,7 +109,7 @@ func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 	// Create table
 	_, statementError := statement.Exec()
 	if statementError != nil {
-		log.Warn("Table already exists!")
+		log.Warn("Table already exists! " + statementError.Error())
 	}
 
 	statement, _ = dbDriver.Prepare(otp)

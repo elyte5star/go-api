@@ -30,8 +30,7 @@ type GetUsersResponse struct {
 }
 
 type GetUserAdressResponse struct {
-	AddressId     uuid.UUID `json:"addressId"`
-	FullName      string    ` json:"fullName" validate:"required"`
+	FullName      string    ` json:"fullName"`
 	StreetAddress string    `json:"streetAddress"`
 	Country       string    `json:"country"`
 	State         string    `json:"state"`

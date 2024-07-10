@@ -248,6 +248,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/products/{pid}/reviews": {
+            "get": {
+                "description": "Get Product reviews by given product ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Get Product reviews by a given pid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "pid",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/server/status": {
             "get": {
                 "security": [
@@ -480,6 +524,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/users/{userid}/address": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Ger User Address.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Ger User Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RequestResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -534,7 +627,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 5
                 },
                 "price": {
                     "type": "number"
@@ -544,6 +639,7 @@ const docTemplate = `{
                 },
                 "stockQuantity": {
                     "type": "integer",
+                    "maximum": 120,
                     "minimum": 0
                 }
             }
@@ -588,6 +684,9 @@ const docTemplate = `{
                     "maxLength": 30,
                     "minLength": 5
                 },
+                "discount": {
+                    "type": "number"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -626,17 +725,12 @@ const docTemplate = `{
         },
         "request.ModifyUser": {
             "type": "object",
-            "required": [
-                "address"
-            ],
             "properties": {
                 "address": {
                     "$ref": "#/definitions/request.CreateAddressReq"
                 },
                 "telephone": {
-                    "type": "string",
-                    "maxLength": 16,
-                    "minLength": 5
+                    "type": "string"
                 },
                 "username": {
                     "type": "string",
@@ -650,11 +744,11 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "integer",
-                    "default": 500
+                    "default": 503
                 },
                 "message": {
                     "type": "string",
-                    "default": "Something went wrong"
+                    "default": "Service unavailable"
                 },
                 "success": {
                     "type": "boolean",

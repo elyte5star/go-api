@@ -2,7 +2,6 @@ package response
 
 import (
 	"time"
-	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
 )
 
@@ -16,7 +15,7 @@ type GetProductResponse struct {
 	Image           string           `json:"image"`
 	Details         string           `json:"details"`
 	ProductDiscount float64          `json:"productDiscount"`
-	Reviews         []*schema.Review `json:"reviews"`
+	Reviews         []*GetProductReviewResponse `json:"reviews"`
 }
 
 // Products struct

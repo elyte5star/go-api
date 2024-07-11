@@ -90,7 +90,8 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = product.Pid
-	return c.Status(fiber.StatusOK).JSON(response)
+	response.Code = fiber.StatusCreated
+	return c.Status(response.Code).JSON(response)
 }
 
 // CreateReview func creates a new product review.
@@ -179,6 +180,7 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
@@ -212,7 +214,7 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = result
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(response.Code).JSON(response)
 }
 
 // GetProducts method for getting all existing products.

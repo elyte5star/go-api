@@ -18,5 +18,5 @@ type CreateProductReviewRequest struct {
 	Rating       int       `json:"rating" validate:"min=1,max=5"`
 	ReviewerName string    `json:"reviewerName" validate:"required"`
 	Comment      string    `json:"comment"  validate:"required"`
-	Email        string    `json:"email" validate:"required,email"`
+	Email        string    `json:"email" validate:"email"`
 }

@@ -1,6 +1,7 @@
 package dbutils
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/api/service"
@@ -94,43 +95,80 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 	`
 
-//const dropUserTable=`DROP TABLE IF EXISTS users;`
+const dropOtpTable = `DROP TABLE IF EXISTS otp;`
+const dropAddressTable = `DROP TABLE IF EXISTS address;`
+const dropBookingsTable = `DROP TABLE IF EXISTS bookings;`
+const dropUserLocationTable = `DROP TABLE IF EXISTS user_locations;`
+const dropUserTable = `DROP TABLE IF EXISTS users;`
+const dropReviewTable = `DROP TABLE IF EXISTS reviews;`
 
 func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
-
 	log := cfg.Logger
 
 	defer dbDriver.Close()
 
-	statement, driverError := dbDriver.Prepare(users)
-	if driverError != nil {
-		log.Error(driverError.Error())
-	}
-	// Create table
-	_, statementError := statement.Exec()
-	if statementError != nil {
-		log.Warn("Table already exists! " + statementError.Error())
-	}
+	Droptables(cfg.Logger, dbDriver)
 
+	statement, _ := dbDriver.Prepare(users)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(otp)
-	statement.Exec()
-
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(userAddress)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(userLocations)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(bookings)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(products)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(productReview)
-	statement.Exec()
-	statement.Close()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+
+	}
 
 	log.Info("All tables created/initialized successfully!")
 	CreateAdminAccount("elyte", cfg)
 }
+func Droptables(log *slog.Logger, dbDriver *sqlx.DB) {
+	statement, _ := dbDriver.Prepare(dropOtpTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropAddressTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropBookingsTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropUserLocationTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropUserTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropReviewTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 
+}
 func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	db, err := service.DbWithQueries(cfg)
 	if err != nil {

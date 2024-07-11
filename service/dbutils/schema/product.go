@@ -1,10 +1,12 @@
 package schema
 
 import (
-	"database/sql/driver"
-	"encoding/json"
-	"errors"
+	// "database/sql/driver"
+	// "encoding/json"
+	// "errors"
 	"time"
+
+	//"time"
 
 	"github.com/google/uuid"
 )
@@ -23,27 +25,12 @@ type Product struct {
 }
 
 type Review struct {
-	Rid          uuid.UUID `db:"rid" json:"rid" validate:"required,uuid"`
-	Pid          uuid.UUID `db:"pid" json:"pid" validate:"required,uuid"`
+	Rid          uuid.UUID `db:"rid" json:"rid" validate:"uuid"`
+	Pid          uuid.UUID `db:"pid" json:"pid" validate:"uuid"`
 	CreatedAt    time.Time `db:"createdAt" json:"createdAt" validate:"required"`
 	Rating       int       `db:"rating" json:"rating" validate:"min=1,max=5"`
 	ReviewerName string    `db:"reviewerName" json:"reviewerName" validate:"required"`
 	Comment      string    `db:"comment" json:"comment"  validate:"required"`
-	Email        string    `db:"email" json:"email" validate:"required,email"`
+	Email        string    `db:"email" json:"email" validate:"email"`
 }
 
-// This method simply returns the JSON-encoded representation of the struct.
-func (r *Review) Value() (driver.Value, error) {
-	return json.Marshal(r)
-}
-
-// Scan make the Review struct implement the sql.Scanner interface.
-// This method simply decodes a JSON-encoded value into the struct fields.
-func (r *Review) Scan(value interface{}) error {
-	j, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
-	}
-
-	return json.Unmarshal(j, &r)
-}

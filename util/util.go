@@ -31,7 +31,9 @@ func TimeElapsed(start time.Time, name string) string {
 func TimeNow() time.Time {
 	return time.Now().UTC()
 }
-
+func TimeNowString() string {
+	return time.Now().UTC().String()
+}
 func TimeThen() time.Time {
 	return time.Date(
 		1970, 11, 17, 20, 34, 58, 651387237, time.UTC)
@@ -89,7 +91,7 @@ func SysRequirment(logger *slog.Logger) bool {
 	}
 	logger.Debug("You are using " + runtime.Compiler + " ")
 	logger.Debug("on a" + runtime.GOARCH + "machine")
-	logger.Debug("Using Go version " + runtime.Version())
+	logger.Info("Using Go version " + runtime.Version())
 	logger.Debug("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
 	logger.Debug("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true

@@ -73,7 +73,7 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	productRoutes.Get("/:pid/reviews", cfg.GetProductReviewsByPid)
 	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
 	productRoutes.Post("/create", jwt, cfg.CreateProduct)
-	productRoutes.Post("/create/review", cfg.CreateProduct)
+	productRoutes.Post("/create/review", cfg.CreateReview)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)
 	// bookingRoutes.Post("/create")

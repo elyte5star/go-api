@@ -2,7 +2,6 @@ package response
 
 import (
 	"time"
-
 	"github.com/api/service/dbutils/schema"
 	"github.com/google/uuid"
 )

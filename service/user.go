@@ -90,7 +90,8 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	//fmt.Printf("%+v\n", user)
 	response := response.NewResponse(c)
 	response.Result = user.Userid
-	return c.Status(fiber.StatusOK).JSON(response)
+	response.Code=fiber.StatusCreated
+	return c.Status(response.Code).JSON(response)
 }
 
 // GetUser func gets User by given ID or 404 error.
@@ -139,7 +140,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = result
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(response.Code).JSON(response)
 }
 
 // UpdateUser func for updating a user by userid.

@@ -157,7 +157,8 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = newReview.Rid
-	return c.Status(fiber.StatusOK).JSON(response)
+	response.Code = fiber.StatusCreated
+	return c.Status(response.Code).JSON(response)
 }
 
 // Get Product reviews from db
@@ -293,19 +294,8 @@ func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	result := &response.GetProductResponse{
-		Pid:             product.Pid,
-		Name:            product.Name,
-		Description:     product.Description,
-		Category:        product.Category,
-		Price:           product.Price,
-		StockQuantity:   product.StockQuantity,
-		Image:           product.Image,
-		Details:         product.Details,
-		ProductDiscount: product.ProductDiscount,
-	}
 	response := response.NewResponse(c)
-	response.Result = result
+	response.Result = product
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 

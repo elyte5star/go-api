@@ -31,7 +31,7 @@ func healthCheck(c *fiber.Ctx) error {
 }
 
 // NotFoundRoute func for describe 404 Error route.
-func NotFoundRoute(c *fiber.Ctx) error {
+func notFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
 	response.Message = "Sorry, endpoint is not found"
 	response.Code = fiber.StatusNotFound
@@ -84,6 +84,6 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	// jobRoute.Delete("/:jid")
 
 	// NotFoundRoute func for describe 404 Error route.
-	app.Use(NotFoundRoute)
+	app.Use(notFoundRoute)
 
 }

@@ -15,7 +15,7 @@ type GetProductResponse struct {
 	Image           string           `json:"image"`
 	Details         string           `json:"details"`
 	ProductDiscount float64          `json:"productDiscount"`
-	Reviews         []*GetProductReviewResponse `json:"reviews"`
+	Reviews         []GetProductReviewResponse `json:"reviews"`
 }
 
 // Products struct
@@ -31,6 +31,8 @@ type GetProductReviewResponse struct {
 	Comment      string    `json:"comment"`
 	Email        string    `json:"email"`
 }
+
+
 type GetProductReviewsResponse struct {
 	Reviews []GetProductReviewResponse `json:"reviews"`
 }

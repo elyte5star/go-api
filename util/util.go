@@ -91,7 +91,7 @@ func SysRequirment(logger *slog.Logger) bool {
 	}
 	logger.Debug("You are using " + runtime.Compiler + " ")
 	logger.Debug("on a" + runtime.GOARCH + "machine")
-	logger.Info("Using Go version " + runtime.Version())
+	logger.Debug("Using Go version " + runtime.Version())
 	logger.Debug("Number of CPUs:" + strconv.Itoa(runtime.NumCPU()))
 	logger.Debug("Number of Goroutines:" + strconv.Itoa(runtime.NumGoroutine()))
 	return true

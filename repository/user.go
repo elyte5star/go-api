@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )

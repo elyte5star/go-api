@@ -3,10 +3,9 @@ package service
 import (
 	"fmt"
 	"strings"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
-	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -55,7 +54,6 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.UserName = createUser.Username
 	user.SetPassword(createUser.Password)
 	user.Email = createUser.Email
-	user.LockTime = util.TimeThen()
 	user.Admin = false
 	user.IsUsing2FA = false
 	user.AccountNonLocked = true
@@ -63,7 +61,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user.FailedAttempt = 0
 	user.Discount = *createUser.Discount
 	user.Telephone = createUser.Telephone
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
 
 	// Validate user fields.
@@ -90,7 +88,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	//fmt.Printf("%+v\n", user)
 	response := response.NewResponse(c)
 	response.Result = user.Userid
-	response.Code=fiber.StatusCreated
+	response.Code = fiber.StatusCreated
 	return c.Status(response.Code).JSON(response)
 }
 
@@ -217,7 +215,8 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 	}
 	foundUser.Telephone = modifyUser.Telephone
 	foundUser.UserName = modifyUser.Username
-	foundUser.AuditInfo.LastModifiedAt = util.TimeNow()
+	now := util.TimeNow()
+	foundUser.AuditInfo.LastModifiedAt = &now
 	foundUser.AuditInfo.LastModifiedBy = data["userid"].(string)
 	if err := db.UpdateUser(foundUser.Userid, &foundUser); err != nil {
 		cfg.Logger.Error(err.Error())

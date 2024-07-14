@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/api/repository/response"
-	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -42,13 +42,11 @@ func (q *ProductQueries) CreateProductReview(review *schema.Review) error {
 }
 
 func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductResponse, error) {
-	query := `
-    SELECT p.pid, p.name,p.description,p.category,p.price,p.stockQuantity,p.image,p.details,p.productDiscount,
-	 r.rid, r.createdAt,r.rating,r.reviewerName,r.comment,r.email
+	query := `SELECT p.pid, p.name,p.description,p.category,p.price,p.stockQuantity,p.image,p.details,
+	p.productDiscount,r.rid, r.createdAt,r.rating,r.reviewerName,r.comment,r.email
     FROM products AS p
     LEFT JOIN reviews AS r ON p.pid = r.pid
     WHERE p.pid = ?`
-
 	product := response.GetProductResponse{}
 	rows, err := q.Queryx(query, pid)
 	if err != nil {
@@ -56,16 +54,20 @@ func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductRespo
 		return product, err
 	}
 	for rows.Next() {
-		review := &response.GetProductReviewResponse{}
-		err = rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category, &product.Price,
-			&product.StockQuantity, &product.Image, &product.Details, &product.ProductDiscount, &review.Rid, &review.CreatedAt, &review.Rating,
+		review := response.GetProductReviewResponse{}
+		err = rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
+			&product.Price,
+			&product.StockQuantity, &product.Image, &product.Details, &product.ProductDiscount,
+			&review.Rid, &review.CreatedAt, &review.Rating,
 			&review.ReviewerName, &review.Comment, &review.Email)
 		if err != nil {
 			return product, err
 		}
-		product.Reviews = append(product.Reviews, *review)
+
+		//product.Reviews = append(product.Reviews, *review)
 	}
 	fmt.Printf("%#v\n", product)
+
 	return product, nil
 }
 

@@ -28,12 +28,15 @@ func TimeElapsed(start time.Time, name string) string {
 	fmt.Println(name + " took " + elapsed.String())
 	return elapsed.String()
 }
+
 func TimeNow() time.Time {
 	return time.Now().UTC()
 }
+
 func TimeNowString() string {
 	return time.Now().UTC().String()
 }
+
 func TimeThen() time.Time {
 	return time.Date(
 		1970, 11, 17, 20, 34, 58, 651387237, time.UTC)
@@ -67,16 +70,6 @@ func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
 	t.Time = time.Unix(v, 0)
 	return nil
 }
-
-///
-// func ConnectionString() string {
-// 	connStr, status := os.LookupEnv("CONN_STR")
-// 	if !status {
-// 		Logger().Error("Missing environment variable CONN_STR")
-// 	}
-
-// 	return connStr
-// }
 
 func SysRequirment(logger *slog.Logger) bool {
 	defer TimeElapsed(TimeNow(), "Checking your Go environment")
@@ -127,6 +120,7 @@ func InitValidator() *validator.Validate {
 
 	return validate
 }
+
 func PercentageValidator(fl validator.FieldLevel) bool {
 	maxPercent := decimal.NewFromInt(100)
 	minPercent := decimal.NewFromInt(0)

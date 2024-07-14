@@ -1,13 +1,7 @@
 package schema
 
 import (
-	// "database/sql/driver"
-	// "encoding/json"
-	// "errors"
 	"time"
-
-	//"time"
-
 	"github.com/google/uuid"
 )
 

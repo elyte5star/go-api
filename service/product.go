@@ -6,7 +6,7 @@ import (
 
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
-	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -71,7 +71,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	product.Image = createProduct.Image
 	product.Details = createProduct.Details
 	product.ProductDiscount = *createProduct.ProductDiscount
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["userid"].(string)}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["userid"].(string)}
 	product.AuditInfo = *audit
 	// Validate product fields.
 	if err := cfg.Validate.Struct(product); err != nil {
@@ -80,6 +80,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+	
 	if err := db.CreateProduct(product); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
@@ -296,7 +297,7 @@ func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = product
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(response.Code).JSON(response)
 }
 
 // DeleteProduct from db

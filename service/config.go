@@ -40,7 +40,7 @@ type DbConfig struct {
 
 func (dbConfig *DbConfig) URL() string {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?timeout=30s",
+		"%s:%s@tcp(%s:%s)/%s",
 		dbConfig.User,
 		dbConfig.Password,
 		dbConfig.Host,

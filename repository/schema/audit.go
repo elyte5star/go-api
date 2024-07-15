@@ -8,13 +8,11 @@ import (
 )
 
 type AuditEntity struct {
-	CreatedAt      time.Time `json:"createdAt" validate:"required"`
-	LastModifiedAt time.Time `json:"lastModifiedAt" validate:"required"`
-	LastModifiedBy string    `json:"lastModifiedBy" validate:"required"`
-	CreatedBy      string    `json:"CreatedBy" validate:"required"`
+	CreatedAt      time.Time  `json:"createdAt" validate:"required"`
+	LastModifiedAt *time.Time `json:"lastModifiedAt,omitempty"`
+	LastModifiedBy string     `json:"lastModifiedBy" validate:"required"`
+	CreatedBy      string     `json:"CreatedBy" validate:"required"`
 }
-
-
 
 // This method simply returns the JSON-encoded representation of the struct.
 func (r AuditEntity) Value() (driver.Value, error) {

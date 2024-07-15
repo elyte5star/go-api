@@ -53,7 +53,7 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	fb := fiber.New(fiber.Config{
 		AppName:           appInfo,
 		EnablePrintRoutes: cfg.Debug,
-		ErrorHandler:      cfg.PanicRecovery,
+		ErrorHandler:      cfg.PanicRecovery("./public"),
 		ReadTimeout:       time.Second * time.Duration(cfg.ReadTimeout),
 	})
 

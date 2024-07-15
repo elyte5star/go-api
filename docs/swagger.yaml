@@ -35,12 +35,15 @@ definitions:
       image:
         type: string
       name:
+        maxLength: 20
+        minLength: 5
         type: string
       price:
         type: number
       productDiscount:
         type: number
       stockQuantity:
+        maximum: 120
         minimum: 0
         type: integer
     required:
@@ -74,6 +77,8 @@ definitions:
         maxLength: 30
         minLength: 5
         type: string
+      discount:
+        type: number
       email:
         type: string
       password:
@@ -108,23 +113,19 @@ definitions:
       address:
         $ref: '#/definitions/request.CreateAddressReq'
       telephone:
-        maxLength: 16
-        minLength: 5
         type: string
       username:
         maxLength: 30
         minLength: 5
         type: string
-    required:
-    - address
     type: object
   response.ErrorResponse:
     properties:
       code:
-        default: 500
+        default: 503
         type: integer
       message:
-        default: Something went wrong
+        default: Service unavailable
         type: string
       success:
         default: false
@@ -254,6 +255,35 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Get product by given pid
+      tags:
+      - Product
+  /api/products/{pid}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Get Product reviews by given product ID.
+      parameters:
+      - description: pid
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get Product reviews by a given pid
       tags:
       - Product
   /api/products/create:
@@ -425,6 +455,37 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user
+      tags:
+      - User
+  /api/users/{userid}/address:
+    get:
+      consumes:
+      - application/json
+      description: Ger User Address.
+      parameters:
+      - description: userid
+        in: path
+        name: userid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Ger User Address
       tags:
       - User
   /api/users/signup:

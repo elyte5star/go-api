@@ -1,17 +1,18 @@
 package request
 
 type CreateUserRequest struct {
-	Username        string `json:"username" validate:"min=5,max=30"`
-	Password        string `json:"password" validate:"eqfield=ConfirmPassword,min=5,max=30"`
-	ConfirmPassword string `json:"confirmPassword" validate:"min=5,max=30"`
-	Email           string `json:"email" validate:"required,email"`
-	Telephone       string `json:"telephone" validate:"required,tel"`
+	Username        string   `json:"username" validate:"min=5,max=30"`
+	Password        string   `json:"password" validate:"eqfield=ConfirmPassword,min=5,max=30"`
+	ConfirmPassword string   `json:"confirmPassword" validate:"min=5,max=30"`
+	Email           string   `json:"email" validate:"required,email"`
+	Telephone       string   `json:"telephone" validate:"required,tel"`
+	Discount        *float64 `json:"discount,omitempty"`
 }
 
 type ModifyUser struct {
-	Username  string           `json:"username" validate:"min=5,max=30"`
-	Telephone string           `json:"telephone" validate:"min=5,max=16"`
-	Address   CreateAddressReq `json:"address,omitempty"  validate:"required,dive,omitempty"`
+	Username  string            `json:"username" validate:"min=5,max=30"`
+	Telephone string            `json:"telephone" validate:"tel"`
+	Address   *CreateAddressReq `json:"address,omitempty"`
 }
 
 type ModifyUserPassword struct {

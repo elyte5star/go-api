@@ -3,10 +3,9 @@ package service
 import (
 	"fmt"
 	"time"
-
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
-	"github.com/api/service/dbutils/schema"
+	"github.com/api/repository/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"

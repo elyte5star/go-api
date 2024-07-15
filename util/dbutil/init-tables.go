@@ -1,18 +1,15 @@
-package dbutils
+package dbutil
 
 import (
+	"log/slog"
 	"strings"
-
+	"github.com/api/repository/schema"
 	"github.com/api/service"
-	"github.com/api/service/dbutils/schema"
 	"github.com/api/util"
 	"github.com/jmoiron/sqlx"
 )
 
-// const schema = `
 
-// DROP TABLE IF EXISTS users,otp,address,user_locations,bookings;
-// `
 const users = `CREATE TABLE IF NOT EXISTS users (
 	userid CHAR(36) PRIMARY KEY,
 	username VARCHAR(64) NOT NULL UNIQUE,
@@ -25,8 +22,8 @@ const users = `CREATE TABLE IF NOT EXISTS users (
 	telephone VARCHAR(64) NOT NULL UNIQUE,
 	discount DECIMAL(16,2) DEFAULT '0.00',
 	failedAttempt INT UNSIGNED  DEFAULT '0000',
-	lockTime TIMESTAMP(0),
-	auditInfo JSON NOT NULL
+	lockTime DATETIME NULL,
+	auditInfo LONGTEXT NOT NULL
 	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 
@@ -34,7 +31,7 @@ const otp = `CREATE TABLE IF NOT EXISTS otp (
 		userid CHAR(36) PRIMARY KEY,
 		email VARCHAR(64) NOT NULL UNIQUE,
 		otpString VARCHAR(64) NOT NULL,
-		expiryDate TIMESTAMP(0),
+		expiryDate DATETIME NOT NULL,
 		FOREIGN KEY(userid) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE
 		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
@@ -61,7 +58,7 @@ const userLocations = `CREATE TABLE IF NOT EXISTS user_locations (
 
 const bookings = `CREATE TABLE IF NOT EXISTS bookings (
 	oId CHAR(36) PRIMARY KEY,
-	createdAt TIMESTAMP(0),
+	createdAt DATETIME NOT NULL,
 	userid CHAR(36) NOT NULL,
 	cart JSON NOT NULL,
 	shippingDetails JSON NOT NULL,
@@ -76,15 +73,15 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	category VARCHAR(264) NOT NULL,
 	price DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	stockQuantity INT UNSIGNED  DEFAULT '0000' NOT NULL,
-	image VARCHAR(64) NOT NULL,
+	image VARCHAR(64) NOT NULL UNIQUE,
 	details VARCHAR(664) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
-	auditInfo JSON NOT NULL
+	auditInfo LONGTEXT NOT NULL
 	) ENGINE=INNODB DEFAULT CHARSET=utf8;
 `
 const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 	rid CHAR(36) PRIMARY KEY,
-	createdAt TIMESTAMP(0),
+	createdAt DATETIME NOT NULL,
 	rating INT UNSIGNED  DEFAULT '0000' NOT NULL,
 	reviewerName VARCHAR(264) NOT NULL,
 	comment VARCHAR(500) NOT NULL,
@@ -94,41 +91,85 @@ const productReview = `CREATE TABLE IF NOT EXISTS reviews (
 		) ENGINE=INNODB DEFAULT CHARSET=utf8;
 	`
 
-func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
+const dropOtpTable = `DROP TABLE IF EXISTS otp;`
+const dropAddressTable = `DROP TABLE IF EXISTS address;`
+const dropBookingsTable = `DROP TABLE IF EXISTS bookings;`
+const dropUserLocationTable = `DROP TABLE IF EXISTS user_locations;`
+const dropUserTable = `DROP TABLE IF EXISTS users;`
+const dropReviewTable = `DROP TABLE IF EXISTS reviews;`
+//const dropProductsTable = `DROP TABLE IF EXISTS products;`
 
+func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 	log := cfg.Logger
 
 	defer dbDriver.Close()
 
-	statement, driverError := dbDriver.Prepare(users)
-	if driverError != nil {
-		log.Error(driverError.Error())
-	}
-	// Create table
-	_, statementError := statement.Exec()
-	if statementError != nil {
-		log.Warn("Table already exists!")
-	}
+	Droptables(cfg.Logger, dbDriver)
 
+	statement, _ := dbDriver.Prepare(users)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(otp)
-	statement.Exec()
-
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(userAddress)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(userLocations)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(bookings)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(products)
-	statement.Exec()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 	statement, _ = dbDriver.Prepare(productReview)
-	statement.Exec()
-	statement.Close()
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+
+	}
 
 	log.Info("All tables created/initialized successfully!")
 	CreateAdminAccount("elyte", cfg)
 }
+func Droptables(log *slog.Logger, dbDriver *sqlx.DB) {
+	statement, _ := dbDriver.Prepare(dropOtpTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropAddressTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropBookingsTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropUserLocationTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropUserTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	statement, _ = dbDriver.Prepare(dropReviewTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
+	// statement, _ = dbDriver.Prepare(dropProductsTable)
+	// if _, err := statement.Exec(); err != nil {
+	// 	log.Error(err.Error())
+	// }
 
+}
 func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	db, err := service.DbWithQueries(cfg)
 	if err != nil {
@@ -140,7 +181,6 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	user.UserName = username
 	user.SetPassword("string")
 	user.Email = "elyte5star@gmail.com"
-	user.LockTime = util.TimeThen()
 	user.Telephone = "234802394"
 	user.AccountNonLocked = true
 	user.FailedAttempt = 0
@@ -148,7 +188,7 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	user.Admin = true
 	user.IsUsing2FA = true
 	user.Enabled = true
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedAt: util.NullTime(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: user.Userid.String()}
 	user.AuditInfo = *audit
 	if err := db.CreateUser(user); err != nil {
 		if strings.Contains(err.Error(), "Error 1062") {

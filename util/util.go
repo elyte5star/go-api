@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -27,8 +28,13 @@ func TimeElapsed(start time.Time, name string) string {
 	fmt.Println(name + " took " + elapsed.String())
 	return elapsed.String()
 }
+
 func TimeNow() time.Time {
 	return time.Now().UTC()
+}
+
+func TimeNowString() string {
+	return time.Now().UTC().String()
 }
 
 func TimeThen() time.Time {
@@ -64,16 +70,6 @@ func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
 	t.Time = time.Unix(v, 0)
 	return nil
 }
-
-///
-// func ConnectionString() string {
-// 	connStr, status := os.LookupEnv("CONN_STR")
-// 	if !status {
-// 		Logger().Error("Missing environment variable CONN_STR")
-// 	}
-
-// 	return connStr
-// }
 
 func SysRequirment(logger *slog.Logger) bool {
 	defer TimeElapsed(TimeNow(), "Checking your Go environment")
@@ -113,6 +109,10 @@ func InitValidator() *validator.Validate {
 	re := regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
 	_ = validate.RegisterValidation("tel", func(fl validator.FieldLevel) bool {
 		field := fl.Field().String()
+		runes := utf8.RuneCountInString(field)
+		if runes < 5 || runes < 16 {
+			return true
+		}
 		return re.MatchString(field)
 	})
 	// // Custom validation for float fields.
@@ -120,6 +120,7 @@ func InitValidator() *validator.Validate {
 
 	return validate
 }
+
 func PercentageValidator(fl validator.FieldLevel) bool {
 	maxPercent := decimal.NewFromInt(100)
 	minPercent := decimal.NewFromInt(0)

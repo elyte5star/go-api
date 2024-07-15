@@ -41,20 +41,20 @@ func (q *ProductQueries) CreateProductReview(review *schema.Review) error {
 	return nil
 }
 
-func (q *ProductQueries) GetProductById(pid uuid.UUID) (*response.GetProductResponse, error) {
+func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductResponse, error) {
 	query := `SELECT p.pid, p.name,p.description,p.category,p.price,p.stockQuantity,p.image,p.details,
 	p.productDiscount,r.rid, r.createdAt,r.rating,r.reviewerName,r.comment,r.email
     FROM products AS p
     LEFT JOIN reviews AS r ON p.pid = r.pid
     WHERE p.pid = ?`
-	product := &response.GetProductResponse{}
+	product := response.GetProductResponse{}
 	rows, err := q.Query(query, pid)
 	if err != nil {
 		//Return empty object and error.
 		return product, err
 	}
 	for rows.Next() {
-		review := &response.GetProductReviewResponse{}
+		review := response.GetProductReviewResponse{}
 		if err := rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
 			&product.Price,
 			&product.StockQuantity, &product.Image, &product.Details, &product.ProductDiscount,
@@ -62,11 +62,8 @@ func (q *ProductQueries) GetProductById(pid uuid.UUID) (*response.GetProductResp
 			&review.ReviewerName, &review.Comment, &review.Email); err != nil {
 			return product, err
 		}
-
-		//product.Reviews = append(product.Reviews, *review)
+		product.Reviews = append(product.Reviews,review)
 	}
-	fmt.Printf("%#v\n", product)
-
 	return product, nil
 }
 
@@ -91,7 +88,6 @@ func (q *ProductQueries) GetReviewsByPid(pid uuid.UUID) ([]schema.Review, error)
 	if err != nil {
 		return reviews, fmt.Errorf("error, Getting product reviews:, %w", err)
 	}
-	fmt.Println("I got here")
 	return reviews, nil
 }
 

@@ -205,12 +205,12 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 	result := response.GetProductReviewsResponse{}
 	for _, review := range reviews {
 		result.Reviews = append(result.Reviews, response.GetProductReviewResponse{
-			Rid:          review.Rid,
-			CreatedAt:    review.CreatedAt,
-			Rating:       review.Rating,
-			ReviewerName: review.ReviewerName,
-			Comment:      review.Comment,
-			Email:        review.Email,
+			Rid:          &review.Rid,
+			CreatedAt:    &review.CreatedAt,
+			Rating:       &review.Rating,
+			ReviewerName: &review.ReviewerName,
+			Comment:      &review.Comment,
+			Email:        &review.Email,
 		})
 
 	}

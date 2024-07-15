@@ -41,26 +41,25 @@ func (q *ProductQueries) CreateProductReview(review *schema.Review) error {
 	return nil
 }
 
-func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductResponse, error) {
+func (q *ProductQueries) GetProductById(pid uuid.UUID) (*response.GetProductResponse, error) {
 	query := `SELECT p.pid, p.name,p.description,p.category,p.price,p.stockQuantity,p.image,p.details,
 	p.productDiscount,r.rid, r.createdAt,r.rating,r.reviewerName,r.comment,r.email
     FROM products AS p
     LEFT JOIN reviews AS r ON p.pid = r.pid
     WHERE p.pid = ?`
-	product := response.GetProductResponse{}
-	rows, err := q.Queryx(query, pid)
+	product := &response.GetProductResponse{}
+	rows, err := q.Query(query, pid)
 	if err != nil {
 		//Return empty object and error.
 		return product, err
 	}
 	for rows.Next() {
-		review := response.GetProductReviewResponse{}
-		err = rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
+		review := &response.GetProductReviewResponse{}
+		if err := rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
 			&product.Price,
 			&product.StockQuantity, &product.Image, &product.Details, &product.ProductDiscount,
 			&review.Rid, &review.CreatedAt, &review.Rating,
-			&review.ReviewerName, &review.Comment, &review.Email)
-		if err != nil {
+			&review.ReviewerName, &review.Comment, &review.Email); err != nil {
 			return product, err
 		}
 

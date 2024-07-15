@@ -80,7 +80,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error(newErr.Message)
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	
+
 	if err := db.CreateProduct(product); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
@@ -244,6 +244,7 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	result := response.GetProductsResponse{}
+	count := 0
 	for _, product := range products {
 		result.Products = append(result.Products, response.GetProductResponse{
 			Pid:             product.Pid,
@@ -256,8 +257,9 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 			Details:         product.Details,
 			ProductDiscount: product.ProductDiscount,
 		})
-
+		count += 1
 	}
+	result.Count = count
 	response := response.NewResponse(c)
 	response.Result = result
 	return c.Status(fiber.StatusOK).JSON(response)

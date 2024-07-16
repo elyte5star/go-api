@@ -26,7 +26,19 @@ func (q *ProductQueries) CreateProduct(product *schema.Product) error {
 	// This query returns nothing.
 	return nil
 }
-
+func (q *ProductQueries) CreateProducts(products []schema.Product) error {
+	// Define query string.
+	query := `INSERT INTO products (pid,name,description,category,price,stockQuantity,image,details,productDiscount,auditInfo)
+	 VALUES (:pid,:name,:description,:category,:price,:stockQuantity,:image,:details,:productDiscount,CONVERT(:auditInfo using utf8mb4))`
+	// Send query to database.
+	_, err := q.NamedExec(query, products)
+	if err != nil {
+		// Return only error.
+		return fmt.Errorf("error, Creating a products:, %w", err)
+	}
+	// This query returns nothing.
+	return nil
+}
 func (q *ProductQueries) CreateProductReview(review *schema.Review) error {
 	// Define query string.
 	query := `INSERT INTO reviews (rid,pid,createdAt,rating,reviewerName,comment,email)

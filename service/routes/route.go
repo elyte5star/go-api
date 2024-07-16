@@ -7,7 +7,6 @@ import (
 	"github.com/api/common/middleware"
 	res "github.com/api/repository/response"
 	"github.com/api/service"
-	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -23,7 +22,8 @@ import (
 func healthCheck(c *fiber.Ctx) error {
 	response := res.NewResponse(c)
 	response.Message = "Server is up and running"
-	if err := c.Status(fiber.StatusOK).JSON(response); err != nil {
+	response.Result = "Ok"
+	if err := c.Status(response.Code).JSON(response); err != nil {
 		return fmt.Errorf("error, Server is down, %w", err)
 	}
 
@@ -35,13 +35,29 @@ func notFoundRoute(c *fiber.Ctx) error {
 	response := res.NewErrorResponse()
 	response.Message = "Sorry, endpoint is not found"
 	response.Code = fiber.StatusNotFound
-	return c.Status(fiber.StatusNotFound).JSON(response)
+	return c.Status(response.Code).JSON(response)
 }
 
-func RouteStack(app *fiber.App) string {
-	defer util.TimeElapsed(util.TimeNow(), "Checking your API information")
-	data, _ := json.MarshalIndent(app.Stack(), "", "  ")
-	return string(data)
+
+// @Summary API Route information
+// @Description API Route information
+// @Tags API
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 501 {object} response.ErrorResponse{message=string,code=int} "SERVICE UNAVAILABLE"
+// @Security BearerAuth
+// @Router /api/server/stack [get]
+func routeStack(c *fiber.Ctx) error {
+	data, err := json.MarshalIndent(c.App().Stack(), "", "  ")
+	if err != nil {
+		newErr := res.NewErrorResponse()
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	response := res.NewResponse(c)
+	response.Result = string(data)
+	response.Message = "Checking your API Route information"
+	return c.Status(response.Code).JSON(response)
 }
 
 func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
@@ -54,9 +70,11 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	api := app.Group("api")
 	serverStatus := api.Group("server")
 	serverStatus.Get("/status", jwt, healthCheck)
+	serverStatus.Get("/stack", jwt, routeStack)
 
 	authRoute := api.Group("auth")
 	authRoute.Post("/login", cfg.Login)
+	authRoute.Post("/form-login", cfg.FormLogin)
 
 	users := api.Group("users")
 	users.Post("signup", cfg.CreateUser)
@@ -73,6 +91,7 @@ func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
 	productRoutes.Get("/:pid/reviews", cfg.GetProductReviewsByPid)
 	productRoutes.Delete("/:pid", jwt, cfg.DeleteProduct)
 	productRoutes.Post("/create", jwt, cfg.CreateProduct)
+	productRoutes.Post("/create-many", jwt, cfg.CreateProducts)
 	productRoutes.Post("/create/review", cfg.CreateReview)
 
 	// bookingRoutes := app.Group("/api/qbooking",jwt)

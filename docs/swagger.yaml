@@ -70,6 +70,15 @@ definitions:
     - pid
     - reviewerName
     type: object
+  request.CreateProductsRequest:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/request.CreateProductRequest'
+        type: array
+    required:
+    - products
+    type: object
   request.CreateUserRequest:
     properties:
       confirmPassword:
@@ -162,6 +171,70 @@ info:
   title: Elyte Realm API
   version: 1.0.1
 paths:
+  /api/auth/form-login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Create a new bearer token.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: BAD REQUEST
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "401":
+          description: UNAUTHORIZED
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "404":
+          description: NOT FOUND
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "501":
+          description: SERVICE UNAVAILABLE
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                message:
+                  type: string
+              type: object
+      summary: Create a new bearer token
+      tags:
+      - Auth
   /api/auth/login:
     post:
       consumes:
@@ -181,6 +254,50 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.RequestResponse'
+        "400":
+          description: BAD REQUEST
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "401":
+          description: UNAUTHORIZED
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "404":
+          description: NOT FOUND
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "501":
+          description: SERVICE UNAVAILABLE
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
       summary: Create a new bearer token
       tags:
       - Auth
@@ -309,6 +426,30 @@ paths:
       summary: Create a new product
       tags:
       - Product
+  /api/products/create-many:
+    post:
+      consumes:
+      - application/json
+      description: Creates new products.
+      parameters:
+      - description: Create products
+        in: body
+        name: create_products
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProductsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new products
+      tags:
+      - Product
   /api/products/create/review:
     post:
       consumes:
@@ -331,6 +472,34 @@ paths:
       summary: Create a new product review
       tags:
       - Product
+  /api/server/stack:
+    get:
+      consumes:
+      - application/json
+      description: API Route information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RequestResponse'
+        "501":
+          description: SERVICE UNAVAILABLE
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ErrorResponse'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: API Route information
+      tags:
+      - API
   /api/server/status:
     get:
       consumes:

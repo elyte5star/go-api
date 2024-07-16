@@ -20,3 +20,7 @@ type CreateProductReviewRequest struct {
 	Comment      string    `json:"comment"  validate:"required"`
 	Email        string    `json:"email" validate:"email"`
 }
+
+type CreateProductsRequest struct {
+	Products []CreateProductRequest `json:"products" validate:"required,dive,required"`
+}

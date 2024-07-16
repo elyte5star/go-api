@@ -202,20 +202,8 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	result := response.GetProductReviewsResponse{}
-	for _, review := range reviews {
-		result.Reviews = append(result.Reviews, response.GetProductReviewResponse{
-			Rid:          &review.Rid,
-			CreatedAt:    &review.CreatedAt,
-			Rating:       &review.Rating,
-			ReviewerName: &review.ReviewerName,
-			Comment:      &review.Comment,
-			Email:        &review.Email,
-		})
-
-	}
 	response := response.NewResponse(c)
-	response.Result = result
+	response.Result = reviews
 	return c.Status(response.Code).JSON(response)
 }
 
@@ -259,10 +247,10 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 		})
 		count += 1
 	}
-	result.Count = count
+	result.NumberOfElements = count
 	response := response.NewResponse(c)
 	response.Result = result
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(response.Code).JSON(response)
 }
 
 // GetSingleProduct from db

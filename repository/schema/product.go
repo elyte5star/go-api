@@ -7,11 +7,11 @@ import (
 
 type Product struct {
 	Pid             uuid.UUID   `db:"pid" json:"pid" validate:"required,uuid"`
-	Name            string      `db:"name" json:"name" validate:"required"`
+	Name            string      `db:"name" json:"name" validate:"required,min=3,max=20"`
 	Description     string      `db:"description" json:"description" validate:"lte=555"`
 	Category        string      `db:"category" json:"category" validate:"lte=255"`
 	Price           float64     `db:"price" json:"price" validate:"required"`
-	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"gte=0,lte=1200"`
+	StockQuantity   int         `db:"stockQuantity" json:"stockQuantity" validate:"gte=0,lte=1000"`
 	Image           string      `db:"image" json:"image" validate:"required"`
 	Details         string      `db:"details" json:"details" validate:"lte=555"`
 	ProductDiscount float64     `db:"productDiscount" json:"productDiscount" validate:"percentage"`

@@ -49,7 +49,7 @@ type User struct {
 
 // SetPassword: sets the hashed password to the user struct defined above
 func (user *User) SetPassword(password string) {
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(strings.TrimSpace(password)), 12)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(strings.TrimSpace(password)), bcrypt.DefaultCost)
 	user.Password = hashedPassword
 }
 

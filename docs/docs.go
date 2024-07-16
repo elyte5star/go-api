@@ -629,7 +629,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 5
+                    "minLength": 3
                 },
                 "price": {
                     "type": "number"
@@ -639,7 +639,7 @@ const docTemplate = `{
                 },
                 "stockQuantity": {
                     "type": "integer",
-                    "maximum": 120,
+                    "maximum": 1000,
                     "minimum": 0
                 }
             }
@@ -648,7 +648,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "comment",
-                "email",
                 "pid",
                 "reviewerName"
             ],

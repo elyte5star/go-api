@@ -3,25 +3,14 @@ package service
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/repository/schema"
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
-
-type UserCredentials struct {
-	Userid                  uuid.UUID `json:"userid"`
-	Username                string    `json:"username"`
-	Email                   string    `json:"email"`
-	IsEnabled               bool      `json:"isEnabled "`
-	IsAccountNonLocked      bool      `json:"isAccountNonLocked"`
-	IsCredentialsNonExpired bool      `json:"isCredentialsNonExpired"`
-	IsAdmin                 bool      `json:"isAdmin"`
-	TokenId                 string    `json:"tokenId"`
-}
 
 //const bearerPrefix = "Bearer "
 
@@ -112,7 +101,7 @@ func (cfg *AppConfig) GetTokenResponse(user schema.User) (response.TokenResponse
 }
 func (cfg *AppConfig) GenerateJWT(user schema.User) (string, error) {
 
-	principal := &UserCredentials{
+	principal := &request.UserCredentials{
 		Userid:                  user.Userid,
 		Username:                user.UserName,
 		Email:                   user.Email,

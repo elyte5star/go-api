@@ -113,7 +113,7 @@
 		"description": "For small office",
 		"details": "Ergonomic product for small office.The word ergonomic gets tossed around like it's the star ingredient in a wellness-word salad. We ourselves are guilty of blindly buying into products that are stamped with its body-support seal of approval — especially now that we're stuck at home in a make-shift office",
 		"image": "13.png",
-		"category": "mk",
+		"category": "mk-lords",
 		"stockQuantity": 30
 	},
 	{
@@ -122,7 +122,7 @@
 		"description": "For small office",
 		"details": "Ergonomic product for small office.Ahead, a shopping guide we hope will make your at-home office feel less makeshift and more professionally aligned — broken down by what each ergonomic item is supporting, backed by people who actually felt supported by it",
 		"image": "14.png",
-		"category": "mk",
+		"category": "mk-lords",
 		"stockQuantity": 30
 	},
 	{
@@ -132,7 +132,7 @@
 		"details": "Ergonomic product for small office.Ahead, a shopping guide we hope will make your at-home office feel less makeshift and more professionally aligned — broken down by what each ergonomic item is supporting, backed by people who actually felt supported by it",
 		"image": "15.png",
 		"category": "grey",
-		"stockQuantity": 0
+		"stockQuantity": 1
 	},
 	{
 		"name": "Saw man",

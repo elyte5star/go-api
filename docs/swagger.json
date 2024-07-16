@@ -627,7 +627,7 @@
                 "name": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 5
+                    "minLength": 3
                 },
                 "price": {
                     "type": "number"
@@ -637,7 +637,7 @@
                 },
                 "stockQuantity": {
                     "type": "integer",
-                    "maximum": 120,
+                    "maximum": 1000,
                     "minimum": 0
                 }
             }
@@ -646,7 +646,6 @@
             "type": "object",
             "required": [
                 "comment",
-                "email",
                 "pid",
                 "reviewerName"
             ],

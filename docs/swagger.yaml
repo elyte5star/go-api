@@ -36,14 +36,14 @@ definitions:
         type: string
       name:
         maxLength: 20
-        minLength: 5
+        minLength: 3
         type: string
       price:
         type: number
       productDiscount:
         type: number
       stockQuantity:
-        maximum: 120
+        maximum: 1000
         minimum: 0
         type: integer
     required:
@@ -67,7 +67,6 @@ definitions:
         type: string
     required:
     - comment
-    - email
     - pid
     - reviewerName
     type: object

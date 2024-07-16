@@ -48,11 +48,12 @@ func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductRespo
     LEFT JOIN reviews AS r ON p.pid = r.pid
     WHERE p.pid = ?`
 	product := response.GetProductResponse{}
-	rows, err := q.Query(query, pid)
+	rows, err := q.Queryx(query, pid)
 	if err != nil {
 		//Return empty object and error.
 		return product, err
 	}
+out:
 	for rows.Next() {
 		review := response.GetProductReviewResponse{}
 		if err := rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
@@ -62,7 +63,10 @@ func (q *ProductQueries) GetProductById(pid uuid.UUID) (response.GetProductRespo
 			&review.ReviewerName, &review.Comment, &review.Email); err != nil {
 			return product, err
 		}
-		product.Reviews = append(product.Reviews,review)
+		if review.Rid == nil {
+			break out
+		}
+		product.Reviews = append(product.Reviews, review)
 	}
 	return product, nil
 }
@@ -71,7 +75,7 @@ func (q *ProductQueries) GetProducts() ([]schema.Product, error) {
 	// Define products variable.
 	products := []schema.Product{}
 	// // Define query string.
-	query := `SELECT * FROM products`
+	query := `SELECT * FROM products LIMIT 12`
 	// Send query to database.
 	err := q.Select(&products, query)
 	if err != nil {

@@ -12,36 +12,35 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-//const bearerPrefix = "Bearer "
+// const bearerPrefix = "Bearer "
 
 // Login method for create a new bearer token.
 // @Description Create a new bearer token.
 // @Summary Create a new bearer token
 // @Tags Auth
-// @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
-// @Param credential body request.LoginRequest true "Login data"
-// @Success 200 {object} response.RequestResponse
-// @Router /api/auth/login [post]
-func (cfg *AppConfig) Login(c *fiber.Ctx) error {
-	// user := c.FormValue("username")
-	// pass := c.FormValue("password")
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 401 {object} response.ErrorResponse{message=string,int} "UNAUTHORIZED"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
+// @Router /api/auth/form-login [post]
+func (cfg *AppConfig) FormLogin(c *fiber.Ctx) error {
+
 	newErr := response.NewErrorResponse()
-
-	tokenReq := new(request.LoginRequest)
-
-	// Check, if received JSON data is valid.
-	if err := c.BodyParser(&tokenReq); err != nil {
-		newErr.Code = fiber.ErrBadRequest.Code
-		newErr.Message = "Invalid JSON body"
-		cfg.Logger.Error(err.Error())
-		return c.Status(newErr.Code).JSON(newErr)
-
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	tokenReq := &request.LoginRequest{
+		Username: username,
+		Password: password,
 	}
 	// Validate Login fields.
 	if err := cfg.Validate.Struct(tokenReq); err != nil {
 		// Return, if some fields are not valid.
-		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Code = fiber.StatusBadRequest
 		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 		cfg.Logger.Error(util.ValidatorErrors(err))
 		return c.Status(newErr.Code).JSON(newErr)
@@ -50,7 +49,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	user, err := db.FindByCredentials(tokenReq.Username)
 	if err != nil {
@@ -73,7 +72,73 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	}
 	response := response.NewResponse(c)
 	response.Result = tokenResponse
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(response.Code).JSON(response)
+
+}
+
+// Login method for create a new bearer token.
+// @Description Create a new bearer token.
+// @Summary Create a new bearer token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param credential body request.LoginRequest true "Login data"
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 401 {object} response.ErrorResponse{message=string,code=int} "UNAUTHORIZED"
+// @Failure 404 {object} response.ErrorResponse{message=string,code=int} "NOT FOUND"
+// @Failure 501 {object} response.ErrorResponse{message=string,code=int} "SERVICE UNAVAILABLE"
+// @Router /api/auth/login [post]
+func (cfg *AppConfig) Login(c *fiber.Ctx) error {
+
+	newErr := response.NewErrorResponse()
+
+	tokenReq := new(request.LoginRequest)
+
+	// Check, if received JSON data is valid.
+	if err := c.BodyParser(&tokenReq); err != nil {
+		newErr.Code = fiber.StatusBadRequest
+		newErr.Message = "Invalid JSON body"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+
+	}
+	// Validate Login fields.
+	if err := cfg.Validate.Struct(tokenReq); err != nil {
+		// Return, if some fields are not valid.
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
+		cfg.Logger.Error(util.ValidatorErrors(err))
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	user, err := db.FindByCredentials(tokenReq.Username)
+	if err != nil {
+		newErr.Message = "User with the given username is not found!"
+		newErr.Code = fiber.StatusNotFound
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	if err = user.ComparePassword(tokenReq.Password); err != nil {
+		newErr.Message = "Invalid password!"
+		newErr.Code = fiber.StatusUnauthorized
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	tokenResponse, err := cfg.GetTokenResponse(user)
+	if err != nil {
+		newErr.Message = "We could not log you in at this time, please try again later"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	response := response.NewResponse(c)
+	response.Result = tokenResponse
+	return c.Status(response.Code).JSON(response)
 
 }
 func (cfg *AppConfig) JwtCredentials(c *fiber.Ctx) map[string]interface{} {

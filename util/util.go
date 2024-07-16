@@ -25,8 +25,7 @@ import (
 // For more details see: https://coderwall.com/p/cp5fya
 func TimeElapsed(start time.Time, name string) string {
 	elapsed := time.Since(start)
-	fmt.Println(name + " took " + elapsed.String())
-	return elapsed.String()
+	return name + " took " + elapsed.String()
 }
 
 func TimeNow() time.Time {

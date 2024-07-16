@@ -71,7 +71,7 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	product.Image = createProduct.Image
 	product.Details = createProduct.Details
 	product.ProductDiscount = *createProduct.ProductDiscount
-	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["userid"].(string)}
+	audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["username"].(string)}
 	product.AuditInfo = *audit
 	// Validate product fields.
 	if err := cfg.Validate.Struct(product); err != nil {
@@ -93,6 +93,88 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 	response.Result = product.Pid
 	response.Code = fiber.StatusCreated
 	return c.Status(response.Code).JSON(response)
+}
+
+// CreateProducts func creates a new products.
+// @Description Creates new products.
+// @Summary Create new products
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param create_products body request.CreateProductsRequest true "Create products"
+// @Success 200 {object} response.RequestResponse
+// @Security BearerAuth
+// @Router /api/products/create-many [post]
+func (cfg *AppConfig) CreateProducts(c *fiber.Ctx) error {
+	newErr := response.NewErrorResponse()
+	// Get claims from JWT.
+	data := cfg.JwtCredentials(c)
+	isAdmin := data["isAdmin"].(bool)
+	if !isAdmin {
+		newErr.Message = "Admin rights needed"
+		newErr.Code = fiber.StatusForbidden
+		cfg.Logger.Warn(newErr.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+
+	createProducts := new(request.CreateProductsRequest)
+	// Check, if received JSON data is valid.
+	if err := c.BodyParser(createProducts); err != nil {
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid JSON body"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+
+	}
+	// Validate createProduct fields.
+	if err := cfg.Validate.Struct(createProducts); err != nil {
+		// Return, if some fields are not valid.
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
+		cfg.Logger.Error(newErr.Message)
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	// Create database connection.
+	db, err := DbWithQueries(cfg)
+	if err != nil {
+		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	var products []schema.Product
+	results := make(map[int]interface{})
+	for index, createProduct := range createProducts.Products {
+		discount := 0.0
+		if createProduct.ProductDiscount == nil {
+			createProduct.ProductDiscount = &discount
+		}
+		audit := &schema.AuditEntity{CreatedAt: util.TimeNow(), LastModifiedBy: "none", CreatedBy: data["username"].(string)}
+		products = append(products, schema.Product{
+			Pid:             util.Ident(),
+			Name:            createProduct.Name,
+			Description:     createProduct.Description,
+			Category:        createProduct.Category,
+			Price:           createProduct.Price,
+			StockQuantity:   createProduct.StockQuantity,
+			Image:           createProduct.Image,
+			Details:         createProduct.Details,
+			ProductDiscount: *createProduct.ProductDiscount,
+			AuditInfo:       *audit,
+		})
+		results[index] = products[index].Pid
+	}
+	if err := db.CreateProducts(products); err != nil {
+		newErr.Message = err.Error()
+		if strings.Contains(err.Error(), "Error 1062") {
+			newErr.Message = "Duplicate key: product already exist"
+		}
+		cfg.Logger.Error(newErr.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+	}
+	response := response.NewResponse(c)
+	response.Result = results
+	response.Code = fiber.StatusCreated
+	return c.Status(response.Code).JSON(response)
+
 }
 
 // CreateReview func creates a new product review.

@@ -61,10 +61,6 @@ func routeStack(c *fiber.Ctx) error {
 }
 
 func MapRoutes(app *fiber.App, cfg *service.AppConfig) {
-
-	//logger middleware
-	//logger := cfg.Logger
-
 	// JWT middleware
 	jwt := middleware.NewAuthMiddleware(cfg.JwtSecretKey)
 	api := app.Group("api")

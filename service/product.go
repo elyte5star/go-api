@@ -19,7 +19,10 @@ import (
 // @Accept json
 // @Produce json
 // @Param create_product body request.CreateProductRequest true "Create product"
-// @Success 200 {object} response.RequestResponse
+// @Success 201 {object} response.RequestResponse "CREATED"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 409 {object} response.ErrorResponse{message=string,code=int} "CONFLICT"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/products/create [post]
 func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
@@ -102,7 +105,10 @@ func (cfg *AppConfig) CreateProduct(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param create_products body request.CreateProductsRequest true "Create products"
-// @Success 200 {object} response.RequestResponse
+// @Success 201 {object} response.RequestResponse "CREATED"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 409 {object} response.ErrorResponse{message=string,code=int} "CONFLICT"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/products/create-many [post]
 func (cfg *AppConfig) CreateProducts(c *fiber.Ctx) error {
@@ -165,7 +171,8 @@ func (cfg *AppConfig) CreateProducts(c *fiber.Ctx) error {
 	if err := db.CreateProducts(products); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
-			newErr.Message = "Duplicate key: product already exist"
+			newErr.Message = "Product with same image already exist"
+			newErr.Code = fiber.ErrConflict.Code
 		}
 		cfg.Logger.Error(newErr.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
@@ -184,7 +191,10 @@ func (cfg *AppConfig) CreateProducts(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param product_review body request.CreateProductReviewRequest true "Create a product review"
-// @Success 200 {object} response.RequestResponse
+// @Success 201 {object} response.RequestResponse "CREATED"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 409 {object} response.ErrorResponse{message=string,code=int} "CONFLICT"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/products/create/review [post]
 func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -251,9 +261,10 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param pid path string true "pid"
-// @Success 200 {object} response.RequestResponse
-// @Failure 400 {object} response.ErrorResponse
-// @Failure 500 {object} response.ErrorResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/products/{pid}/reviews [get]
 func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -295,8 +306,9 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Failure 500 {object} response.ErrorResponse
-// @Success 200 {array} response.RequestResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/products [get]
 func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -342,9 +354,10 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param pid path string true "pid"
-// @Success 200 {object} response.RequestResponse
-// @Failure 400 {object} response.ErrorResponse
-// @Failure 500 {object} response.ErrorResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/products/{pid} [get]
 func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
@@ -379,7 +392,11 @@ func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param pid path string true "pid"
-// @Success 200 {object} response.RequestResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 403 {object} response.ErrorResponse{message=string,int} "FORBIDDEN"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/products/{pid} [delete]
 func (cfg *AppConfig) DeleteProduct(c *fiber.Ctx) error {

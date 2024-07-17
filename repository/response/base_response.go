@@ -3,9 +3,9 @@ package response
 import (
 	"fmt"
 	"time"
+
 	"github.com/api/util"
 	"github.com/gofiber/fiber/v2"
-	d "github.com/mcuadros/go-defaults"
 )
 
 type NoContent struct {
@@ -17,33 +17,33 @@ func (e *RecordNotFoundError) Error() string {
 }
 
 type RequestResponse struct {
-	Path      string      `default:"0" json:"path"`
-	Message   string      `default:"Operation Successful!" json:"message"`
+	Path      string      `json:"path"`
+	Message   string      `json:"message"`
 	Success   bool        `default:"true" json:"success"`
-	Code      int         `default:"200" json:"code"`
+	Code      int         `json:"code"`
 	TimeStamp time.Time   `json:"timeStamp"`
 	Result    interface{} `json:"result"`
 }
 
 func NewResponse(c *fiber.Ctx) *RequestResponse {
-	response := new(RequestResponse)
-	d.SetDefaults(response)
-	response.TimeStamp = util.TimeNow()
-	response.Path = c.Route().Path
-	return response
+	return &RequestResponse{
+		Path:      c.Route().Path,
+		Message:   "Operation Successful!",
+		Code:      200,
+		TimeStamp: util.TimeNow(),
+		Success:   true,
+	}
 
 }
 
 type ErrorResponse struct {
-	Code    int    `default:"503" json:"code"`
-	Message string `default:"Service unavailable" json:"message"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 	Success bool   `default:"false" json:"success"`
 }
 
 func NewErrorResponse() *ErrorResponse {
-	err := new(ErrorResponse)
-	d.SetDefaults(err)
-	return err
+	return &ErrorResponse{Code: 503, Message: "Service unavailable", Success: false}
 }
 
 func (e *ErrorResponse) Error() string {

@@ -8,7 +8,6 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mcuadros/go-defaults v1.2.0
 	github.com/samber/slog-fiber v1.15.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3

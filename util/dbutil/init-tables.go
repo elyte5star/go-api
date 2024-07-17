@@ -3,12 +3,12 @@ package dbutil
 import (
 	"log/slog"
 	"strings"
+
 	"github.com/api/repository/schema"
 	"github.com/api/service"
 	"github.com/api/util"
 	"github.com/jmoiron/sqlx"
 )
-
 
 const users = `CREATE TABLE IF NOT EXISTS users (
 	userid CHAR(36) PRIMARY KEY,
@@ -74,7 +74,7 @@ const products = `CREATE TABLE IF NOT EXISTS products (
 	price DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	stockQuantity INT UNSIGNED  DEFAULT '0000' NOT NULL,
 	image VARCHAR(64) NOT NULL UNIQUE,
-	details VARCHAR(664) NOT NULL,
+	details VARCHAR(1500) NOT NULL,
 	productDiscount DECIMAL(16,2) DEFAULT '0.00' NOT NULL,
 	auditInfo LONGTEXT NOT NULL
 	) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -97,14 +97,15 @@ const dropBookingsTable = `DROP TABLE IF EXISTS bookings;`
 const dropUserLocationTable = `DROP TABLE IF EXISTS user_locations;`
 const dropUserTable = `DROP TABLE IF EXISTS users;`
 const dropReviewTable = `DROP TABLE IF EXISTS reviews;`
+
 //const dropProductsTable = `DROP TABLE IF EXISTS products;`
 
-func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
+func LoadDatabase(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 	log := cfg.Logger
 
 	defer dbDriver.Close()
 
-	Droptables(cfg.Logger, dbDriver)
+	//Droptables(cfg.Logger, dbDriver)
 
 	statement, _ := dbDriver.Prepare(users)
 	if _, err := statement.Exec(); err != nil {
@@ -137,7 +138,7 @@ func CreateTables(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 	}
 
 	log.Info("All tables created/initialized successfully!")
-	CreateAdminAccount("elyte", cfg)
+	CreateAdminAccount(cfg)
 }
 func Droptables(log *slog.Logger, dbDriver *sqlx.DB) {
 	statement, _ := dbDriver.Prepare(dropOtpTable)
@@ -170,7 +171,7 @@ func Droptables(log *slog.Logger, dbDriver *sqlx.DB) {
 	// }
 
 }
-func CreateAdminAccount(username string, cfg *service.AppConfig) {
+func CreateAdminAccount(cfg *service.AppConfig) {
 	db, err := service.DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error(err.Error())
@@ -178,9 +179,9 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 	}
 	user := new(schema.User)
 	user.Userid = util.Ident()
-	user.UserName = username
+	user.UserName = cfg.SmtpUsername
 	user.SetPassword("string")
-	user.Email = "elyte5star@gmail.com"
+	user.Email = cfg.SupportEmail
 	user.Telephone = "234802394"
 	user.AccountNonLocked = true
 	user.FailedAttempt = 0
@@ -202,6 +203,3 @@ func CreateAdminAccount(username string, cfg *service.AppConfig) {
 
 }
 
-func CreateProducts(user *[]schema.Product) {
-
-}

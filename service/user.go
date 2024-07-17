@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"strings"
+
 	"github.com/api/repository/request"
 	"github.com/api/repository/response"
 	"github.com/api/repository/schema"
@@ -18,7 +19,10 @@ import (
 // @Accept json
 // @Produce json
 // @Param create_user body request.CreateUserRequest true "Create User"
-// @Success 200 {object} response.RequestResponse
+// @Success 201 {object} response.RequestResponse "CREATED"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 409 {object} response.ErrorResponse{message=string,code=int} "CONFLICT"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/users/signup [post]
 func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 
@@ -80,7 +84,8 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	if err := db.CreateUser(user); err != nil {
 		newErr.Message = err.Error()
 		if strings.Contains(err.Error(), "Error 1062") {
-			newErr.Message = "Duplicate key: user already exist"
+			newErr.Message = "User with email or username or telephone already exist"
+			newErr.Code = fiber.ErrConflict.Code
 		}
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
@@ -99,9 +104,10 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param userid path string true "userid"
-// @Success 200 {object} response.RequestResponse
-// @Failure 400 {object} response.ErrorResponse
-// @Failure 500 {object} response.ErrorResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/users/{userid} [get]
 func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
@@ -149,7 +155,11 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 // @Produce json
 // @Param userid path string true "userid"
 // @Param modify_user body request.ModifyUser true "Modify User"
-// @Success 201 {object} response.RequestResponse
+// @Success 201 {object} response.RequestResponse "CREATED"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 409 {object} response.ErrorResponse{message=string,code=int} "CONFLICT"
+// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/users/{userid} [put]
 func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
@@ -236,9 +246,10 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param userid path string true "userid"
-// @Success 200 {object} response.RequestResponse
-// @Failure 400 {object} response.ErrorResponse
-// @Failure 500 {object} response.ErrorResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/users/{userid}/address [get]
 func (cfg *AppConfig) GetAddressByUserid(c *fiber.Ctx) error {
@@ -284,8 +295,10 @@ func (cfg *AppConfig) GetAddressByUserid(c *fiber.Ctx) error {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Failure 500 {object} response.ErrorResponse
-// @Success 200 {array} response.RequestResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 403 {object} response.ErrorResponse{message=string,int} "FORBIDDEN"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/users [get]
 func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
@@ -341,7 +354,10 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param userid path string true "userid"
-// @Success 200 {object} response.RequestResponse
+// @Success 200 {object} response.RequestResponse "OK"
+// @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
+// @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Security BearerAuth
 // @Router /api/users/{userid} [delete]
 func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {

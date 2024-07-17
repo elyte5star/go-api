@@ -15,11 +15,13 @@ type AppConfig struct {
 	ClientOrigin          string ` validate:"required"`
 	SmtpServer            string ` validate:"required"`
 	SmtpUsername          string ` validate:"required"`
+	SmtpPort              int    ` validate:"required"`
 	SmtpPassword          string ` validate:"required"`
 	JwtSecretKey          string ` validate:"required"`
-	JwtExpireMinutesCount int    ` validate:"required"`
+	JwtExpireMinutesCount int    ` validate:"required,gte=0"`
 	ServiceName           string ` validate:"required"`
-	ReadTimeout           int    ` validate:"required"`
+	SupportEmail          string ` validate:"required,email"`
+	ReadTimeout           int    ` validate:"required,gte=0"`
 	Version               string ` validate:"required"`
 	Logger                *slog.Logger
 	Validate              *validator.Validate

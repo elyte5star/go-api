@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"net/mail"
 	"time"
 
 	"github.com/api/repository/request"
@@ -20,13 +21,13 @@ import (
 // @Tags Auth
 // @Accept x-www-form-urlencoded
 // @Produce json
-// @Param username formData string true "Username"
+// @Param username formData string true "Username/Email"
 // @Param password formData string true "Password"
 // @Success 200 {object} response.RequestResponse "OK"
 // @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
-// @Failure 401 {object} response.ErrorResponse{message=string,int} "UNAUTHORIZED"
 // @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
-// @Failure 501 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
+// @Failure 423 {object} response.ErrorResponse{message=string,code=int} "LOCKED"
+// @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/auth/form-login [post]
 func (cfg *AppConfig) FormLogin(c *fiber.Ctx) error {
 
@@ -51,11 +52,21 @@ func (cfg *AppConfig) FormLogin(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	user, err := db.FindByCredentials(tokenReq.Username)
+	user, err := schema.User{}, *new(error)
+	if isEmail(tokenReq.Username) {
+		user, err = db.FindByEmail(tokenReq.Username)
+	} else {
+		user, err = db.FindByUsername(tokenReq.Username)
+	}
 	if err != nil {
-		newErr.Message = "User with the given username is not found!"
+		newErr.Message = "User with the given username/email is not found!"
 		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	if !isEnabled(&user) || !isAccountNonLocked(&user) {
+		newErr.Message = "Account not active or locked"
+		newErr.Code = fiber.ErrLocked.Code
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
@@ -85,9 +96,9 @@ func (cfg *AppConfig) FormLogin(c *fiber.Ctx) error {
 // @Param credential body request.LoginRequest true "Login data"
 // @Success 200 {object} response.RequestResponse "OK"
 // @Failure 400 {object} response.ErrorResponse{message=string,code=int} "BAD REQUEST"
-// @Failure 401 {object} response.ErrorResponse{message=string,code=int} "UNAUTHORIZED"
 // @Failure 404 {object} response.ErrorResponse{message=string,code=int} "NOT FOUND"
-// @Failure 501 {object} response.ErrorResponse{message=string,code=int} "SERVICE UNAVAILABLE"
+// @Failure 423 {object} response.ErrorResponse{message=string,code=int} "LOCKED"
+// @Failure 503 {object} response.ErrorResponse{message=string,code=int} "SERVICE UNAVAILABLE"
 // @Router /api/auth/login [post]
 func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 
@@ -117,11 +128,21 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	user, err := db.FindByCredentials(tokenReq.Username)
+	user, err := schema.User{}, *new(error)
+	if isEmail(tokenReq.Username) {
+		user, err = db.FindByEmail(tokenReq.Username)
+	} else {
+		user, err = db.FindByUsername(tokenReq.Username)
+	}
 	if err != nil {
-		newErr.Message = "User with the given username is not found!"
+		newErr.Message = "User with the given username or email is not found!"
 		newErr.Code = fiber.StatusNotFound
 		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
+	}
+	if !isEnabled(&user) || !isAccountNonLocked(&user) {
+		newErr.Message = "Account not active or locked"
+		newErr.Code = fiber.ErrLocked.Code
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
@@ -141,6 +162,7 @@ func (cfg *AppConfig) Login(c *fiber.Ctx) error {
 	return c.Status(response.Code).JSON(response)
 
 }
+
 func (cfg *AppConfig) JwtCredentials(c *fiber.Ctx) map[string]interface{} {
 	loggedInUser := c.Locals("jwt").(*jwt.Token)
 	claims := loggedInUser.Claims.(jwt.MapClaims)
@@ -158,6 +180,7 @@ func (cfg *AppConfig) GetTokenResponse(user schema.User) (response.TokenResponse
 			Email:            user.Email,
 			AccountNonLocked: user.AccountNonLocked,
 			Admin:            user.Admin,
+			Enabled:          user.Enabled,
 			AccessToken:      token,
 			TokenType:        "bearer",
 		}, nil
@@ -179,6 +202,7 @@ func (cfg *AppConfig) GenerateJWT(user schema.User) (string, error) {
 	// Create the Claims
 	claims := jwt.MapClaims{
 		"name": "Elyte Application",
+		"iat":  time.Now().Unix(),
 		"exp":  time.Now().Add(time.Minute * time.Duration(cfg.JwtExpireMinutesCount)).Unix(),
 		"data": principal,
 	}
@@ -189,6 +213,18 @@ func (cfg *AppConfig) GenerateJWT(user schema.User) (string, error) {
 	// Generate encoded token and send it as response.
 	return token.SignedString([]byte(cfg.JwtSecretKey))
 
+}
+func isEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+func isAccountNonLocked(user *schema.User) bool {
+	return user.AccountNonLocked
+}
+
+func isEnabled(user *schema.User) bool {
+	return user.Enabled
 }
 
 // func ExtractJwtCredentials(c *fiber.Ctx, cfg *AppConfig) (*UserCredentials, error) {

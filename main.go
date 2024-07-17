@@ -68,7 +68,7 @@ func main() {
 	h := Handler(cfg)
 
 	if db, err := service.ConnectToMySQL(cfg); err == nil {
-		dbutil.CreateTables(db, cfg)
+		dbutil.LoadDatabase(db, cfg)
 		api.StartApi(h, cfg, db)
 
 	}

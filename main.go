@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/api/api"
-	"github.com/api/common/middleware"
+	"github.com/api/middleware"
 	_ "github.com/api/docs"
 	"github.com/api/service"
 	"github.com/api/util/dbutil"

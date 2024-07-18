@@ -47,7 +47,8 @@ API with Go Fiber.
 - Run the Application
 
  ```
+ ```
  go run *.go
 
  ```
- ```
+ 

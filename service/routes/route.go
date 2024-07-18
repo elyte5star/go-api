@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/api/common/middleware"
+	"github.com/api/middleware"
 	res "github.com/api/repository/response"
 	"github.com/api/service"
 	"github.com/gofiber/fiber/v2"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/api/common/middleware"
+	"github.com/api/middleware"
 	res "github.com/api/repository/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"

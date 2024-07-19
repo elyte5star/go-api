@@ -176,7 +176,7 @@ func (cfg *AppConfig) GetTokenResponse(user schema.User) (response.TokenResponse
 	if err == nil {
 		return response.TokenResponse{
 			Userid:           user.Userid,
-			Username:         user.UserName,
+			Username:         user.Username,
 			Email:            user.Email,
 			AccountNonLocked: user.AccountNonLocked,
 			Admin:            user.Admin,
@@ -191,7 +191,7 @@ func (cfg *AppConfig) GenerateJWT(user schema.User) (string, error) {
 
 	principal := &request.UserCredentials{
 		Userid:                  user.Userid,
-		Username:                user.UserName,
+		Username:                user.Username,
 		Email:                   user.Email,
 		IsEnabled:               user.Enabled,
 		IsAccountNonLocked:      user.AccountNonLocked,

@@ -55,7 +55,7 @@ func (cfg *AppConfig) CreateUser(c *fiber.Ctx) error {
 	user := new(schema.User)
 	// Set initialized default data for user:
 	user.Userid = util.Ident()
-	user.UserName = createUser.Username
+	user.Username = createUser.Username
 	user.SetPassword(createUser.Password)
 	user.Email = createUser.Email
 	user.Admin = false
@@ -128,12 +128,13 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		newErr.Message = "User with userid is not found!"
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusNotFound).JSON(newErr)
+		newErr.Code = fiber.StatusNotFound
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	result := &response.GetUserResponse{Userid: user.Userid,
 		LastModifiedAt:   user.AuditInfo.LastModifiedAt,
 		CreatedAt:        user.AuditInfo.CreatedAt,
-		Username:         user.UserName,
+		Username:         user.Username,
 		Email:            user.Email,
 		AccountNonLocked: user.AccountNonLocked,
 		Admin:            user.Admin,
@@ -141,7 +142,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 		Enabled:          user.Enabled,
 		Telephone:        user.Telephone,
 		LockTime:         user.LockTime,
-		Address:          &address,
+		Address:          address,
 	}
 	response := response.NewResponse(c)
 	response.Result = result
@@ -198,40 +199,49 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	foundUser, _, err := db.GetUserById(userid)
+	foundUser, address, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given userid is not found!"
 		cfg.Logger.Error(err.Error())
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	if modifyUser.Address != nil {
+	modifyAddress := modifyUser.Address
+	if modifyAddress != nil {
+		newAddress := &schema.UserAddress{Userid: foundUser.Userid, FullName: modifyAddress.FullName,
+			StreetAddress: modifyAddress.StreetAddress, Country: modifyAddress.Country,
+			State: modifyAddress.State, Zip: modifyAddress.Zip}
 		// Validate User Address fields.
-		if err := cfg.Validate.Struct(modifyUser.Address); err != nil {
+		if err := cfg.Validate.Struct(newAddress); err != nil {
 			// Return, if some fields are not valid.
 			newErr.Code = fiber.ErrBadRequest.Code
 			newErr.Message = fmt.Sprintf("Invalid Field(s) :%v", util.ValidatorErrors(err))
 			cfg.Logger.Error(newErr.Message)
 			return c.Status(newErr.Code).JSON(newErr)
 		}
-		modifyAddress := modifyUser.Address
-		address := &schema.UserAddress{Userid: foundUser.Userid, FullName: modifyAddress.FullName,
-			StreetAddress: modifyAddress.StreetAddress, Country: modifyAddress.Country,
-			State: modifyAddress.State, Zip: modifyAddress.Zip}
-		if err := db.CreateUserAdress(address); err != nil {
-			cfg.Logger.Error(err.Error())
-			return c.Status(newErr.Code).JSON(newErr)
+		if address.FullName == nil {
+			if err := db.CreateUserAdress(newAddress); err != nil {
+				cfg.Logger.Error(err.Error())
+				return c.Status(newErr.Code).JSON(newErr)
+			}
+			cfg.Logger.Info("User Address was Created")
+		} else {
+			if err := db.UpdateUserAdress(foundUser.Userid, newAddress); err != nil {
+				cfg.Logger.Error(err.Error())
+				return c.Status(newErr.Code).JSON(newErr)
+			}
+			cfg.Logger.Info("User Address was Updated")
 		}
 		//announce change of address
 	}
 	foundUser.Telephone = modifyUser.Telephone
-	foundUser.UserName = modifyUser.Username
+	foundUser.Username = modifyUser.Username
 	now := util.TimeNow()
 	foundUser.AuditInfo.LastModifiedAt = &now
-	foundUser.AuditInfo.LastModifiedBy = data["userid"].(string)
+	foundUser.AuditInfo.LastModifiedBy = data["username"].(string)
 	if err := db.UpdateUser(foundUser.Userid, &foundUser); err != nil {
 		cfg.Logger.Error(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(newErr)
+		return c.Status(newErr.Code).JSON(newErr)
 	}
 	response := response.NewResponse(c)
 	response.Code = fiber.StatusCreated
@@ -329,7 +339,7 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 		result.Users = append(result.Users, response.GetUserResponse{Userid: user.Userid,
 			LastModifiedAt:   user.AuditInfo.LastModifiedAt,
 			CreatedAt:        user.AuditInfo.CreatedAt,
-			Username:         user.UserName,
+			Username:         user.Username,
 			Email:            user.Email,
 			AccountNonLocked: user.AccountNonLocked,
 			Admin:            user.Admin,

@@ -14,14 +14,14 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, response.GetUserAdressResponse, error) {
+func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, *response.GetUserAdressResponse, error) {
 	user := schema.User{}
-	address := response.GetUserAdressResponse{}
+	address := &response.GetUserAdressResponse{}
 	query := `SELECT u.*,a.fullName,a.streetAddress,a.country,a.state, a.zip
 	 FROM users AS u LEFT JOIN address AS a on u.userid=a.userid WHERE u.userid=?`
-	if err := q.QueryRow(query, userid).Scan(&user.Userid, &user.UserName, &user.Password, &user.Email,
-		&user.Admin, &user.IsUsing2FA, &user.AccountNonLocked, &user.Enabled, &user.FailedAttempt,
-		&user.Discount, &user.Telephone, &user.LockTime, &user.AuditInfo, &address.FullName,
+	if err := q.QueryRow(query, userid).Scan(&user.Userid, &user.Username, &user.Password, &user.Email, &user.AccountNonLocked,
+		&user.Admin, &user.Enabled, &user.IsUsing2FA, &user.Telephone, &user.Discount, &user.FailedAttempt,
+		&user.LockTime, &user.AuditInfo, &address.FullName,
 		&address.StreetAddress, &address.Country, &address.State, &address.Zip); err != nil {
 		if err == sql.ErrNoRows {
 			return user, address, fmt.Errorf("unknown userid : %d", userid)
@@ -65,22 +65,31 @@ func (q *UserQueries) GetUserAddressById(userid uuid.UUID) (schema.UserAddress, 
 func (q *UserQueries) CreateUserAdress(address *schema.UserAddress) error {
 	// Define query string.
 	query := `INSERT INTO address (userid,fullName,streetAddress,country,state,zip)
-	 VALUES (:userid,:fullName,:streetAddress,:country,:state,:zip) 
-	 ON DUPLICATE KEY UPDATE fullName=:fullName,streetAddress=:streetAddress,country=:country,state=:state,zip=:zip`
-
+	 VALUES (:userid,:fullName,:streetAddress,:country,:state,:zip)`
 	// Send query to database.
 	_, err := q.NamedExec(query, address)
 	if err != nil {
 		// Return only error.
 		return err
 	}
+	// This query returns nothing.
+	return nil
+}
 
+// UpdateUserAdress method for creating UserAddress by given UserAddress object.
+func (q *UserQueries) UpdateUserAdress(userid uuid.UUID, address *schema.UserAddress) error {
+	// Define query string.
+	query := `UPDATE address SET fullName=?,streetAddress=?,country=?,state=?,zip=? WHERE userid=?`
+	_, err := q.Exec(query, address.FullName, address.StreetAddress, address.Country, address.State, address.Zip, userid)
+	if err != nil {
+		// Return only error.
+		return err
+	}
 	// This query returns nothing.
 	return nil
 }
 
 func (q *UserQueries) GetUsers() ([]schema.User, error) {
-
 	// Define users variable.
 	users := []schema.User{}
 	// Define query string.
@@ -116,7 +125,7 @@ func (q *UserQueries) UpdateUser(userid uuid.UUID, user *schema.User) error {
 	// Define query string.
 	query := `UPDATE users SET username=?,telephone=?, auditInfo=? WHERE userid=?`
 	// Send query to database.
-	_, err := q.Exec(query, user.UserName, user.Telephone, user.AuditInfo, userid)
+	_, err := q.Exec(query, user.Username, user.Telephone, user.AuditInfo, userid)
 	if err != nil {
 		// Return only error.
 		return err

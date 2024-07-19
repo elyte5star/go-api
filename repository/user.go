@@ -1,6 +1,10 @@
 package repository
 
 import (
+	"database/sql"
+	"fmt"
+
+	"github.com/api/repository/response"
 	"github.com/api/repository/schema"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -10,19 +14,21 @@ type UserQueries struct {
 	*sqlx.DB
 }
 
-func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, error) {
-
+func (q *UserQueries) GetUserById(userid uuid.UUID) (schema.User, response.GetUserAdressResponse, error) {
 	user := schema.User{}
-	// Define query string.
-	query := `SELECT * FROM users WHERE userid=?`
-
-	// Send query to database.
-	err := q.Get(&user, query, userid)
-	if err != nil {
-		// Return empty object and error.
-		return user, err
+	address := response.GetUserAdressResponse{}
+	query := `SELECT u.*,a.fullName,a.streetAddress,a.country,a.state, a.zip
+	 FROM users AS u LEFT JOIN address AS a on u.userid=a.userid WHERE u.userid=?`
+	if err := q.QueryRow(query, userid).Scan(&user.Userid, &user.UserName, &user.Password, &user.Email,
+		&user.Admin, &user.IsUsing2FA, &user.AccountNonLocked, &user.Enabled, &user.FailedAttempt,
+		&user.Discount, &user.Telephone, &user.LockTime, &user.AuditInfo, &address.FullName,
+		&address.StreetAddress, &address.Country, &address.State, &address.Zip); err != nil {
+		if err == sql.ErrNoRows {
+			return user, address, fmt.Errorf("unknown userid : %d", userid)
+		}
+		return user, address, err
 	}
-	return user, nil
+	return user, address, nil
 }
 
 func (q *UserQueries) GetUserByUsername(username string) (schema.User, error) {

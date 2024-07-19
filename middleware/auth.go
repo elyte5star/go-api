@@ -15,7 +15,7 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 		SigningKey:     jwtware.SigningKey{Key: []byte(secret)},
 		ErrorHandler:   abortAuthenticationFailed,
 		ContextKey:     "jwt",
-		SuccessHandler: AuthSuccess,
+		SuccessHandler: authSuccess,
 	})
 }
 
@@ -35,7 +35,7 @@ func abortAuthenticationFailed(c *fiber.Ctx, err error) error {
 
 }
 
-func AuthSuccess(c *fiber.Ctx) error {
+func authSuccess(c *fiber.Ctx) error {
 	//reset failed attempt counter
 	loggedInUser := c.Locals("jwt").(*jwt.Token)
 	claims := loggedInUser.Claims.(jwt.MapClaims)

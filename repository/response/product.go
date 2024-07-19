@@ -7,16 +7,16 @@ import (
 )
 
 type GetProductResponse struct {
-	Pid             uuid.UUID     `json:"pid"`
-	Name            string        `json:"name"`
-	Description     string        `json:"description"`
-	Category        string        `json:"category"`
-	Price           float64       `json:"price"`
-	StockQuantity   int           `json:"stockQuantity"`
-	Image           string        `json:"image"`
-	Details         string        `json:"details"`
-	ProductDiscount float64       `json:"productDiscount"`
-	Reviews         []interface{} `json:"reviews"`
+	Pid             uuid.UUID   `json:"pid"`
+	Name            string      `json:"name"`
+	Description     string      `json:"description"`
+	Category        string      `json:"category"`
+	Price           float64     `json:"price"`
+	StockQuantity   int         `json:"stockQuantity"`
+	Image           string      `json:"image"`
+	Details         string      `json:"details"`
+	ProductDiscount float64     `json:"productDiscount"`
+	Reviews         interface{} `json:"reviews"`
 }
 
 // Products struct

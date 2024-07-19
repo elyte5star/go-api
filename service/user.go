@@ -124,7 +124,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	user, err := db.GetUserById(userid)
+	user, address, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with userid is not found!"
 		cfg.Logger.Error(err.Error())
@@ -141,6 +141,7 @@ func (cfg *AppConfig) GetUser(c *fiber.Ctx) error {
 		Enabled:          user.Enabled,
 		Telephone:        user.Telephone,
 		LockTime:         user.LockTime,
+		Address:          &address,
 	}
 	response := response.NewResponse(c)
 	response.Result = result
@@ -197,7 +198,7 @@ func (cfg *AppConfig) UpdateUser(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	foundUser, err := db.GetUserById(userid)
+	foundUser, _, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given userid is not found!"
 		cfg.Logger.Error(err.Error())
@@ -266,7 +267,7 @@ func (cfg *AppConfig) GetAddressByUserid(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	_, err = db.GetUserById(userid)
+	_, _, err = db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given ID is not found!"
 		newErr.Code = fiber.StatusNotFound
@@ -280,12 +281,8 @@ func (cfg *AppConfig) GetAddressByUserid(c *fiber.Ctx) error {
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	result := &response.GetUserAdressResponse{
-		FullName: userAddress.FullName, StreetAddress: userAddress.StreetAddress,
-		Country: userAddress.Country, State: userAddress.State, Zip: userAddress.Zip,
-	}
 	response := response.NewResponse(c)
-	response.Result = result
+	response.Result = userAddress
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
@@ -374,7 +371,7 @@ func (cfg *AppConfig) DeleteUser(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	foundUser, err := db.GetUserById(userid)
+	foundUser, _, err := db.GetUserById(userid)
 	if err != nil {
 		newErr.Message = "User with the given ID is not found!"
 		newErr.Code = fiber.StatusNotFound

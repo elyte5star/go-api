@@ -221,7 +221,7 @@ func (cfg *AppConfig) CreateReview(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	foundProduct, err := db.GetProductById(createReview.Pid)
+	foundProduct, _, err := db.GetProductById(createReview.Pid)
 	if err != nil {
 		newErr.Message = "Product with the given ID is not found!"
 		newErr.Code = fiber.StatusNotFound
@@ -281,7 +281,7 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	product, err := db.GetProductById(pid)
+	product, _, err := db.GetProductById(pid)
 	if err != nil {
 		newErr.Message = "Product with pid is not found!"
 		cfg.Logger.Error(err.Error())
@@ -373,15 +373,18 @@ func (cfg *AppConfig) GetSingleProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	product, err := db.GetProductById(pid)
+	product, reviews, err := db.GetProductById(pid)
 	if err != nil {
 		newErr.Message = "Product with pid is not found!"
 		cfg.Logger.Error(err.Error())
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
+	result := response.GetProductResponse{Pid: product.Pid, Name: product.Name, Description: product.Description,
+		Category: product.Category, Price: product.Price, StockQuantity: product.StockQuantity, Image: product.Image,
+		Details: product.Details, ProductDiscount: product.ProductDiscount, Reviews: reviews}
 	response := response.NewResponse(c)
-	response.Result = product
+	response.Result = result
 	return c.Status(response.Code).JSON(response)
 }
 
@@ -422,7 +425,7 @@ func (cfg *AppConfig) DeleteProduct(c *fiber.Ctx) error {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	foundProduct, err := db.GetProductById(pid)
+	foundProduct, _, err := db.GetProductById(pid)
 	if err != nil {
 		newErr.Message = "Product with the given ID is not found!"
 		cfg.Logger.Error(err.Error())

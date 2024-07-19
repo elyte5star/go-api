@@ -325,10 +325,10 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	result := response.GetProductsResponse{}
+	result := []response.GetProductResponse{}
 	count := 0
 	for _, product := range products {
-		result.Products = append(result.Products, response.GetProductResponse{
+		result = append(result, response.GetProductResponse{
 			Pid:             product.Pid,
 			Name:            product.Name,
 			Description:     product.Description,
@@ -341,9 +341,9 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 		})
 		count += 1
 	}
-	result.NumberOfElements = count
+	temp := &response.GetProductsResponse{Products: result, NumberOfElements: count}
 	response := response.NewResponse(c)
-	response.Result = result
+	response.Result = temp
 	return c.Status(response.Code).JSON(response)
 }
 

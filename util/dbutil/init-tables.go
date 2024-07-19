@@ -179,7 +179,7 @@ func CreateAdminAccount(cfg *service.AppConfig) {
 	}
 	user := new(schema.User)
 	user.Userid = util.Ident()
-	user.UserName = cfg.SmtpUsername
+	user.Username = cfg.SmtpUsername
 	user.SetPassword("string")
 	user.Email = cfg.SupportEmail
 	user.Telephone = "234802394"

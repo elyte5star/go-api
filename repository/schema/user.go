@@ -33,7 +33,7 @@ type Otp struct {
 
 type User struct {
 	Userid           uuid.UUID   `db:"userid" json:"userid" validate:"required,uuid"`
-	UserName         string      `db:"username" json:"username" validate:"required,max=10"`
+	Username         string      `db:"username" json:"username" validate:"required,max=10"`
 	Password         []byte      `db:"password" json:"password"  validate:"required"`
 	Email            string      `db:"email" json:"email" validate:"required,email"`
 	AccountNonLocked bool        `db:"accountNonLocked" json:"accountNonLocked"`

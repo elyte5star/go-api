@@ -1,0 +1,18 @@
+[
+    {   "username": "user1",
+        "password": "string",
+        "email": "elyte5star@gmail.com",
+        "admin": true,
+        "enabled": true,
+        "discount": "0.05",
+        "telephone": "1234567"
+    },
+    {   "username": "user",
+        "password": "string",
+        "email": "test@aon.com",
+        "admin": false,
+        "enabled": false,
+        "discount": "0.05",
+        "telephone": "1234567"
+    }
+]

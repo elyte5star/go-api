@@ -325,25 +325,9 @@ func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 		newErr.Code = fiber.StatusNotFound
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	result := []response.GetProductResponse{}
-	count := 0
-	for _, product := range products {
-		result = append(result, response.GetProductResponse{
-			Pid:             product.Pid,
-			Name:            product.Name,
-			Description:     product.Description,
-			Category:        product.Category,
-			Price:           product.Price,
-			StockQuantity:   product.StockQuantity,
-			Image:           product.Image,
-			Details:         product.Details,
-			ProductDiscount: product.ProductDiscount,
-		})
-		count += 1
-	}
-	temp := &response.GetProductsResponse{Products: result, NumberOfElements: count}
+	result := &response.GetProductsResponse{Products: products, NumberOfElements: len(products)}
 	response := response.NewResponse(c)
-	response.Result = temp
+	response.Result = result
 	return c.Status(response.Code).JSON(response)
 }
 

@@ -81,17 +81,28 @@ out:
 	return product, reviews, nil
 }
 
-func (q *ProductQueries) GetProducts() ([]schema.Product, error) {
+func (q *ProductQueries) GetProducts() ([]response.GetProductResponse, error) {
 	// Define products variable.
-	products := []schema.Product{}
+	products := []response.GetProductResponse{}
 	// // Define query string.
-	query := `SELECT * FROM products LIMIT 12`
+	query := `SELECT p.pid, p.name,p.description,p.category,p.price,p.stockQuantity,p.image,p.details,
+	p.productDiscount, COUNT(r.rid) AS reviews FROM products AS p LEFT JOIN reviews AS r USING(pid) GROUP BY p.pid`
 	// Send query to database.
-	err := q.Select(&products, query)
+	rows, err := q.Queryx(query)
 	if err != nil {
-		// Return empty object and error.
+		//Return empty object and error.
 		return products, err
 	}
+	for rows.Next() {
+		product := response.GetProductResponse{}
+		if err := rows.Scan(&product.Pid, &product.Name, &product.Description, &product.Category,
+			&product.Price,
+			&product.StockQuantity, &product.Image, &product.Details, &product.ProductDiscount, &product.Reviews); err != nil {
+			return products, err
+		}
+		products = append(products, product)
+	}
+
 	return products, nil
 }
 

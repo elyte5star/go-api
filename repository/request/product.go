@@ -24,3 +24,9 @@ type CreateProductReviewRequest struct {
 type CreateProductsRequest struct {
 	Products []CreateProductRequest `json:"products" validate:"required,dive,required"`
 }
+
+type GetproductsQuery struct {
+	Page int    `json:"page"`
+	Size int    `json:"size"`
+	Sort string `json:"sort"`
+}

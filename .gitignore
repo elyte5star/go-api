@@ -156,7 +156,7 @@ $RECYCLE.BIN/
 
 # Go workspace file
 go.work
-util/data/*
+util/dbutil/data/*
 doc/*
 core
 *.cgo*.go

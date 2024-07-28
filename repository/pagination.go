@@ -14,4 +14,6 @@ type Pagination struct {
 	TotalPage     int
 }
 
-func (p *Pagination) Pageable(table string, page int) {}
+func (q *PaginationQueries) Pageable(table string, page int) *Pagination {
+	return &Pagination{}
+}

@@ -306,6 +306,9 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 // @Tags Product
 // @Accept json
 // @Produce json
+// @Param			page	query		int				true	"Page number"
+// @Param			size	query		int				true	"Number of element"
+// @Param			sort	query		string				true	"Sort"
 // @Success 200 {object} response.RequestResponse "OK"
 // @Failure 404 {object} response.ErrorResponse{message=string,int} "NOT FOUND"
 // @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
@@ -313,6 +316,12 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
 	newErr := response.NewErrorResponse()
 	// Create database connection.
+	query := new(request.GetproductsQuery)
+
+	if err := c.QueryParser(query); err != nil {
+		return err
+	}
+	fmt.Println(query.Size)
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())

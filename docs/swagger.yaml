@@ -303,6 +303,22 @@ paths:
       consumes:
       - application/json
       description: Get all existing products.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Number of element
+        in: query
+        name: size
+        required: true
+        type: integer
+      - description: Sort
+        in: query
+        name: sort
+        required: true
+        type: string
       produces:
       - application/json
       responses:

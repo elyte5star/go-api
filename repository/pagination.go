@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -26,9 +27,18 @@ type Pagination struct {
 
 func (q *PaginationQueries) Pageable(table string, page int) *Pagination {
 	const LIMIT = 12
-	var rowCount int
+	var (
+		pagination = Pagination{}
+		rowCount   int
+	)
+	pagination.Empty = false
+	pagination.Last = false
+	pagination.First = false
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
-	_ = q.QueryRow(query).Scan(&rowCount)
+	err := q.QueryRow(query).Scan(&rowCount)
+	if err == sql.ErrNoRows {
+		pagination.Empty = true
+	}
 	total := (rowCount / LIMIT)
 	return &Pagination{}
 }

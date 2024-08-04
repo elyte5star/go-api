@@ -11,34 +11,56 @@ type PaginationQueries struct {
 	*sqlx.DB
 }
 
-type Pagination struct {
-	Next             int  `json:"next"`
-	Previous         int  `json:"previous"`
-	RecordPerPage    int  `json:"recordPerPage"`
-	CurrentPage      int  `json:"currentPage"`
-	TotalPages       int  `json:"totalPages"`
-	NumberOfElements int  `json:"numberOfElements"`
-	Number           int  `json:"number"`
+const limit = 12
+
+type Page struct {
+	Next             int  `json:"next,omitempty"`
+	Previous         int  `json:"previous,omitempty"`
+	CurrentPage      int  `json:"currentPage,omitempty"`
+	TotalPages       int  `json:"totalPages,omitempty"`
+	NumberOfElements int  `json:"numberOfElements,omitempty"`
+	Number           int  `json:"number,omitempty"`
 	TotalElements    int  `json:"totalElements"`
 	Empty            bool `json:"empty"`
-	Last             bool `json:"last"`
-	First            bool `json:"first"`
+	Size             int  `json:"size"`
 }
 
-func (q *PaginationQueries) Pageable(table string, page int) *Pagination {
-	const LIMIT = 12
+func (q *PaginationQueries) Pageable(table string, page int) (*Page, error) {
 	var (
-		pagination = Pagination{}
+		pagination = Page{}
 		rowCount   int
 	)
-	pagination.Empty = false
-	pagination.Last = false
-	pagination.First = false
+
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
 	err := q.QueryRow(query).Scan(&rowCount)
 	if err == sql.ErrNoRows {
 		pagination.Empty = true
+		pagination.TotalElements = 0
+		pagination.NumberOfElements = 0
+		pagination.Size = limit
+		return &pagination, nil
+	} 
+	pagination.Empty = false
+	pagination.TotalElements = rowCount
+	pagination.NumberOfElements = limit
+	totalPages := (rowCount / limit)
+	remainder := (rowCount % limit)
+	if remainder == 0 {
+		pagination.TotalPages = totalPages
+	} else {
+		pagination.TotalPages = totalPages + 1
 	}
-	total := (rowCount / LIMIT)
-	return &Pagination{}
+	pagination.CurrentPage = page
+	pagination.Size = limit
+	if page <= 0 {
+		pagination.Next = page + 1
+	} else if page < pagination.TotalPages {
+		pagination.Previous = page - 1
+		pagination.Next = page + 1
+	} else if page == pagination.TotalPages {
+		pagination.Previous = page - 1
+		pagination.Next = 0
+
+	}
+	return &pagination, nil
 }

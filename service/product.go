@@ -314,20 +314,28 @@ func (cfg *AppConfig) GetProductReviewsByPid(c *fiber.Ctx) error {
 // @Failure 503 {object} response.ErrorResponse{message=string,int} "SERVICE UNAVAILABLE"
 // @Router /api/products [get]
 func (cfg *AppConfig) GetAllProducts(c *fiber.Ctx) error {
+
 	newErr := response.NewErrorResponse()
-	// Create database connection.
+
 	query := new(request.GetproductsQuery)
 
 	if err := c.QueryParser(query); err != nil {
-		return err
+		newErr.Code = fiber.ErrBadRequest.Code
+		newErr.Message = "Invalid Query"
+		cfg.Logger.Error(err.Error())
+		return c.Status(newErr.Code).JSON(newErr)
 	}
-	fmt.Println(query.Size)
+
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	// Create database connection.
 	db, err := DbWithQueries(cfg)
 	if err != nil {
 		cfg.Logger.Error("Couldnt connect to DB: " + err.Error())
 		return c.Status(newErr.Code).JSON(newErr)
 	}
-	products, err := db.GetProducts()
+	products, err := db.GetProducts(query.Page)
 	if err != nil {
 		newErr.Message = "Products not found!"
 		cfg.Logger.Error(err.Error())

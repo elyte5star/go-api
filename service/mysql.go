@@ -13,6 +13,7 @@ type Queries struct {
 	*repository.UserQueries
 	*repository.AuthQueries
 	*repository.ProductQueries
+	*repository.PaginationQueries
 }
 
 func getDbConfig(dbConfig *DbConfig) (*mysql.Config, error) {
@@ -47,7 +48,7 @@ func ConnectToMySQL(cfg *AppConfig) (*sqlx.DB, error) {
 		return nil, fmt.Errorf("error, cant ping database, %w", err)
 	}
 	cfg.Logger.Debug(fmt.Sprintf("Connection Opened to MySQL Database at %v:%v", cfg.DbConfig.Host, cfg.DbConfig.Port))
-	
+
 	return db, nil
 }
 
@@ -57,9 +58,10 @@ func DbWithQueries(cfg *AppConfig) (*Queries, error) {
 		return nil, err
 	}
 	return &Queries{
-		UserQueries:    &repository.UserQueries{DB: db},
-		AuthQueries:    &repository.AuthQueries{DB: db},
-		ProductQueries: &repository.ProductQueries{DB: db},
+		UserQueries:       &repository.UserQueries{DB: db},
+		AuthQueries:       &repository.AuthQueries{DB: db},
+		ProductQueries:    &repository.ProductQueries{DB: db},
+		PaginationQueries: &repository.PaginationQueries{DB: db},
 	}, nil
 
 }

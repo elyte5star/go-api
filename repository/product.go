@@ -81,7 +81,8 @@ out:
 	return product, reviews, nil
 }
 
-func (q *ProductQueries) GetProducts() ([]response.GetProductResponse, error) {
+func (q *ProductQueries) GetProducts(page int) ([]response.GetProductResponse, error) {
+	
 	// Define products variable.
 	products := []response.GetProductResponse{}
 	// // Define query string.

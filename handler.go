@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"time"
+
 	"github.com/api/service"
+	"github.com/api/service/routes"
 	"github.com/api/util"
 	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/mvrilo/go-redoc"
-	"github.com/api/service/routes"
 	fiberredoc "github.com/mvrilo/go-redoc/fiber"
 	slogfiber "github.com/samber/slog-fiber"
 )
@@ -51,10 +52,11 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 
 	// Fiber instance
 	fb := fiber.New(fiber.Config{
-		AppName:           appInfo,
-		EnablePrintRoutes: cfg.Debug,
-		ErrorHandler:      cfg.PanicRecovery("./public"),
-		ReadTimeout:       time.Second * time.Duration(cfg.ReadTimeout),
+		AppName:                  appInfo,
+		EnablePrintRoutes:        cfg.Debug,
+		ErrorHandler:             cfg.PanicRecovery("./public"),
+		ReadTimeout:              time.Second * time.Duration(cfg.ReadTimeout),
+		EnableSplittingOnParsers: true,
 	})
 
 	//check if application meets requirments
@@ -88,7 +90,7 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	}
 
 	//Add routes
-	routes.MapRoutes(fb,cfg)
+	routes.MapRoutes(fb, cfg)
 
 	return fb
 }

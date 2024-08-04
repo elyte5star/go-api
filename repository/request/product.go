@@ -27,6 +27,6 @@ type CreateProductsRequest struct {
 
 type GetproductsQuery struct {
 	Page int    `query:"page"`
-	Size int    `query:"size"`
-	Sort string `query:"sort"`
+	Size int    `query:"size,omitempty"`
+	Sort string `query:"sort,omitempty"`
 }

@@ -97,8 +97,7 @@ const dropBookingsTable = `DROP TABLE IF EXISTS bookings;`
 const dropUserLocationTable = `DROP TABLE IF EXISTS user_locations;`
 const dropUserTable = `DROP TABLE IF EXISTS users;`
 const dropReviewTable = `DROP TABLE IF EXISTS reviews;`
-
-//const dropProductsTable = `DROP TABLE IF EXISTS products;`
+const dropProductsTable = `DROP TABLE IF EXISTS products;`
 
 func LoadDatabase(dbDriver *sqlx.DB, cfg *service.AppConfig) {
 	log := cfg.Logger
@@ -165,10 +164,10 @@ func Droptables(log *slog.Logger, dbDriver *sqlx.DB) {
 	if _, err := statement.Exec(); err != nil {
 		log.Error(err.Error())
 	}
-	// statement, _ = dbDriver.Prepare(dropProductsTable)
-	// if _, err := statement.Exec(); err != nil {
-	// 	log.Error(err.Error())
-	// }
+	statement, _ = dbDriver.Prepare(dropProductsTable)
+	if _, err := statement.Exec(); err != nil {
+		log.Error(err.Error())
+	}
 
 }
 func CreateAdminAccount(cfg *service.AppConfig) {

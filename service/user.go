@@ -315,7 +315,7 @@ func (cfg *AppConfig) GetUsers(c *fiber.Ctx) error {
 	isAdmin := data["isAdmin"].(bool)
 
 	if !isAdmin {
-		newErr.Message = "Admin rights needed"
+		newErr.Message = "InsufficientPermissions. Admin rights needed"
 		newErr.Code = fiber.StatusForbidden
 		cfg.Logger.Warn(newErr.Error())
 		return c.Status(newErr.Code).JSON(newErr)

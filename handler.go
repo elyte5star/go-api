@@ -50,6 +50,10 @@ func Handler(cfg *service.AppConfig) *fiber.App {
 	//logger middleware
 	logger := cfg.Logger
 
+	// Add an attribute to all log entries made through this logger.
+	//logger = logger.With("env", "production")
+	
+	
 	// Fiber instance
 	fb := fiber.New(fiber.Config{
 		AppName:                  appInfo,

@@ -40,10 +40,12 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/samber/lo v1.38.1 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
 	go.opentelemetry.io/otel v1.19.0 // indirect
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
@@ -65,6 +67,7 @@ require (
 	github.com/mvrilo/go-redoc v0.1.5
 	github.com/mvrilo/go-redoc/fiber v0.0.0-20240120021923-101384bb3acd
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/samber/slog-multi v1.2.2
 	github.com/shopspring/decimal v1.4.0
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.54.0 // indirect

@@ -70,7 +70,7 @@ func (cfg *AppConfig) FormLogin(c *fiber.Ctx) error {
 		return c.Status(newErr.Code).JSON(newErr)
 	}
 	if err = user.ComparePassword(tokenReq.Password); err != nil {
-		newErr.Message = "Invalid password!"
+		newErr.Message = "Invalid  username/password!"
 		newErr.Code = fiber.StatusUnauthorized
 		cfg.Logger.Error(err.Error())
 		return c.Status(newErr.Code).JSON(newErr)

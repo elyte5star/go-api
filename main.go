@@ -71,6 +71,8 @@ func main() {
 		dbutil.LoadDatabase(db, cfg)
 		api.StartApi(h, cfg, db)
 
+	}else{
+		cfg.Logger.Error("Couldnt connect to database server")
 	}
 
 }
